@@ -22,6 +22,29 @@
       margin: 5px;
     }
 
+    #progress-text {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    #progress-bar-container {
+      width: 300px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px auto;
+      overflow: hidden;
+      display: block;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, #5cd9ff, #4fc87a);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
     .card-grid {
       display: flex;
       flex-wrap: wrap;
@@ -52,10 +75,19 @@
       background-color: transparent;
     }
 
+    .card:not(.missing):hover .card-inner {
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+      z-index: 2;
+    }
+
     .card.missing .card-inner {
       filter: grayscale(100%) brightness(0.6) contrast(0.8);
       opacity: 0.7;
       pointer-events: none;
+    }
+
+    .hidden {
+      display: none !important;
     }
 
     #popup {
@@ -69,22 +101,10 @@
       visibility: hidden;
     }
 
-    #popup.visible {
-      visibility: visible;
-    }
-
-    .popup-wrapper {
-      position: relative;
-      width: 320px;
-      height: 480px;
-    }
-
     .popup-card {
-      width: 100%;
-      height: 100%;
+      width: 300px;
+      height: 450px;
       perspective: 1000px;
-      z-index: 2;
-      position: relative;
     }
 
     .popup-card-inner {
@@ -94,21 +114,10 @@
       background-repeat: no-repeat;
       background-position: center;
       transition: transform 0.2s ease;
-      z-index: 2;
-      position: relative;
     }
 
-    canvas#effect-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .glow {
-      box-shadow: 0 0 20px 10px rgba(0, 200, 255, 0.5), 0 0 40px 15px rgba(0, 100, 255, 0.3);
-      border-radius: 12px;
+    #popup.visible {
+      visibility: visible;
     }
 
     @keyframes fadeInUp {
@@ -127,19 +136,24 @@
   <h1>Gobgob DEX</h1>
   <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
   <button onclick="loadCollection()">Afficher</button>
+  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
+
+  <div id="progress-text"></div>
+  <div id="progress-bar-container">
+    <div id="progress-bar"></div>
+  </div>
+
   <div class="card-grid" id="cards"></div>
 
   <div id="popup" onclick="hidePopup()">
-    <div class="popup-wrapper">
-      <canvas id="effect-canvas" width="320" height="480"></canvas>
-      <div class="popup-card">
-        <div class="popup-card-inner" id="popup-inner"></div>
-      </div>
+    <div class="popup-card">
+      <div class="popup-card-inner" id="popup-inner"></div>
     </div>
   </div>
 
   <script>
     let allCards = [];
+    let showMissing = true;
 
     async function fetchCards() {
       const res = await fetch("cards.csv");
@@ -147,7 +161,7 @@
       const lines = text.trim().split("\n").slice(1);
       return lines.map(line => {
         const [id, nom, rarete] = line.split(",");
-        return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim().toUpperCase() };
+        return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim() };
       });
     }
 
@@ -161,53 +175,45 @@
       });
     }
 
-    function addZoomEffect(cardId, rarity) {
+    function addTiltEffect(card) {
+      card.addEventListener("mousemove", e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = -(y - centerY) / 3;
+        const rotateY = (x - centerX) / 3;
+
+        card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
+    function addZoomEffect(cardId) {
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
-      const canvas = document.getElementById("effect-canvas");
-      const ctx = canvas.getContext("2d");
-
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
-      if (rarity === "UR") {
-        inner.classList.add("glow");
+      inner.addEventListener("mousemove", e => {
+        const rect = inner.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = -(y - centerY) / 6;
+        const rotateY = (x - centerX) / 6;
+        inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      });
 
-        let particles = [];
-        for (let i = 0; i < 50; i++) {
-          particles.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 2 + 1,
-            dx: (Math.random() - 0.5) * 0.3,
-            dy: (Math.random() - 0.5) * 0.3,
-            alpha: Math.random()
-          });
-        }
-
-        function animateParticles() {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          particles.forEach(p => {
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(0,200,255,${p.alpha})`;
-            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-            ctx.fill();
-            p.x += p.dx;
-            p.y += p.dy;
-            p.alpha += (Math.random() - 0.5) * 0.03;
-            if (p.alpha < 0.1) p.alpha = 0.1;
-            if (p.alpha > 1) p.alpha = 1;
-            if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-            if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-          });
-          requestAnimationFrame(animateParticles);
-        }
-
-        animateParticles();
-      } else {
-        inner.classList.remove("glow");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
+      inner.addEventListener("mouseleave", () => {
+        inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
     }
 
     function hidePopup() {
@@ -221,25 +227,43 @@
       const container = document.getElementById("cards");
       container.innerHTML = "";
 
+      let index = 0;
       for (const card of allCards) {
         const div = document.createElement("div");
         div.className = "card";
+        div.style.animationDelay = `${index * 50}ms`;
 
         const inner = document.createElement("div");
         inner.className = "card-inner";
         inner.style.backgroundImage = `url(img/${card.id}.png)`;
         inner.title = `${card.name} (${card.rarity})`;
-
         div.appendChild(inner);
 
-        if (!owned.has(card.id)) {
+        const isOwned = owned.has(card.id);
+        if (!isOwned) {
           div.classList.add("missing");
+          if (!showMissing) div.classList.add("hidden");
         } else {
-          div.onclick = () => addZoomEffect(card.id, card.rarity);
+          addTiltEffect(div);
+          div.onclick = () => addZoomEffect(card.id);
         }
 
         container.appendChild(div);
+        index++;
       }
+
+      const ownedCount = owned.size;
+      const totalCount = allCards.length || 1;
+      const percent = (ownedCount / totalCount) * 100;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-bar").style.width = percent + "%";
+    }
+
+    function toggleMissing() {
+      showMissing = !showMissing;
+      document.querySelectorAll(".card.missing").forEach(card => {
+        card.classList.toggle("hidden", !showMissing);
+      });
     }
 
     fetchCards().then(cards => allCards = cards);
