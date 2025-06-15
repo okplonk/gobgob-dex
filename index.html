@@ -55,7 +55,7 @@
     .card-grid {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 20px;
       justify-content: center;
       margin-top: 30px;
     }
@@ -66,6 +66,7 @@
       perspective: 1000px;
       animation: fadeInUp 0.4s ease forwards;
       opacity: 0;
+      position: relative;
     }
 
     .card-inner {
@@ -75,16 +76,15 @@
       background-repeat: no-repeat;
       background-position: center;
       transition: transform 0.2s ease, filter 0.2s ease;
-      transform-style: preserve-3d;
       background-color: transparent;
     }
 
-    .card-inner:hover {
+    .card:hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
     }
 
-    .missing {
+    .card.missing .card-inner {
       filter: grayscale(100%) blur(1px) brightness(0.7);
     }
 
@@ -147,11 +147,11 @@
         const rotateX = -(y - centerY) / 3;
         const rotateY = (x - centerX) / 3;
 
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+        card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
 
       card.addEventListener("mouseleave", () => {
-        card.style.transform = "rotateX(0deg) rotateY(0deg)";
+        card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
       });
     }
 
@@ -173,13 +173,14 @@
         inner.style.backgroundImage = `url(img/${card.id}.png)`;
         inner.title = `${card.name} (${card.rarity})`;
 
+        div.appendChild(inner);
+
         if (!owned.has(card.id)) {
-          inner.classList.add("missing");
+          div.classList.add("missing");
         } else {
-          addTiltEffect(inner);
+          addTiltEffect(div);
         }
 
-        div.appendChild(inner);
         container.appendChild(div);
         index++;
       }
