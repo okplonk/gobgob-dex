@@ -100,6 +100,7 @@
 
     let particles = [];
     let animationFrameId;
+    let currentRarity = 'UR';
 
     const rarityColors = {
       N: '#b285ff',
@@ -109,13 +110,8 @@
       UR: '#c2e0ff'
     };
 
-    function showPopup(cardId, rarity) {
-      popup.classList.add("visible");
-      popupInner.style.backgroundImage = `url('img/${cardId}.png')`;
-      canvas.width = popup.clientWidth;
-      canvas.height = popup.clientHeight;
-      particles = [];
-      for (let i = 0; i < 100; i++) {
+    function createParticles(color, count = 80) {
+      for (let i = 0; i < count; i++) {
         const angle = Math.random() * 2 * Math.PI;
         const speed = Math.random() * 2 + 0.5;
         particles.push({
@@ -125,15 +121,14 @@
           vy: Math.sin(angle) * speed,
           alpha: 1,
           radius: Math.random() * 2 + 1,
-          color: rarityColors[rarity] || '#ffffff'
+          color
         });
       }
-      animateParticles();
     }
 
     function animateParticles() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const p of particles) {
+      particles.forEach(p => {
         p.x += p.vx;
         p.y += p.vy;
         p.alpha -= 0.01;
@@ -141,17 +136,30 @@
         ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
         ctx.fillStyle = `${p.color}${Math.floor(p.alpha * 255).toString(16).padStart(2, '0')}`;
         ctx.fill();
-      }
+      });
       particles = particles.filter(p => p.alpha > 0);
-      if (particles.length > 0) {
-        animationFrameId = requestAnimationFrame(animateParticles);
+      if (particles.length < 80) {
+        createParticles(rarityColors[currentRarity]);
       }
+      animationFrameId = requestAnimationFrame(animateParticles);
+    }
+
+    function showPopup(cardId, rarity) {
+      popup.classList.add("visible");
+      popupInner.style.backgroundImage = `url('img/${cardId}.png')`;
+      canvas.width = popup.clientWidth;
+      canvas.height = popup.clientHeight;
+      currentRarity = rarity;
+      particles = [];
+      createParticles(rarityColors[rarity]);
+      animateParticles();
     }
 
     function hidePopup() {
       popup.classList.remove("visible");
       cancelAnimationFrame(animationFrameId);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = [];
     }
   </script>
 </body>
