@@ -64,6 +64,8 @@
       width: 120px;
       height: 190px;
       perspective: 1000px;
+      animation: fadeInUp 0.4s ease forwards;
+      opacity: 0;
     }
 
     .card-inner {
@@ -80,6 +82,17 @@
     .card-inner:hover {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 </head>
@@ -127,8 +140,8 @@
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = -(y - centerY) / 4;
-        const rotateY = (x - centerX) / 4;
+        const rotateX = -(y - centerY) / 3;
+        const rotateY = (x - centerX) / 3;
 
         card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
@@ -145,10 +158,12 @@
       const container = document.getElementById("cards");
       container.innerHTML = "";
 
+      let index = 0;
       for (const card of allCards) {
         if (owned.has(card.id)) {
           const div = document.createElement("div");
           div.className = "card";
+          div.style.animationDelay = `${index * 50}ms`;
 
           const inner = document.createElement("div");
           inner.className = "card-inner";
@@ -158,6 +173,7 @@
           div.appendChild(inner);
           container.appendChild(div);
           addTiltEffect(inner);
+          index++;
         }
       }
 
