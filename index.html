@@ -56,6 +56,9 @@
       width: 300px;
       height: 450px;
       z-index: 2;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+      border-radius: 10px;
+      animation: pulse-glow 2s infinite;
     }
     .popup-card-inner {
       width: 100%;
@@ -74,6 +77,14 @@
       height: 100%;
       z-index: 1;
       pointer-events: none;
+    }
+    @keyframes pulse-glow {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 60px rgba(255, 255, 255, 0.8);
+      }
     }
   </style>
 </head>
@@ -110,18 +121,19 @@
       UR: '#c2e0ff'
     };
 
-    function createParticles(color, count = 80) {
+    function createParticles(color, count = 100) {
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * 2 * Math.PI;
-        const speed = Math.random() * 2 + 0.5;
+        const speed = Math.random() * 1.5 + 0.5;
         particles.push({
           x: canvas.width / 2,
           y: canvas.height / 2,
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           alpha: 1,
-          radius: Math.random() * 2 + 1,
-          color
+          radius: Math.random() * 3 + 1,
+          color,
+          life: 1 + Math.random() * 2
         });
       }
     }
@@ -135,10 +147,12 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
         ctx.fillStyle = `${p.color}${Math.floor(p.alpha * 255).toString(16).padStart(2, '0')}`;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 10;
         ctx.fill();
       });
       particles = particles.filter(p => p.alpha > 0);
-      if (particles.length < 80) {
+      if (particles.length < 100) {
         createParticles(rarityColors[currentRarity]);
       }
       animationFrameId = requestAnimationFrame(animateParticles);
