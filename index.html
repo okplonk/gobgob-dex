@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Gobgob DEX</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f8f8f8;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+    input {
+      padding: 10px;
+      font-size: 1em;
+      width: 200px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 10px 15px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .card-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .card {
+      width: 100px;
+      height: 140px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <h1>Gobgob DEX</h1>
+  <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
+  <button onclick="loadCollection()">Afficher</button>
+  <div class="card-grid" id="cards"></div>
+
+  <script>
+    const allCards = [
+      { id: 1, name: "Gobgob Moisi", img: "img/gob1.png" },
+      { id: 2, name: "Gobgob Voleur de Soupline", img: "img/gob2.png" },
+      { id: 3, name: "Gobgob en Feu", img: "img/gob3.png" }
+    ];
+
+    async function fetchCSV() {
+      const res = await fetch("collection.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1); // skip header
+      return lines.map(line => {
+        const [pseudo, id] = line.split(",");
+        return {
+          pseudo: pseudo.trim().toLowerCase(),
+          id: parseInt(id)
+        };
+      });
+    }
+
+    async function loadCollection() {
+      const username = document.getElementById("username").value.toLowerCase();
+      const data = await fetchCSV();
+      const userCards = new Set(
+        data.filter(entry => entry.pseudo === username).map(entry => entry.id)
+      );
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+      allCards.forEach(card => {
+        if (userCards.has(card.id)) {
+          const div = document.createElement("div");
+          div.className = "card";
+          div.style.backgroundImage = `url(${card.img})`;
+          div.title = card.name;
+          container.appendChild(div);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
