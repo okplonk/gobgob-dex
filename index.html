@@ -217,12 +217,19 @@
         canvas.height = 450;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        ctx.globalCompositeOperation = "source-in";
+        // Étape 1 : sparkles en premier
         ctx.drawImage(sparkles, 0, 0, canvas.width, canvas.height);
 
+        // Étape 2 : masquer les sparkles avec la carte (masque alpha)
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        // Étape 3 : dessiner la carte par-dessus
+        ctx.globalCompositeOperation = "destination-over";
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
         ctx.globalCompositeOperation = "source-over";
+      }
       }
 
       img.onload = () => {
