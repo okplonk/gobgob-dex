@@ -16,17 +16,10 @@
       margin-bottom: 10px;
     }
 
-    input {
+    input, button {
       padding: 10px;
       font-size: 1em;
-      width: 200px;
-      margin-right: 10px;
-    }
-
-    button {
-      padding: 10px 15px;
-      font-size: 1em;
-      cursor: pointer;
+      margin: 5px;
     }
 
     #progress-text {
@@ -92,6 +85,10 @@
       pointer-events: none;
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -108,8 +105,8 @@
   <h1>Gobgob DEX</h1>
   <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
   <button onclick="loadCollection()">Afficher</button>
+  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
 
-  <!-- Barre de progression -->
   <div id="progress-text"></div>
   <div id="progress-bar-container">
     <div id="progress-bar"></div>
@@ -119,6 +116,7 @@
 
   <script>
     let allCards = [];
+    let showMissing = true;
 
     async function fetchCards() {
       const res = await fetch("cards.csv");
@@ -176,11 +174,12 @@
         inner.className = "card-inner";
         inner.style.backgroundImage = `url(img/${card.id}.png)`;
         inner.title = `${card.name} (${card.rarity})`;
-
         div.appendChild(inner);
 
-        if (!owned.has(card.id)) {
+        const isOwned = owned.has(card.id);
+        if (!isOwned) {
           div.classList.add("missing");
+          if (!showMissing) div.classList.add("hidden");
         } else {
           addTiltEffect(div);
         }
@@ -196,9 +195,14 @@
       document.getElementById("progress-bar").style.width = percent + "%";
     }
 
+    function toggleMissing() {
+      showMissing = !showMissing;
+      document.querySelectorAll(".card.missing").forEach(card => {
+        card.classList.toggle("hidden", !showMissing);
+      });
+    }
+
     fetchCards().then(cards => allCards = cards);
   </script>
 </body>
 </html>
-
-@plonkCorp
