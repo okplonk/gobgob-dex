@@ -53,10 +53,10 @@
     }
 
     .card-grid {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       gap: 20px;
-      justify-content: center;
+      justify-items: center;
       margin-top: 30px;
     }
 
@@ -79,13 +79,14 @@
       background-color: transparent;
     }
 
-    .card:hover .card-inner {
+    .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
     }
 
     .card.missing .card-inner {
-      filter: grayscale(100%) blur(1px) brightness(0.7);
+      filter: grayscale(100%) blur(3px) brightness(0.6);
+      pointer-events: none;
     }
 
     @keyframes fadeInUp {
