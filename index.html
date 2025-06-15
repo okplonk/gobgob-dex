@@ -91,6 +91,7 @@
     }
 
     #popup {
+      visibility: hidden;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.8);
@@ -105,6 +106,7 @@
       width: 300px;
       height: 450px;
       perspective: 1000px;
+      position: relative;
     }
 
     .popup-card-inner {
@@ -114,10 +116,24 @@
       background-repeat: no-repeat;
       background-position: center;
       transition: transform 0.2s ease;
+      position: relative;
     }
 
-    #popup.visible {
-      visibility: visible;
+    .popup-card-inner.ur::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(130deg, rgba(255,255,255,0.1), rgba(0,255,255,0.05), rgba(255,0,255,0.1));
+      background-size: 400% 400%;
+      animation: holo 5s linear infinite;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      border-radius: 12px;
+    }
+
+    @keyframes holo {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 200%; }
     }
 
     @keyframes fadeInUp {
@@ -130,7 +146,11 @@
         transform: translateY(0) scale(1);
       }
     }
-  </style>
+  
+    #popup.visible {
+      visibility: visible;
+    }
+</style>
 </head>
 <body>
   <h1>Gobgob DEX</h1>
@@ -194,10 +214,11 @@
       });
     }
 
-    function addZoomEffect(cardId) {
+    function addZoomEffect(card) {
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
-      inner.style.backgroundImage = `url(img/${cardId}.png)`;
+      inner.style.backgroundImage = `url(img/${card.id}.png)`;
+      inner.className = "popup-card-inner" + (card.rarity === "UR" ? " ur" : "");
       popup.classList.add("visible");
 
       inner.addEventListener("mousemove", e => {
@@ -245,7 +266,7 @@
           if (!showMissing) div.classList.add("hidden");
         } else {
           addTiltEffect(div);
-          div.onclick = () => addZoomEffect(card.id);
+          div.onclick = () => addZoomEffect(card);
         }
 
         container.appendChild(div);
@@ -269,4 +290,48 @@
     fetchCards().then(cards => allCards = cards);
   </script>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <button onclick="downloadImage()">Télécharger une image de la collection</button>
+  <script>
+    async function downloadImage() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) {
+        alert("Entre ton pseudo Twitch avant de télécharger !");
+        return;
+      }
+
+      const grid = document.getElementById("cards");
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+      wrapper.style.padding = "20px";
+      wrapper.style.backgroundColor = "#f8f8f8";
+      wrapper.style.textAlign = "center";
+
+      const title = document.createElement("h2");
+      title.textContent = "Collection de " + username;
+      title.style.marginBottom = "20px";
+      title.style.fontFamily = "sans-serif";
+      wrapper.appendChild(title);
+
+      const clone = grid.cloneNode(true);
+      clone.style.display = "flex";
+      clone.style.flexWrap = "wrap";
+      clone.style.justifyContent = "center";
+      clone.querySelectorAll(".card").forEach(c => {
+        c.style.animation = "none";
+        c.style.opacity = "1";
+        c.style.transform = "none";
+      });
+      wrapper.appendChild(clone);
+
+      document.body.appendChild(wrapper);
+      html2canvas(wrapper).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "collection_" + username + ".png";
+        link.href = canvas.toDataURL();
+        link.click();
+        document.body.removeChild(wrapper);
+      });
+    }
+  </script>
 </html>
