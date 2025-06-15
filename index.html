@@ -334,4 +334,53 @@
       });
     }
   </script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <button onclick="downloadImage()">Télécharger une image de la collection</button>
+  <script>
+    async function downloadImage() {
+      const username = document.getElementById("username").value.trim();
+      if (!username) {
+        alert("Entre ton pseudo Twitch avant de télécharger !");
+        return;
+      }
+
+      const grid = document.getElementById("cards");
+      const wrapper = document.createElement("div");
+      wrapper.style.position = "relative";
+      wrapper.style.padding = "20px";
+      wrapper.style.backgroundColor = "#f8f8f8";
+      wrapper.style.textAlign = "center";
+
+      const title = document.createElement("h2");
+      title.textContent = "Collection de " + username;
+      title.style.marginBottom = "20px";
+      title.style.fontFamily = "sans-serif";
+      wrapper.appendChild(title);
+
+      const clone = grid.cloneNode(true);
+      clone.style.display = "flex";
+      clone.style.flexWrap = "wrap";
+      clone.style.justifyContent = "center";
+      clone.querySelectorAll(".card").forEach(c => {
+        c.style.animation = "none";
+        c.style.opacity = "1";
+        c.style.transform = "none";
+
+        if (c.classList.contains("missing")) {
+          c.querySelector(".card-inner").style.filter = "grayscale(100%) brightness(0.6) contrast(0.8)";
+          c.querySelector(".card-inner").style.opacity = "0.7";
+        }
+      });
+      wrapper.appendChild(clone);
+
+      document.body.appendChild(wrapper);
+      html2canvas(wrapper).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "collection_" + username + ".png";
+        link.href = canvas.toDataURL();
+        link.click();
+        document.body.removeChild(wrapper);
+      });
+    }
+  </script>
 </html>
