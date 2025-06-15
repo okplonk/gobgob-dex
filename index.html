@@ -63,14 +63,21 @@
     .card {
       width: 120px;
       height: 190px;
-      background-size: contain;
-      background-color: transparent;
-      transition: transform 0.1s ease, filter 0.2s ease;
-      transform-style: preserve-3d;
       perspective: 1000px;
     }
 
-    .card:hover {
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      transform-style: preserve-3d;
+      background-color: transparent;
+    }
+
+    .card-inner:hover {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
     }
@@ -120,10 +127,10 @@
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
 
-        const rotateX = -(y - centerY) / 10;
-        const rotateY = (x - centerX) / 10;
+        const rotateX = -(y - centerY) / 8;
+        const rotateY = (x - centerX) / 8;
 
-        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.1)`;
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
 
       card.addEventListener("mouseleave", () => {
@@ -142,10 +149,15 @@
         if (owned.has(card.id)) {
           const div = document.createElement("div");
           div.className = "card";
-          div.style.backgroundImage = `url(img/${card.id}.png)`;
-          div.title = `${card.name} (${card.rarity})`;
+
+          const inner = document.createElement("div");
+          inner.className = "card-inner";
+          inner.style.backgroundImage = `url(img/${card.id}.png)`;
+          inner.title = `${card.name} (${card.rarity})`;
+
+          div.appendChild(inner);
           container.appendChild(div);
-          addTiltEffect(div);
+          addTiltEffect(inner);
         }
       }
 
