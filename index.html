@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+More actions
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -10,21 +11,25 @@
       text-align: center;
       padding: 20px;
     }
+
     h1 {
       font-size: 3em;
       margin-bottom: 10px;
     }
+
     input {
       padding: 10px;
       font-size: 1em;
       width: 200px;
       margin-right: 10px;
     }
+
     button {
       padding: 10px 15px;
       font-size: 1em;
       cursor: pointer;
     }
+
     .card-grid {
       display: flex;
       flex-wrap: wrap;
@@ -32,16 +37,27 @@
       justify-content: center;
       margin-top: 30px;
     }
+
     .card {
       width: 120px;
       height: 190px;
+      width: 100px;
+      height: 140px;
       background-size: cover;
       background-position: center;
+      background-color: transparent;
+      background-color: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
+      padding: 5px;
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: 10px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
+
     .card:hover {
       transform: scale(1.1) translateY(-5px);
-      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
       z-index: 2;
 }
 
@@ -52,10 +68,8 @@
   <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
   <button onclick="loadCollection()">Afficher</button>
   <div class="card-grid" id="cards"></div>
-
   <script>
     let allCards = [];
-
     async function fetchCards() {
       const res = await fetch("cards.csv");
       const text = await res.text();
@@ -80,7 +94,6 @@
       const username = document.getElementById("username").value.toLowerCase();
       const collection = await fetchCollection();
       const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
-
       const container = document.getElementById("cards");
       container.innerHTML = "";
       for (const card of allCards) {
@@ -93,7 +106,6 @@
         }
       }
     }
-
     fetchCards().then(cards => allCards = cards);
   </script>
 </body>
