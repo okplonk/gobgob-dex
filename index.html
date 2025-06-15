@@ -70,8 +70,6 @@ input, button {
   background-position: center;
   transition: transform 0.2s ease, filter 0.2s ease;
   background-color: transparent;
-  position: relative;
-  transform-style: preserve-3d;
 }
 
 .card:not(.missing):hover .card-inner {
@@ -118,24 +116,6 @@ input, button {
   isolation: isolate;
 }
 
-.popup-card-inner::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url('https://assets.codepen.io/13471/sparkles.gif');
-  background-size: cover;
-  opacity: 0.4;
-  mix-blend-mode: screen;
-  z-index: 1;
-  pointer-events: none;
-  display: none;
-}
-
-.popup-card-inner.UR::after,
-.popup-card-inner.SSR::after {
-  display: block;
-}
-
 .popup-card-inner::before {
   content: "";
   position: absolute;
@@ -146,11 +126,19 @@ input, button {
   mix-blend-mode: overlay;
   z-index: 1;
   pointer-events: none;
-  display: none;
+  display: block;
 }
 
-.popup-card-inner.UR::before,
-.popup-card-inner.SSR::before {
+.popup-card-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('https://assets.codepen.io/13471/sparkles.gif');
+  background-size: cover;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  z-index: 2;
+  pointer-events: none;
   display: block;
 }
 
@@ -167,10 +155,5 @@ input, button {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-@keyframes holo-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 </style>
