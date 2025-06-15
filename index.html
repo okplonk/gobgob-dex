@@ -91,7 +91,6 @@
     }
 
     #popup {
-      visibility: hidden;
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0, 0, 0, 0.8);
@@ -106,7 +105,6 @@
       width: 300px;
       height: 450px;
       perspective: 1000px;
-      position: relative;
     }
 
     .popup-card-inner {
@@ -116,24 +114,10 @@
       background-repeat: no-repeat;
       background-position: center;
       transition: transform 0.2s ease;
-      position: relative;
     }
 
-    .popup-card-inner.ur::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(130deg, rgba(255,255,255,0.1), rgba(0,255,255,0.05), rgba(255,0,255,0.1));
-      background-size: 400% 400%;
-      animation: holo 5s linear infinite;
-      mix-blend-mode: screen;
-      pointer-events: none;
-      border-radius: 12px;
-    }
-
-    @keyframes holo {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 200% 200%; }
+    #popup.visible {
+      visibility: visible;
     }
 
     @keyframes fadeInUp {
@@ -146,11 +130,7 @@
         transform: translateY(0) scale(1);
       }
     }
-  
-    #popup.visible {
-      visibility: visible;
-    }
-</style>
+  </style>
 </head>
 <body>
   <h1>Gobgob DEX</h1>
@@ -214,11 +194,10 @@
       });
     }
 
-    function addZoomEffect(card) {
+    function addZoomEffect(cardId) {
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
-      inner.style.backgroundImage = `url(img/${card.id}.png)`;
-      inner.className = "popup-card-inner" + (card.rarity === "UR" ? " ur" : "");
+      inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
       inner.addEventListener("mousemove", e => {
@@ -266,7 +245,7 @@
           if (!showMissing) div.classList.add("hidden");
         } else {
           addTiltEffect(div);
-          div.onclick = () => addZoomEffect(card);
+          div.onclick = () => addZoomEffect(card.id);
         }
 
         container.appendChild(div);
