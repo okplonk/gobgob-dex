@@ -113,35 +113,13 @@
     .popup-card-inner {
       width: 100%;
       height: 100%;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      transition: transform 0.3s ease;
-      transform-style: preserve-3d;
       position: relative;
     }
 
-    .popup-card-inner::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at var(--pointer-x, 50%) var(--pointer-y, 50%), rgba(255,255,255,0.2), transparent 60%);
-      opacity: 0.6;
-      pointer-events: none;
-      mix-blend-mode: overlay;
-      z-index: 1;
-    }
-
-    .popup-card-inner::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: url("https://assets.codepen.io/13471/sparkles.gif");
-      background-size: cover;
-      opacity: 0.3;
-      pointer-events: none;
-      mix-blend-mode: screen;
-      z-index: 2;
+    .popup-card-inner canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
     #popup.visible {
@@ -176,7 +154,9 @@
 
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
-      <div class="popup-card-inner" id="popup-inner"></div>
+      <div class="popup-card-inner">
+        <canvas id="popup-canvas"></canvas>
+      </div>
     </div>
   </div>
 
@@ -225,30 +205,39 @@
 
     function addZoomEffect(cardId) {
       const popup = document.getElementById("popup");
-      const inner = document.getElementById("popup-inner");
-      inner.style.backgroundImage = `url(img/${cardId}.png)`;
+      const canvas = document.getElementById("popup-canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+      const sparkles = new Image();
+      img.src = `img/${cardId}.png`;
+      sparkles.src = "https://assets.codepen.io/13471/sparkles.gif";
+
+      function drawMasked() {
+        canvas.width = 300;
+        canvas.height = 450;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        ctx.globalCompositeOperation = "source-in";
+        ctx.drawImage(sparkles, 0, 0, canvas.width, canvas.height);
+
+        ctx.globalCompositeOperation = "source-over";
+      }
+
+      img.onload = () => {
+        if (sparkles.complete) drawMasked();
+      };
+      sparkles.onload = () => {
+        if (img.complete) drawMasked();
+      };
+
       popup.classList.add("visible");
 
-      VanillaTilt.init(inner, {
+      VanillaTilt.init(canvas, {
         max: 25,
         speed: 1500,
         glare: false,
-      });
-
-      inner.addEventListener("mousemove", e => {
-        const rect = inner.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const lp = (100 * x / rect.width).toFixed(2);
-        const tp = (100 * y / rect.height).toFixed(2);
-        document.querySelector("style.hover").textContent = `
-          .popup-card-inner::before { --pointer-x: ${lp}%; --pointer-y: ${tp}%; }
-        `;
-      });
-
-      inner.addEventListener("mouseleave", () => {
-        inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-        document.querySelector("style.hover").textContent = "";
       });
     }
 
