@@ -41,6 +41,7 @@
       border-radius: 10px;
       margin: 10px auto;
       overflow: hidden;
+      display: block;
     }
 
     #progress-bar {
@@ -64,11 +65,12 @@
       height: 190px;
       background-size: contain;
       background-color: transparent;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      transition: transform 0.1s ease, filter 0.2s ease;
+      transform-style: preserve-3d;
+      perspective: 1000px;
     }
 
     .card:hover {
-      transform: scale(1.1) translateY(-5px);
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
     }
@@ -110,6 +112,25 @@
       });
     }
 
+    function addTiltEffect(card) {
+      card.addEventListener("mousemove", e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = -(y - centerY) / 10;
+        const rotateY = (x - centerX) / 10;
+
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.1)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
     async function loadCollection() {
       const username = document.getElementById("username").value.toLowerCase();
       const collection = await fetchCollection();
@@ -124,14 +145,14 @@
           div.style.backgroundImage = `url(img/${card.id}.png)`;
           div.title = `${card.name} (${card.rarity})`;
           container.appendChild(div);
+          addTiltEffect(div);
         }
       }
 
-      // Progression
       const ownedCount = owned.size;
-      const totalCount = allCards.length;
+      const totalCount = allCards.length || 1;
       const percent = (ownedCount / totalCount) * 100;
-      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount > 1 ? "s" : ""} débloquée${ownedCount > 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
       document.getElementById("progress-bar").style.width = percent + "%";
     }
 
