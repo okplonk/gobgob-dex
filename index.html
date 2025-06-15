@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -30,6 +29,28 @@
       cursor: pointer;
     }
 
+    #progress-text {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    #progress-bar-container {
+      width: 300px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px auto;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, #5cd9ff, #4fc87a);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
     .card-grid {
       display: flex;
       flex-wrap: wrap;
@@ -43,24 +64,32 @@
       height: 190px;
       background-size: contain;
       background-color: transparent;
-      drop-shadow: 0 2px 5px rgba(0,0,0,0.2);
       transition: transform 0.2s ease, filter 0.2s ease;
-}
+    }
 
     .card:hover {
       transform: scale(1.1) translateY(-5px);
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
-}
-
+    }
   </style>
 </head>
 <body>
   <h1>Gobgob DEX</h1>
   <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
   <button onclick="loadCollection()">Afficher</button>
+
+  <!-- Barre de progression -->
+  <div id="progress-text"></div>
+  <div id="progress-bar-container">
+    <div id="progress-bar"></div>
+  </div>
+
   <div class="card-grid" id="cards"></div>
+
   <script>
     let allCards = [];
+
     async function fetchCards() {
       const res = await fetch("cards.csv");
       const text = await res.text();
@@ -87,6 +116,7 @@
       const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
       const container = document.getElementById("cards");
       container.innerHTML = "";
+
       for (const card of allCards) {
         if (owned.has(card.id)) {
           const div = document.createElement("div");
@@ -96,7 +126,15 @@
           container.appendChild(div);
         }
       }
+
+      // Progression
+      const ownedCount = owned.size;
+      const totalCount = allCards.length;
+      const percent = (ownedCount / totalCount) * 100;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount > 1 ? "s" : ""} débloquée${ownedCount > 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-bar").style.width = percent + "%";
     }
+
     fetchCards().then(cards => allCards = cards);
   </script>
 </body>
