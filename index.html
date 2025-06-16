@@ -10,23 +10,19 @@
       text-align: center;
       padding: 20px;
     }
-
     h1 {
       font-size: 3em;
       margin-bottom: 10px;
     }
-
     input, button {
       padding: 10px;
       font-size: 1em;
       margin: 5px;
     }
-
     #progress-text {
       margin-top: 20px;
       font-size: 1.1em;
     }
-
     #progress-bar-container {
       width: 300px;
       height: 20px;
@@ -36,7 +32,6 @@
       overflow: hidden;
       display: block;
     }
-
     #progress-bar {
       height: 100%;
       width: 0;
@@ -44,7 +39,6 @@
       border-radius: 10px;
       transition: width 0.3s ease;
     }
-
     .card-grid {
       display: flex;
       flex-wrap: wrap;
@@ -54,7 +48,6 @@
       margin-right: 10%;
       margin-left: 10%;
     }
-
     .card {
       width: 120px;
       height: 190px;
@@ -64,7 +57,6 @@
       position: relative;
       cursor: pointer;
     }
-
     .card-inner {
       width: 100%;
       height: 100%;
@@ -74,22 +66,18 @@
       transition: transform 0.2s ease, filter 0.2s ease;
       background-color: transparent;
     }
-
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
     }
-
     .card.missing .card-inner {
       filter: grayscale(100%) brightness(0.6) contrast(0.8);
       opacity: 0.7;
       pointer-events: none;
     }
-
     .hidden {
       display: none !important;
     }
-
     #popup {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -100,13 +88,11 @@
       z-index: 9999;
       visibility: hidden;
     }
-
     .popup-card {
       width: 300px;
       height: 450px;
       perspective: 1000px;
     }
-
     .popup-card-inner {
       width: 100%;
       height: 100%;
@@ -116,9 +102,9 @@
       box-shadow: 0 8px 32px 8px #0006;
       background: none;
       transition: transform 0.2s ease;
+      /* stacking context for blend modes */
+      isolation: isolate;
     }
-
-    /* --- EMBOSS / BUMP MAP EFFECT --- */
     .popup-img {
       position: absolute;
       inset: 0;
@@ -128,9 +114,9 @@
       user-select: none;
       pointer-events: none;
       transition: filter 0.1s, transform 0.1s;
+      z-index: 1;
     }
     .popup-img.base {
-      z-index: 1;
       filter: contrast(1.08) brightness(1.10);
     }
     .popup-img.shadow {
@@ -144,18 +130,52 @@
       mix-blend-mode: screen;
     }
 
-    /* --- Effet visuel/holographique --- */
-    .card-effect-layer {
+    /* --- HOLO EFFECTS --- */
+    .holo-glare, .holo-rainbow, .holo-sparkles {
       position: absolute;
       inset: 0;
-      z-index: 5;
       pointer-events: none;
       border-radius: 18px;
-      overflow: hidden;
-      background: none;
-      transition: background 0.2s;
+      z-index: 5;
+      opacity: 0.85;
+      mix-blend-mode: lighten;
+      transition: opacity 0.3s;
     }
-
+    .holo-rainbow {
+      opacity: 0.66;
+      z-index: 4;
+      mix-blend-mode: color-dodge;
+      background: conic-gradient(from 0deg, #f4aaff, #aaf4ff, #fff1aa, #ffaaf4, #f4aaff);
+      animation: holoRainbowAnim 6s linear infinite;
+      filter: blur(0.7px) brightness(1.08) saturate(1.15);
+    }
+    @keyframes holoRainbowAnim {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg);}
+    }
+    .holo-glare {
+      opacity: 0.13;
+      z-index: 6;
+      background: linear-gradient(115deg, transparent 32%, #fff 51%, transparent 63%);
+      background-size: 300% 300%;
+      background-position: 60% 0;
+      mix-blend-mode: lighten;
+      transition: opacity 0.2s;
+      /* animated by JS */
+    }
+    .holo-sparkles {
+      opacity: 0.38;
+      z-index: 7;
+      background: url('data:image/svg+xml;utf8,<svg width="120" height="180" xmlns="http://www.w3.org/2000/svg"><g fill="white" opacity="0.7"><circle cx="60" cy="50" r="2"/><circle cx="25" cy="120" r="1.4"/><circle cx="90" cy="80" r="2.7"/><circle cx="40" cy="160" r="1.8"/><circle cx="110" cy="30" r="1.2"/></g></svg>') repeat;
+      background-size: 90px 130px;
+      animation: sparkles-move 3s linear infinite;
+      filter: blur(0.5px) brightness(1.5);
+      pointer-events: none;
+    }
+    @keyframes sparkles-move {
+      0% { background-position: 0 0;}
+      100% { background-position: 45px 65px;}
+    }
     .emboss-effect {
       position: absolute;
       inset: 0;
@@ -163,24 +183,12 @@
       mix-blend-mode: soft-light;
       opacity: 0.35;
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
-      z-index: 6;
+      z-index: 10;
       transition: background 0.15s;
     }
-
     #popup.visible {
       visibility: visible;
     }
-
-    @keyframes holoMove {
-      0% { background-position: 0 0; }
-      100% { background-position: 120px 240px; }
-    }
-
-    @keyframes holoShine {
-      0% { background-position: -350px 0;}
-      100% { background-position: 350px 0;}
-    }
-
     @keyframes fadeInUp {
       from {
         opacity: 0;
@@ -206,14 +214,14 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet emboss/bump map, particules, et holo -->
+  <!-- Popup avec effet holographique façon simeydotme -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img class="popup-img base" id="popup-img-base">
         <img class="popup-img shadow" id="popup-img-shadow">
         <img class="popup-img light" id="popup-img-light">
-        <div class="card-effect-layer" id="card-effect-layer"></div>
+        <!-- HOLO FX LAYER INSERTED HERE -->
         <div class="emboss-effect" id="emboss"></div>
       </div>
     </div>
@@ -275,7 +283,7 @@
       inner.style.transform = "";
 
       popup.classList.add("visible");
-      setupEffectLayer(rarity);
+      setupHoloEffectLayer(inner, rarity);
 
       function updateEffect(e) {
         const rect = inner.getBoundingClientRect();
@@ -291,7 +299,6 @@
         const intensity = 4;
         const dx = (x - centerX) / rect.width * intensity;
         const dy = (y - centerY) / rect.height * intensity;
-
         imgShadow.style.transform = `translate(${-dx}px, ${-dy}px)`;
         imgLight.style.transform = `translate(${dx}px, ${dy}px)`;
 
@@ -299,6 +306,15 @@
         const percentX = Math.round((x / rect.width) * 100);
         const percentY = Math.round((y / rect.height) * 100);
         emboss.style.background = `radial-gradient(circle at ${percentX}% ${percentY - 10}%, #fff7 40%, #aaa3 65%, transparent 95%)`;
+
+        // HOLO GLARE (déplacement)
+        let holoGlare = inner.querySelector('.holo-glare');
+        if(holoGlare) {
+          // translate la position du glare selon la souris
+          let bgX = Math.round((x / rect.width) * 100);
+          holoGlare.style.backgroundPosition = `${bgX}% 0%`;
+          holoGlare.style.opacity = 0.09 + 0.18 * Math.abs((x-centerX)/rect.width) + 0.06 * Math.abs((y-centerY)/rect.height);
+        }
       }
 
       inner.onmousemove = updateEffect;
@@ -307,6 +323,11 @@
         imgShadow.style.transform = "";
         imgLight.style.transform = "";
         emboss.style.background = "radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%)";
+        let holoGlare = inner.querySelector('.holo-glare');
+        if(holoGlare) {
+          holoGlare.style.backgroundPosition = "60% 0";
+          holoGlare.style.opacity = 0.13;
+        }
       };
     }
 
@@ -317,117 +338,68 @@
       document.getElementById("popup-img-shadow").style.transform = "";
       document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
-      document.getElementById("card-effect-layer").innerHTML = "";
-      document.getElementById("card-effect-layer").style.background = "";
-      document.getElementById("card-effect-layer").style.animation = "";
+      // Remove holo layers
+      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles');
+      layers.forEach(layer => layer.remove());
     }
 
-    // ==== EFFETS PARTICULES ET HOLOGRAPHIQUES ====
-    function setupEffectLayer(rarity) {
-      const effectLayer = document.getElementById('card-effect-layer');
-      effectLayer.innerHTML = "";
-      effectLayer.style.background = "";
-      effectLayer.style.animation = "";
+    // ==== HOLO EFFECT (Simeydotme style) ====
+    function setupHoloEffectLayer(inner, rarity) {
+      // Remove previous
+      let layers = inner.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles');
+      layers.forEach(layer => layer.remove());
 
-      // Réglages par rareté
-      let particleColors = [];
-      let holo = false;
-      let shine = false;
-
+      // Par rareté : intensité de chaque calque
+      let holoRainbow = false, holoGlare = false, sparkles = false;
+      let rainbowOpacity = 0, glareOpacity = 0.08, sparklesOpacity = 0;
       switch(rarity) {
         case "UR":
-          particleColors = ["#ff2fd7","#18f0ff","#ffe959","#ff9232","#b8ff69"];
-          holo = true;
-          shine = true;
+          holoRainbow = true; rainbowOpacity = 1.0;
+          holoGlare = true;   glareOpacity = 0.24;
+          sparkles = true;    sparklesOpacity = 0.44;
           break;
         case "SSR":
-          particleColors = ["#ffab2f","#ff9232","#ffe959"];
-          holo = true;
-          shine = true;
+          holoRainbow = true; rainbowOpacity = 0.78;
+          holoGlare = true;   glareOpacity = 0.17;
+          sparkles = true;    sparklesOpacity = 0.30;
           break;
         case "SR":
-          particleColors = ["#ffe959","#fff7be","#ffd700"];
-          holo = true;
-          shine = false;
+          holoRainbow = true; rainbowOpacity = 0.53;
+          holoGlare = true;   glareOpacity = 0.11;
+          sparkles = true;    sparklesOpacity = 0.18;
           break;
         case "HR":
-          particleColors = ["#3fff6e","#60e7c5","#bbffc6"];
+          holoRainbow = true; rainbowOpacity = 0.26;
+          holoGlare = true;   glareOpacity = 0.06;
+          sparkles = false;   sparklesOpacity = 0;
           break;
-        default: // "N"
-          particleColors = ["#b65cff","#8e56ef"];
+        default: // N
+          holoRainbow = false;
+          holoGlare = true;   glareOpacity = 0.04;
+          sparkles = false;
           break;
       }
-
-      // Canvas particules
-      const canvas = document.createElement('canvas');
-      canvas.width = 300;
-      canvas.height = 450;
-      canvas.style.width = "100%";
-      canvas.style.height = "100%";
-      effectLayer.appendChild(canvas);
-      animateParticles(canvas, particleColors, rarity);
-
-      // Holographie : calque de rayures holo
-      if (holo) {
-        effectLayer.style.background =
-          "repeating-linear-gradient(120deg,rgba(255,255,255,0.09) 0px,rgba(255,255,255,0.16) 14px,rgba(255,255,255,0.05) 26px)";
-        effectLayer.style.animation = "holoMove 5s linear infinite";
+      // Calque rainbow (conic gradient animé)
+      if(holoRainbow) {
+        let rainbow = document.createElement('div');
+        rainbow.className = 'holo-rainbow';
+        rainbow.style.opacity = rainbowOpacity;
+        inner.appendChild(rainbow);
       }
-      // Shine dynamique arc-en-ciel (pour SSR/UR)
-      if (shine) {
-        let shineDiv = document.createElement('div');
-        shineDiv.style.position = "absolute";
-        shineDiv.style.inset = 0;
-        shineDiv.style.borderRadius = "18px";
-        shineDiv.style.pointerEvents = "none";
-        shineDiv.style.background =
-          "linear-gradient(112deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.25) 48%, rgba(255,255,255,0.65) 53%, rgba(255,255,255,0.25) 57%, rgba(255,255,255,0) 74%)";
-        shineDiv.style.mixBlendMode = "color-dodge";
-        shineDiv.style.opacity = "0.85";
-        shineDiv.style.animation = "holoShine 3.6s linear infinite";
-        effectLayer.appendChild(shineDiv);
+      // Calque glare (suivi souris)
+      if(holoGlare) {
+        let glare = document.createElement('div');
+        glare.className = 'holo-glare';
+        glare.style.opacity = glareOpacity;
+        inner.appendChild(glare);
       }
-    }
-
-    // Particules dynamiques selon la rareté
-    function animateParticles(canvas, colors, rarity) {
-      const ctx = canvas.getContext('2d');
-      const w = canvas.width, h = canvas.height;
-      let particles = [];
-      let rarityStep = ["N","HR","SR","SSR","UR"].indexOf(rarity);
-      let count = 12 + rarityStep*11;
-
-      for(let i=0;i<count;i++){
-        let angle = Math.random()*2*Math.PI;
-        let dist = 55 + Math.random()*165 + (rarityStep*4);
-        let size = 2.2 + Math.random()*3.4 + (rarity==="UR"?1.6:0);
-        let speed = 0.008 + Math.random()*0.007 + (rarity==="UR"?0.008:0);
-        let color = colors[Math.floor(Math.random()*colors.length)];
-        particles.push({angle, dist, size, color, speed, aOffset:Math.random()*100});
+      // Calque sparkles (SVG étoile animée)
+      if(sparkles) {
+        let sp = document.createElement('div');
+        sp.className = 'holo-sparkles';
+        sp.style.opacity = sparklesOpacity;
+        inner.appendChild(sp);
       }
-
-      let running = true;
-      function draw() {
-        if (!running) return;
-        ctx.clearRect(0,0,w,h);
-        particles.forEach(p=>{
-          p.angle += p.speed;
-          let x = w/2 + Math.cos(p.angle)*p.dist;
-          let y = h/2 + Math.sin(p.angle)*p.dist;
-          ctx.globalAlpha = 0.31 + 0.27*Math.sin(Date.now()/650 + p.aOffset);
-          ctx.beginPath();
-          ctx.arc(x,y,p.size,0,2*Math.PI);
-          ctx.fillStyle = p.color;
-          ctx.shadowColor = p.color;
-          ctx.shadowBlur = 10 + rarityStep*2;
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        });
-        requestAnimationFrame(draw);
-      }
-      draw();
-      // Stop particles on close
-      canvas.closest("#card-effect-layer").parentNode.closest("#popup").addEventListener("click", ()=>{running=false;}, {once:true});
     }
 
     async function loadCollection() {
