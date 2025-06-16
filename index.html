@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Opening Stack Gobgob</title>
+  <title>Booster Stack Gobgob HALO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
@@ -18,7 +18,6 @@
       touch-action: manipulation;
       background: transparent;
     }
-    /* BOOSTER GENERAL */
     .popup-booster-container {
       position: absolute;
       left: 0; top: 0;
@@ -32,8 +31,8 @@
       opacity: 1;
       transform: translateY(0) scale(1) rotate(0deg);
       pointer-events: all;
+      overflow: visible;
     }
-    /* BOOSTER DU DESSOUS (background) */
     .popup-booster-container.inactive {
       pointer-events: none;
       filter: blur(2.5px) brightness(0.88) grayscale(0.28);
@@ -42,7 +41,6 @@
       transform: translateY(34px) scale(0.93) rotate(-5deg);
       box-shadow: 0 8px 44px #0006;
     }
-    /* BOOSTER QUI PART (après ouverture) */
     .popup-booster-container.hide {
       pointer-events: none;
       opacity: 0;
@@ -60,7 +58,7 @@
     .card-img {
       z-index: 2;
       opacity: 0;
-      filter: drop-shadow(0 12px 40px #000a) brightness(0.85);
+      filter: drop-shadow(0 12px 40px #000a) brightness(0.92);
       transform: translateY(0%) scale(0.97) rotate(2deg);
       transition:
         opacity 0.3s, filter 0.42s, transform 0.42s;
@@ -79,29 +77,29 @@
     }
     .card-img.revealup {
       opacity: 1;
+      /* Passe devant le booster-top (sous le front) */
       transition: transform 0.42s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
-      transform: translateY(-47%) scale(1.07) rotate(-2.5deg);
-      filter: drop-shadow(0 7px 40px #fff5) drop-shadow(0 0px 15px #ffe33a55) brightness(1.09);
-      z-index: 14;
+      transform: translateY(-48%) scale(1.07) rotate(-2.5deg);
+      filter: drop-shadow(0 7px 40px #fff5) drop-shadow(0 0px 15px #ffe33a55) brightness(1.11);
+      z-index: 4;
     }
     .card-img.revealdone {
       opacity: 1;
+      /* Se pose pile entre le booster-back et le booster-top */
       transition: transform 0.38s cubic-bezier(.42,1.6,.5,1.03), filter 0.4s;
       transform: translateY(-9%) scale(1) rotate(0deg);
-      filter: drop-shadow(0 4px 36px #fff3) drop-shadow(0 0px 15px #ffe33a22) brightness(1.03);
-      z-index: 15;
+      filter: drop-shadow(0 4px 36px #fff3) drop-shadow(0 0px 15px #ffe33a22) brightness(1.05);
+      z-index: 4;
     }
     .card-img.disappear {
       transition: opacity 0.36s cubic-bezier(.45,2,.55,1), transform 0.5s cubic-bezier(.41,2.6,.55,1);
       opacity: 0;
       transform: translateY(-40%) scale(0.8) rotate(-8deg);
       filter: blur(2px) brightness(0.7);
-      z-index: 18;
+      z-index: 4;
     }
-    .booster-front { z-index: 11; }
     .booster-top {
-      z-index: 12;
-      /* Effet pop, pas page-turn */
+      z-index: 5;
       transition: transform 0.44s cubic-bezier(.55,1.7,.33,1), opacity 0.36s;
       transform: translateY(0) rotate(0deg);
       opacity: 1;
@@ -110,6 +108,23 @@
     .booster-top.open {
       transform: translateY(-28%) rotate(-10deg) scale(1.08,1.03);
       opacity: 0.94;
+    }
+    .booster-front { z-index: 11; pointer-events: none; }
+    /* HALO lumineux */
+    .halo {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 22;
+      mix-blend-mode: screen;
+      border-radius: 16px;
+      opacity: 0.93;
+      background: radial-gradient(circle at 50% 40%, #fffbe6 0px, #fffbe6cc 50px, #fff8 100px, #ffe80000 240px);
+      transition: background 0.09s;
+      will-change: background;
+    }
+    .popup-booster-container.inactive .halo {
+      opacity: 0.4;
     }
     /* Booster VIBRATION */
     @keyframes booster-vibe {
@@ -146,37 +161,44 @@
     <div class="popup-booster-container inactive" id="booster2">
       <img src="img/booster-back.png" class="booster-back">
       <img src="img/14.png" class="card-img" id="card2">
-      <img src="img/booster-front.png" class="booster-front">
       <img src="img/booster-top.png" class="booster-top" id="boosterTop2">
+      <img src="img/booster-front.png" class="booster-front">
+      <div class="halo" id="halo2"></div>
     </div>
     <!-- Booster 1 (devant, actif au début) -->
     <div class="popup-booster-container" id="booster1">
       <img src="img/booster-back.png" class="booster-back">
       <img src="img/14.png" class="card-img" id="card1">
-      <img src="img/booster-front.png" class="booster-front">
       <img src="img/booster-top.png" class="booster-top" id="boosterTop1">
+      <img src="img/booster-front.png" class="booster-front">
+      <div class="halo" id="halo1"></div>
     </div>
   </div>
 </div>
 <script>
-function addTilt(boosterBox) {
+function addTiltAndHalo(boosterBox, halo) {
   boosterBox.addEventListener('mousemove', (e) => {
     const rect = boosterBox.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    const tiltX = x*22, tiltY = -y*19;
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    // 3D tilt
+    const tiltX = (x-0.5)*22, tiltY = (0.5-y)*19;
     boosterBox.style.transform = `perspective(900px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) scale(1.03)`;
     boosterBox.classList.add('tilted');
+    // Halo
+    halo.style.background = `radial-gradient(circle at ${x*100}% ${y*100}%, #fffbe6 0px, #fffbe6cc 40px, #fff8 100px, #ffe80000 200px)`;
   });
   boosterBox.addEventListener('mouseleave', () => {
     boosterBox.style.transform = "";
     boosterBox.classList.remove('tilted');
+    halo.style.background = `radial-gradient(circle at 50% 40%, #fffbe6 0px, #fffbe6cc 50px, #fff8 100px, #ffe80000 240px)`;
   });
   boosterBox.addEventListener('mouseenter', () => {
     boosterBox.classList.add('tilted');
   });
 }
-addTilt(document.getElementById('booster1'));
+addTiltAndHalo(document.getElementById('booster1'), document.getElementById('halo1'));
+addTiltAndHalo(document.getElementById('booster2'), document.getElementById('halo2'));
 
 let current = 1;
 function openBooster(num) {
@@ -193,7 +215,7 @@ function openBooster(num) {
   setTimeout(() => {
     // 2. Languette pop (translate+rotate)
     boosterTop.classList.add('open');
-    // 3. Carte vibre puis sort, dépasse, puis descend
+    // 3. Carte vibre puis sort, dépasse, puis descend (le top est devant elle, le front reste tout en haut)
     card.classList.add('vibrating');
     setTimeout(() => {
       card.classList.remove('vibrating');
@@ -212,7 +234,6 @@ function openBooster(num) {
               // Booster 2 devient actif
               const b2 = document.getElementById('booster2');
               b2.classList.remove('inactive');
-              addTilt(b2);
             } else {
               // Tous ouverts : on passe à la suite
               setTimeout(()=>{
