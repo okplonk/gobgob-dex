@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test Pack Opening Vertical Vibe - Carte 14</title>
+  <title>Test Pack Opening Vertical Pluie - Carte 14</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; text-align: center; font-family: sans-serif; }
@@ -73,16 +73,23 @@ function startPackAnimation() {
   let start = null;
   const duration = 1600; // ms
   const particles = [];
+  let animDone = false;
   openBtn.disabled = true;
   openBtn.style.opacity = 0.65;
 
-  function animateParticles(frontY) {
-    // Grosse pluie de particules brillantes sur la frontière horizontale
+  // On va déterminer la vitesse de chute de la "frontière" : 
+  // En px/ms
+  const revealSpeed = cardH / duration;
+
+  function spawnParticlesAtTop() {
+    // Grosse pluie de particules brillantes au sommet à chaque frame
     for (let i = 0; i < 100; i++) {
       const x = Math.random() * cardW;
-      const angle = (Math.random()-0.5)*Math.PI/2;
-      const vx = Math.cos(angle) * (Math.random()*1.6 + 0.7);
-      const vy = Math.sin(angle) * (Math.random()*1.6 + 0.7);
+      // La vitesse de base = vitesse de révélation + variation random
+      const baseVy = revealSpeed * (13 + Math.random() * 10); // un peu + rapide que la front
+      const angle = (Math.random()-0.5)*Math.PI/9;
+      const vx = Math.cos(angle) * (Math.random()*1.5); // petit écart latéral
+      const vy = Math.abs(Math.sin(angle) * (Math.random()*1.2)) + baseVy;
       const colorList = [
         "#fff", "#ffe066", "#fffbe6", "#9ffcff", "#f9f06b",
         "#fffb", "#fff9", "#ffe9", "#fffd", "#fcf5ff"
@@ -90,25 +97,26 @@ function startPackAnimation() {
       const glowColor = colorList[Math.floor(Math.random()*colorList.length)];
       particles.push({
         x: x,
-        y: frontY + Math.random()*22-11,
+        y: 0,
         vx, vy,
         r: 3.7 + Math.random()*2.5,
         color: glowColor,
         life: 0,
-        maxLife: 13 + Math.random()*16,
+        maxLife: 18 + Math.random()*18,
         glow: true
       });
     }
-    // Très grosses "étincelles" pour effet surbrillant
-    for (let i=0; i<10; i++) {
+    // Grosses "étincelles" (moins nombreuses)
+    for (let i=0; i<8; i++) {
       const x = Math.random() * cardW;
+      const vy = revealSpeed * (18 + Math.random()*10);
       particles.push({
-        x: x, y: frontY,
-        vx: (Math.random()-0.5)*0.9, vy: (Math.random()-0.5)*0.9,
+        x: x, y: 0,
+        vx: (Math.random()-0.5)*0.8, vy,
         r: 16 + Math.random()*14,
         color: "#fff",
         life: 0,
-        maxLife: 12 + Math.random()*10,
+        maxLife: 15 + Math.random()*8,
         glow: true
       });
     }
@@ -136,7 +144,8 @@ function startPackAnimation() {
       p.x += p.vx;
       p.y += p.vy;
       p.life += 1;
-      if (p.life > p.maxLife) particles.splice(i, 1);
+      // On retire les particules SEULEMENT quand elles sont totalement sorties du cadre
+      if (p.y > cardH + p.r*1.5 || p.life > p.maxLife) particles.splice(i, 1);
     }
   }
 
@@ -151,9 +160,8 @@ function startPackAnimation() {
     const rotate = Math.sin(progress*27)*2 + (Math.random()-0.5)*1.4;
     card.style.transform = `translate(${vibration}px, ${-vibration/2}px) rotate(${rotate}deg)`;
 
-    // Frontière Y = position de la transition
-    const frontY = cardH - progress*cardH;
-    animateParticles(frontY);
+    // On génère les particules EN HAUT pendant toute la révélation
+    if (!animDone) spawnParticlesAtTop();
     drawParticles();
 
     if (progress < 1) {
@@ -161,11 +169,18 @@ function startPackAnimation() {
     } else {
       color.style.clipPath = "none";
       card.style.transform = ""; // stop vibration
-      setTimeout(() => {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        openBtn.disabled = false;
-        openBtn.style.opacity = 1;
-      }, 600);
+      animDone = true;
+      // Continue à dessiner les particules jusqu'à ce qu'il n'en reste plus
+      function finishParticles() {
+        drawParticles();
+        if (particles.length > 0) {
+          requestAnimationFrame(finishParticles);
+        } else {
+          openBtn.disabled = false;
+          openBtn.style.opacity = 1;
+        }
+      }
+      finishParticles();
     }
   }
   requestAnimationFrame(step);
