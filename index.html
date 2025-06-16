@@ -131,15 +131,16 @@
     }
     .popup-img.base {
       z-index: 1;
+      filter: contrast(1.08) brightness(1.10);
     }
     .popup-img.shadow {
       z-index: 2;
-      filter: brightness(0) blur(0.7px) opacity(0.48);
+      filter: brightness(0) blur(0.7px) opacity(0.10);
       mix-blend-mode: multiply;
     }
     .popup-img.light {
       z-index: 3;
-      filter: brightness(10) blur(0.7px) opacity(0.33);
+      filter: brightness(9) blur(0.8px) opacity(0.06);
       mix-blend-mode: screen;
     }
 
@@ -148,7 +149,7 @@
       inset: 0;
       pointer-events: none;
       mix-blend-mode: soft-light;
-      opacity: 0.7;
+      opacity: 0.35;
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
       z-index: 4;
       transition: background 0.15s;
