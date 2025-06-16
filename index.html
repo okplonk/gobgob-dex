@@ -2,23 +2,26 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Popup Gobgob</title>
+  <title>Booster Popup Gobgob - Drag Reveal</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
+    html, body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
     .booster-zone {
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .popup-booster-container {
       position: relative;
-      width: 320px; height: 510px; /* comme ton popup */
+      width: 320px; height: 510px;
       margin: 0 auto;
       user-select: none;
       touch-action: manipulation;
       perspective: 1200px;
       z-index: 1;
       background: transparent;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      box-shadow: 0 2px 24px #000b;
     }
     .booster-back, .card-img, .booster-front, .booster-top {
       position: absolute; left: 0; top: 0; width: 100%; height: 100%;
@@ -30,69 +33,61 @@
     .card-img {
       z-index: 2;
       opacity: 0;
-      /* Sort du booster en "popant" un peu plus haut, puis redescend au bon endroit */
+      /* Commence cachée sous la languette */
       filter: drop-shadow(0 12px 40px #000a) brightness(0.85);
-      transform: translateY(37%) scale(0.9) rotate(2.3deg);
+      transform: translateY(0%) scale(0.97) rotate(2deg);
       transition:
-        opacity 0.7s cubic-bezier(.34,2,.55,1.2),
-        transform 0.7s cubic-bezier(.34,2,.55,1.2),
-        filter 0.45s;
+        opacity 0.35s, filter 0.44s;
     }
-    .card-img.reveal {
+    .card-img.vibrating {
+      animation: card-vibe 0.65s cubic-bezier(.21,1.9,.51,1.2) 1;
+    }
+    @keyframes card-vibe {
+      0% { transform: translateY(0%) scale(0.97) rotate(2deg);}
+      16% { transform: translateY(1%) scale(1.01) rotate(3deg);}
+      32% { transform: translateY(-1%) scale(0.98) rotate(-3deg);}
+      48% { transform: translateY(1%) scale(1.01) rotate(2deg);}
+      64% { transform: translateY(-1%) scale(0.98) rotate(-2deg);}
+      80% { transform: translateY(0%) scale(1) rotate(0deg);}
+      100% { transform: translateY(0%) scale(0.97) rotate(2deg);}
+    }
+    /* Anim principale du reveal, séquencée par JS */
+    .card-img.revealup {
       opacity: 1;
-      /* Sort juste du booster puis se place exactement dessus */
-      transform: translateY(-9%) scale(1) rotate(0deg);
-      filter: drop-shadow(0 4px 40px #fff6) drop-shadow(0 0px 35px #ffe33a44) brightness(1.05);
-      z-index: 12;
-      transition:
-        opacity 0.7s cubic-bezier(.22,2.4,.55,1.2),
-        transform 0.8s cubic-bezier(.27,2.1,.5,1.2),
-        filter 0.5s;
+      transition: transform 0.42s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
+      /* Passe devant la languette (dépasse le booster-top, sort du booster) */
+      transform: translateY(-47%) scale(1.07) rotate(-2.5deg);
+      filter: drop-shadow(0 7px 40px #fff5) drop-shadow(0 0px 15px #ffe33a55) brightness(1.09);
+      z-index: 14;
     }
-    .booster-front { z-index: 11; }
+    .card-img.revealdone {
+      opacity: 1;
+      /* Descend pile sur le booster-top, stack final */
+      transition: transform 0.35s cubic-bezier(.42,1.6,.5,1.03), filter 0.4s;
+      transform: translateY(-9%) scale(1) rotate(0deg);
+      filter: drop-shadow(0 4px 36px #fff3) drop-shadow(0 0px 15px #ffe33a22) brightness(1.03);
+      z-index: 15;
+    }
+    .booster-front { z-index: 11; pointer-events: none; }
     .booster-top {
       z-index: 12;
-      transition: transform 0.44s cubic-bezier(.55,1.7,.33,1), opacity 0.36s;
+      transition: transform 0.42s cubic-bezier(.55,1.7,.33,1), opacity 0.32s;
       transform: translateY(0) rotate(0deg);
       opacity: 1;
       pointer-events: none;
     }
     .booster-top.open {
-      transform: translateY(-26%) rotate(-10deg) scale(1.05,1.01);
+      transform: translateY(-28%) rotate(-11deg) scale(1.07,1.01);
       opacity: 0.96;
     }
-    .vibrating {
-      animation: booster-vibe 1s cubic-bezier(.41,2.5,.55,1.1) 1;
+    /* 3D tilt */
+    .popup-booster-container.tilted {
+      box-shadow: 0 12px 60px #000c;
+      transition: box-shadow 0.08s;
     }
-    @keyframes booster-vibe {
-      0% { transform: scale(1) rotate(0deg);}
-      10% { transform: scale(1.03) rotate(-1deg);}
-      20% { transform: scale(1.05) rotate(1deg);}
-      30% { transform: scale(1.09) rotate(-2deg);}
-      40% { transform: scale(1.06) rotate(1deg);}
-      50% { transform: scale(1.11) rotate(2deg);}
-      60% { transform: scale(1.07) rotate(-2deg);}
-      70% { transform: scale(1.13) rotate(1.5deg);}
-      80% { transform: scale(1.09) rotate(-2deg);}
-      90% { transform: scale(1.06) rotate(1deg);}
-      100% { transform: scale(1.13) rotate(0deg);}
+    @media (max-width: 400px) {
+      .popup-booster-container { width: 98vw; max-width: 350px; }
     }
-    .btn {
-      margin-top: 38px;
-      font-size: 1.15em;
-      padding: 11px 25px;
-      border-radius: 9px;
-      border: none;
-      background: linear-gradient(90deg, #fffcb7 15%, #ffd446 50%, #ffed99 85%);
-      color: #302600;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 2px 18px #0005;
-      letter-spacing: 1.2px;
-      transition: filter 0.16s;
-      outline: none;
-    }
-    .btn:active { filter: brightness(0.92);}
   </style>
 </head>
 <body>
@@ -103,28 +98,61 @@
     <img src="img/booster-front.png" class="booster-front">
     <img src="img/booster-top.png" class="booster-top" id="boosterTop">
   </div>
-  <button class="btn" id="openBtn">Ouvrir le booster !</button>
 </div>
 <script>
+const boosterBox = document.getElementById('boosterBox');
 const boosterTop = document.getElementById('boosterTop');
 const card = document.getElementById('card');
-const btn = document.getElementById('openBtn');
-const box = document.getElementById('boosterBox');
 
-btn.onclick = function() {
-  btn.disabled = true;
-  btn.style.opacity = 0.7;
-  // 1. Booster vibre et grossit
-  box.classList.add('vibrating');
+let opened = false;
+
+// ---- 3D TILT effet sur hover/touch ----
+let tilt = {x: 0, y: 0};
+boosterBox.addEventListener('mousemove', (e) => {
+  const rect = boosterBox.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / rect.width - 0.5;
+  const y = (e.clientY - rect.top) / rect.height - 0.5;
+  tilt.x = x*26;
+  tilt.y = -y*24;
+  boosterBox.style.transform = `perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(1.03)`;
+  boosterBox.classList.add('tilted');
+});
+boosterBox.addEventListener('mouseleave', () => {
+  boosterBox.style.transform = "";
+  boosterBox.classList.remove('tilted');
+});
+boosterBox.addEventListener('mouseenter', () => {
+  boosterBox.classList.add('tilted');
+});
+
+// Mobile tilt (gyroscope)
+window.addEventListener("deviceorientation", (e) => {
+  // Optionnel: tu veux l'activer sur mobile ?
+  // let x = Math.max(-1, Math.min(1, e.gamma/20)); // entre -1 et 1
+  // let y = Math.max(-1, Math.min(1, e.beta/24));
+  // boosterBox.style.transform = `perspective(900px) rotateY(${x*26}deg) rotateX(${-y*24}deg) scale(1.04)`;
+  // boosterBox.classList.add('tilted');
+});
+
+// ---- OUVERTURE DU BOOSTER SUR CLICK ----
+boosterBox.addEventListener('click', () => {
+  if (opened) return;
+  opened = true;
+  // 1. La carte vibre sous la languette
+  card.classList.add('vibrating');
   setTimeout(() => {
-    // 2. Languette s'ouvre
+    // 2. Booster-top s'ouvre
     boosterTop.classList.add('open');
-    // 3. Après un petit délai, la carte sort et reste sur le booster
+    // 3. La carte sort et passe DEVANT la languette (dépasser)
+    card.classList.remove('vibrating');
+    card.classList.add('revealup');
+    // 4. Après 520ms, la carte descend sur le booster (stack finale)
     setTimeout(() => {
-      card.classList.add('reveal');
-    }, 380);
-  }, 1000);
-};
+      card.classList.remove('revealup');
+      card.classList.add('revealdone');
+    }, 520);
+  }, 650); // vibration durée
+});
 </script>
 </body>
 </html>
