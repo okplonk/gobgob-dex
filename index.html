@@ -279,24 +279,25 @@
     function hidePopup() {
       const popup = document.getElementById("popup");
       popup.classList.remove("visible");
-      document.getElementById("popup-img").style.transform = "rotateX(0deg) rotateY(0deg)";
+      const inner = document.getElementById("popup-inner");
+      inner.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
     document.getElementById("popup-inner").addEventListener("mousemove", e => {
-      const img = document.getElementById("popup-img");
-      const rect = img.getBoundingClientRect();
+      const container = e.currentTarget;
+      const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
       const rotateX = -(y - centerY) / 6;
       const rotateY = (x - centerX) / 6;
-      img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
     });
 
     document.getElementById("popup-inner").addEventListener("mouseleave", () => {
-      const img = document.getElementById("popup-img");
-      img.style.transform = "rotateX(0deg) rotateY(0deg)";
+      const container = document.getElementById("popup-inner");
+      container.style.transform = "rotateX(0deg) rotateY(0deg)";
     });
 
     async function loadCollection() {
