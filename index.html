@@ -66,7 +66,6 @@
       cursor: pointer;
       background: transparent;
       margin-bottom: 8px;
-      /* empilement propre du halo */
       overflow: visible;
     }
     .card-inner {
@@ -88,14 +87,13 @@
       height: 100%;
       pointer-events: none;
       z-index: 2;
-      /* masquage alpha : ici le masque doit être fourni (PNG en nuances de gris, blanc=opaque, noir=transparent) */
       mask-image: url('img/alpha-mask.png');
       mask-size: 100% 100%;
       mask-repeat: no-repeat;
       -webkit-mask-image: url('img/alpha-mask.png');
       -webkit-mask-size: 100% 100%;
       -webkit-mask-repeat: no-repeat;
-      /* on pourrait adapter l'url si tu la changes ! */
+      /* pour debug sans alpha mask : retire les mask-* */
     }
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
@@ -127,6 +125,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .popup-card-inner {
       width: 100%;
@@ -223,28 +222,29 @@
       });
     }
 
-    function drawHalosOnCanvas(canvas, intensity=1) {
-      // double halo : grand diffus + petit plus vif, centrés, sans toucher alpha PNG
+    // ----------- HOLO TRACKING HALO ---------
+    function drawTrackingHalo(canvas, x, y, intensity=1) {
       const ctx = canvas.getContext("2d");
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
 
-      // grand halo large diffus
-      const grad1 = ctx.createRadialGradient(
-        w/2, h/2, w*0.15, w/2, h/2, w*0.48
-      );
-      grad1.addColorStop(0, `rgba(255,255,255,${0.32*intensity})`);
-      grad1.addColorStop(0.6, `rgba(255,255,255,${0.10*intensity})`);
+      // default: centre
+      x = (typeof x === 'number') ? x : w/2;
+      y = (typeof y === 'number') ? y : h/2;
+
+      // Grand halo, bleuté/blanc pour "holo"
+      let grad1 = ctx.createRadialGradient(x, y, w*0.04, x, y, w*0.5);
+      grad1.addColorStop(0, `rgba(255,255,255,${0.60*intensity})`);
+      grad1.addColorStop(0.30, `rgba(150,210,255,${0.20*intensity})`);
       grad1.addColorStop(1, "rgba(255,255,255,0)");
       ctx.globalCompositeOperation = "lighter";
       ctx.fillStyle = grad1;
       ctx.fillRect(0,0,w,h);
 
-      // petit halo plus net
-      const grad2 = ctx.createRadialGradient(
-        w/2, h/2, 0, w/2, h/2, w*0.23
-      );
-      grad2.addColorStop(0, `rgba(255,255,255,${0.14*intensity})`);
+      // Petit halo plus vif, léger doré
+      let grad2 = ctx.createRadialGradient(x, y, 0, x, y, w*0.20);
+      grad2.addColorStop(0, `rgba(255,255,255,${0.25*intensity})`);
+      grad2.addColorStop(0.65, `rgba(255,230,150,${0.07*intensity})`);
       grad2.addColorStop(1, "rgba(255,255,255,0)");
       ctx.fillStyle = grad2;
       ctx.fillRect(0,0,w,h);
@@ -252,14 +252,69 @@
       ctx.globalCompositeOperation = "source-over";
     }
 
-    function updateHalosTransform(cardElem, inner) {
-      // synchronise le halo sur la rotation de la carte
-      const halo = cardElem.querySelector('.halo-overlay');
-      if (halo) {
-        halo.style.transform = inner.style.transform || "";
+    function updateHaloToPointer(canvas, event, refElem, mobile) {
+      const rect = refElem.getBoundingClientRect();
+      let x, y;
+      if (mobile && event.touches && event.touches.length > 0) {
+        x = event.touches[0].clientX - rect.left;
+        y = event.touches[0].clientY - rect.top;
+      } else {
+        x = event.clientX - rect.left;
+        y = event.clientY - rect.top;
+      }
+      drawTrackingHalo(canvas, x / rect.width * canvas.width, y / rect.height * canvas.height, 1.04);
+    }
+
+    function setHaloToCenter(canvas) {
+      drawTrackingHalo(canvas, canvas.width/2, canvas.height/2, 1.0);
+    }
+
+    function addTrackingHalo(card) {
+      const inner = card.querySelector('.card-inner');
+      const halo = card.querySelector('.halo-overlay');
+      if (!halo) return;
+      // Set canvas size
+      halo.width = inner.offsetWidth;
+      halo.height = inner.offsetHeight;
+      setHaloToCenter(halo);
+
+      // desktop
+      if (window.matchMedia("(pointer: fine)").matches) {
+        inner.addEventListener("mousemove", (e) => updateHaloToPointer(halo, e, inner, false));
+        inner.addEventListener("mouseleave", () => setHaloToCenter(halo));
+      } else {
+        // mobile: le reflet reste au centre (sauf si tu veux track le doigt)
+        inner.addEventListener("touchstart", (e) => updateHaloToPointer(halo, e, inner, true));
+        inner.addEventListener("touchmove", (e) => updateHaloToPointer(halo, e, inner, true));
+        inner.addEventListener("touchend", () => setHaloToCenter(halo));
       }
     }
 
+    function addTrackingHaloToPopup() {
+      const inner = document.getElementById("popup-inner");
+      const halo = document.querySelector('.popup-halo-overlay');
+      halo.width = inner.offsetWidth;
+      halo.height = inner.offsetHeight;
+      setHaloToCenter(halo);
+
+      // Remove old listeners
+      inner.onmousemove = null;
+      inner.onmouseleave = null;
+      inner.ontouchstart = null;
+      inner.ontouchmove = null;
+      inner.ontouchend = null;
+
+      if (window.matchMedia("(pointer: fine)").matches) {
+        inner.onmousemove = (e) => updateHaloToPointer(halo, e, inner, false);
+        inner.onmouseleave = () => setHaloToCenter(halo);
+      } else {
+        inner.ontouchstart = (e) => updateHaloToPointer(halo, e, inner, true);
+        inner.ontouchmove = (e) => updateHaloToPointer(halo, e, inner, true);
+        inner.ontouchend = () => setHaloToCenter(halo);
+      }
+    }
+
+    // ----------- RESTE DU CODE NORMAL ---------
     function addTiltEffect(card) {
       if (window.matchMedia("(pointer: fine)").matches) {
         const inner = card.querySelector('.card-inner');
@@ -273,13 +328,10 @@
           const rotateY = (x - centerX) / 3;
           inner.style.transform =
             `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-          updateHalosTransform(card, inner);
         });
         card.addEventListener("mouseleave", () => {
           const inner = card.querySelector('.card-inner');
-          inner.style.transform =
-            "rotateX(0deg) rotateY(0deg)";
-          updateHalosTransform(card, inner);
+          inner.style.transform = "rotateX(0deg) rotateY(0deg)";
         });
       }
     }
@@ -294,12 +346,12 @@
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
-      // Redessine le halo dans le popup
+      // Redessine le halo dans le popup et active le tracking
       const canvas = document.querySelector('.popup-halo-overlay');
-      const rect = inner.getBoundingClientRect();
       canvas.width = inner.offsetWidth;
       canvas.height = inner.offsetHeight;
-      drawHalosOnCanvas(canvas, 1);
+      setHaloToCenter(canvas);
+      addTrackingHaloToPopup();
 
       // On gère effet 3D selon l'appareil
       if (window.matchMedia("(pointer: coarse)").matches) {
@@ -311,25 +363,10 @@
     }
 
     function onPopupMouseMove(e) {
-      const inner = e.currentTarget;
-      const rect = inner.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = -(y - centerY) / 8;
-      const rotateY = (x - centerX) / 8;
-      inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-
-      // sync halo
-      const canvas = document.querySelector('.popup-halo-overlay');
-      if (canvas) canvas.style.transform = inner.style.transform || "";
+      // tracking déjà géré, rien à faire
     }
     function onPopupMouseLeave(e) {
-      const inner = e.currentTarget;
-      inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-      const canvas = document.querySelector('.popup-halo-overlay');
-      if (canvas) canvas.style.transform = "";
+      // tracking déjà géré, rien à faire
     }
 
     function enableGyroOnPopup(inner, canvas) {
@@ -360,10 +397,7 @@
       }
       const inner = document.getElementById("popup-inner");
       if (inner) inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-      inner.removeEventListener("mousemove", onPopupMouseMove);
-      inner.removeEventListener("mouseleave", onPopupMouseLeave);
-      const canvas = document.querySelector('.popup-halo-overlay');
-      if (canvas) canvas.style.transform = "";
+      // Listeners gérés dans addTrackingHaloToPopup
     }
 
     function applyGyroToPopup(inner, canvas, event) {
@@ -377,7 +411,8 @@
       const rotateY = -(y - 0) / 2;
       inner.style.transform =
         `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
-      if (canvas) canvas.style.transform = inner.style.transform || "";
+      // HALO suit le centre, possible d’ajouter tracking gyro
+      setHaloToCenter(canvas);
     }
 
     function hidePopup() {
@@ -407,13 +442,12 @@
         // HALO overlay (canvas) par carte
         const halo = document.createElement("canvas");
         halo.className = "halo-overlay";
-        // On taille le halo après insertion dans le DOM (donc après appendChild)
         div.appendChild(halo);
         setTimeout(() => {
-          // pour que .offsetWidth existe (DOM update)
           halo.width = inner.offsetWidth;
           halo.height = inner.offsetHeight;
-          drawHalosOnCanvas(halo, 0.88);
+          setHaloToCenter(halo);
+          addTrackingHalo(div);
         });
 
         const isOwned = owned.has(card.id);
@@ -446,14 +480,14 @@
 
     fetchCards().then(cards => allCards = cards);
 
-    // Si resize, on resize tous les halos
+    // Resize = on resize tous les halos
     window.addEventListener('resize', () => {
       document.querySelectorAll('.halo-overlay').forEach(halo => {
         const parent = halo.parentElement.querySelector('.card-inner');
         if (parent) {
           halo.width = parent.offsetWidth;
           halo.height = parent.offsetHeight;
-          drawHalosOnCanvas(halo, 0.88);
+          setHaloToCenter(halo);
         }
       });
       // Popup aussi
@@ -462,7 +496,7 @@
       if (canvas && popupInner) {
         canvas.width = popupInner.offsetWidth;
         canvas.height = popupInner.offsetHeight;
-        drawHalosOnCanvas(canvas, 1);
+        setHaloToCenter(canvas);
       }
     });
   </script>
