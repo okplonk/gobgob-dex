@@ -2,127 +2,271 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Gobgob DEX Card Holo Demo</title>
+  <title>Gobgob DEX</title>
   <style>
-    :root {
-      --holo1: #00fff7;
-      --holo2: #ffd700;
-      --holo3: #ff00f7;
-      --holo4: #a0ff00;
-      --holo5: #ffffff;
-    }
     body {
-      background: #111;
+      font-family: sans-serif;
+      background-color: #f8f8f8;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 5px;
+    }
+
+    #progress-text {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+
+    #progress-bar-container {
+      width: 300px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px auto;
+      overflow: hidden;
+      display: block;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, #5cd9ff, #4fc87a);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+
+    .card-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+      margin-right: 10%;
+      margin-left: 10%;
+    }
+
+    .card {
+      width: 120px;
+      height: 190px;
+      perspective: 1000px;
+      animation: fadeInUp 0.4s ease forwards;
+      opacity: 0;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      background-color: transparent;
+    }
+
+    .card:not(.missing):hover .card-inner {
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+      z-index: 2;
+    }
+
+    .card.missing .card-inner {
+      filter: grayscale(100%) brightness(0.6) contrast(0.8);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    #popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      margin: 0;
+      z-index: 9999;
+      visibility: hidden;
     }
-    .card-holo-container {
-      width: 380px;
-      height: 600px;
-      position: relative;
+
+    .popup-card {
+      width: 300px;
+      height: 450px;
       perspective: 1000px;
-      user-select: none;
     }
-    .card-holo-inner {
+
+    .popup-card-inner {
       width: 100%;
       height: 100%;
-      position: absolute;
-      left: 0; top: 0;
-      border-radius: 30px;
-      box-shadow: 0 12px 60px 0 #000b, 0 2px 10px #0008;
-      overflow: hidden;
-      background: #222;
-      /* Effet 3D */
-      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
-      will-change: transform;
-    }
-    .card-holo-inner:hover {
-      transform: rotateY(14deg) rotateX(5deg) scale(1.035);
-      box-shadow: 0 20px 60px 0 #00fff855, 0 2px 20px #ffd70099;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s ease;
     }
 
-    /* --- BASE ILLUSTRATION --- */
-    .card-base {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      z-index: 1;
-      object-fit: cover;
-      pointer-events: none;
-    }
-    /* --- FOIL EFFECT --- */
-    .card-foil-holo {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      z-index: 2;
-      /* Zone holo : le mask ! */
-      -webkit-mask-image: url('img/66-foil.png');
-      mask-image: url('img/66-foil.png');
-      -webkit-mask-size: cover;
-      mask-size: cover;
-      /* Le layer Holo visible uniquement dans la zone foil */
-      pointer-events: none;
-      mix-blend-mode: color-dodge;
-      opacity: .75;
-      animation: holoMove 6s infinite linear;
-    }
-    /* Animation de gradient qui bouge */
-    .card-foil-holo::before {
-      content: "";
-      display: block;
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: 
-        linear-gradient(120deg, var(--holo1), var(--holo2), var(--holo3), var(--holo4), var(--holo5), var(--holo1));
-      background-size: 400% 400%;
-      animation: holoGradient 5s linear infinite;
-      opacity: 0.8;
-      mix-blend-mode: screen;
-      border-radius: 30px;
-    }
-    @keyframes holoGradient {
-      0% { background-position: 0% 40%; }
-      50% { background-position: 100% 60%; }
-      100% { background-position: 0% 40%; }
-    }
-    @keyframes holoMove {
-      0% { filter: brightness(1) contrast(2) saturate(1.4) hue-rotate(0deg);}
-      100% { filter: brightness(1.05) contrast(2.1) saturate(1.5) hue-rotate(360deg);}
+    #popup.visible {
+      visibility: visible;
     }
 
-    /* --- FRAME/UI LAYER --- */
-    .card-ui {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      z-index: 3;
-      object-fit: cover;
-      pointer-events: none;
-      /* On peut ajouter un mini effet glow ici aussi */
-      filter: drop-shadow(0 2px 4px #fff8) drop-shadow(0 0 12px #ffd70044);
-      /* ou juste laisser à 1 */
-    }
-    /* -- GLOW outline au hover sur la frame -- */
-    .card-holo-inner:hover .card-ui {
-      filter: drop-shadow(0 2px 10px #fff8) drop-shadow(0 0 22px #ffd700aa);
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card-holo-container">
-    <div class="card-holo-inner">
-      <!-- Illustration de base -->
-      <img src="img/66.png" alt="Gobgob Momijix" class="card-base" />
-      <!-- FOIL HOLO effect (masqué par foil alpha PNG) -->
-      <div class="card-foil-holo"></div>
-      <!-- Frame/texte (UI) -->
-      <img src="img/66-ui.png" alt="UI Frame" class="card-ui" />
+  <h1>Gobgob DEX</h1>
+  <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
+  <button onclick="loadCollection()">Afficher</button>
+  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
+
+  <div id="progress-text"></div>
+  <div id="progress-bar-container">
+    <div id="progress-bar"></div>
+  </div>
+
+  <div class="card-grid" id="cards"></div>
+
+  <div id="popup" onclick="hidePopup()">
+    <div class="popup-card">
+      <div class="popup-card-inner" id="popup-inner"></div>
     </div>
   </div>
+
+  <script>
+    let allCards = [];
+    let showMissing = true;
+
+    async function fetchCards() {
+      const res = await fetch("cards.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [id, nom, rarete] = line.split(",");
+        return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim() };
+      });
+    }
+
+    async function fetchCollection() {
+      const res = await fetch("collection.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [pseudo, id] = line.split(",");
+        return { pseudo: pseudo.trim().toLowerCase(), id: parseInt(id) };
+      });
+    }
+
+    function addTiltEffect(card) {
+      card.addEventListener("mousemove", e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = -(y - centerY) / 3;
+        const rotateY = (x - centerX) / 3;
+
+        card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
+    function addZoomEffect(cardId) {
+      const popup = document.getElementById("popup");
+      const inner = document.getElementById("popup-inner");
+      inner.style.backgroundImage = `url(img/${cardId}.png)`;
+      popup.classList.add("visible");
+
+      inner.addEventListener("mousemove", e => {
+        const rect = inner.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = -(y - centerY) / 6;
+        const rotateY = (x - centerX) / 6;
+        inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      });
+
+      inner.addEventListener("mouseleave", () => {
+        inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+      });
+    }
+
+    function hidePopup() {
+      document.getElementById("popup").classList.remove("visible");
+    }
+
+    async function loadCollection() {
+      const username = document.getElementById("username").value.toLowerCase();
+      const collection = await fetchCollection();
+      const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+
+      let index = 0;
+      for (const card of allCards) {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.animationDelay = `${index * 50}ms`;
+
+        const inner = document.createElement("div");
+        inner.className = "card-inner";
+        inner.style.backgroundImage = `url(img/${card.id}.png)`;
+        inner.title = `${card.name} (${card.rarity})`;
+        div.appendChild(inner);
+
+        const isOwned = owned.has(card.id);
+        if (!isOwned) {
+          div.classList.add("missing");
+          if (!showMissing) div.classList.add("hidden");
+        } else {
+          addTiltEffect(div);
+          div.onclick = () => addZoomEffect(card.id);
+        }
+
+        container.appendChild(div);
+        index++;
+      }
+
+      const ownedCount = owned.size;
+      const totalCount = allCards.length || 1;
+      const percent = (ownedCount / totalCount) * 100;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-bar").style.width = percent + "%";
+    }
+
+    function toggleMissing() {
+      showMissing = !showMissing;
+      document.querySelectorAll(".card.missing").forEach(card => {
+        card.classList.toggle("hidden", !showMissing);
+      });
+    }
+
+    fetchCards().then(cards => allCards = cards);
+  </script>
 </body>
 </html>
