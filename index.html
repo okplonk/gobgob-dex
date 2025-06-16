@@ -2,48 +2,36 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test Booster Opening Gobgob</title>
+  <title>Mini Booster Opening Gobgob</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
+    body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
     .booster-zone {
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
     .booster-container {
       position: relative;
-      width: 100vw; max-width: 340px;
-      height: calc(100vw * 1.5958);
-      max-height: 543px;
+      width: 120px; height: 191.5px; /* ratio exact 1200x1915 */
       margin: 0 auto;
       user-select: none;
       touch-action: manipulation;
-      perspective: 1400px;
+      perspective: 600px;
+      z-index: 1;
+      /* transition removed, done in animation */
     }
-    .booster-pack, .booster-top, .card-img {
-      position: absolute;
-      left: 0; top: 0; width: 100%; height: 100%;
+    .booster-back, .card-img, .booster-front, .booster-top {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%;
       object-fit: cover;
       pointer-events: none;
       user-drag: none; user-select: none;
-      transition: none;
     }
-    .booster-pack { z-index: 2; }
-    .booster-top {
-      z-index: 3;
-      transition: transform 0.55s cubic-bezier(.55,1.7,.33,1), opacity 0.45s;
-      transform: translateY(0) rotate(0deg);
-      opacity: 1;
-    }
-    .booster-top.open {
-      transform: translateY(-28%) rotate(-8deg) scale(1.07,1.03);
-      opacity: 0.92;
-    }
+    .booster-back { z-index: 1; }
     .card-img {
-      z-index: 1;
+      z-index: 2;
       opacity: 0;
-      filter: drop-shadow(0 20px 90px #000a) brightness(0.8);
-      transform: translateY(38%) scale(0.93) rotate(2deg);
+      filter: drop-shadow(0 12px 40px #000a) brightness(0.85);
+      transform: translateY(37%) scale(0.9) rotate(2.3deg);
       transition:
         opacity 0.7s cubic-bezier(.34,2,.55,1.2),
         transform 0.7s cubic-bezier(.34,2,.55,1.2),
@@ -51,27 +39,31 @@
     }
     .card-img.reveal {
       opacity: 1;
-      transform: translateY(-8%) scale(1.05) rotate(-1.5deg);
-      filter: drop-shadow(0 12px 50px #fff8) drop-shadow(0 0px 90px #ffe33a66) brightness(1.12);
-      z-index: 10;
+      /* Vient bien au-dessus du booster */
+      transform: translateY(-120%) scale(1.04) rotate(-1.5deg);
+      filter: drop-shadow(0 6px 40px #fff6) drop-shadow(0 0px 35px #ffe33a44) brightness(1.13);
+      z-index: 12;
       transition:
         opacity 0.7s cubic-bezier(.22,2.4,.55,1.2),
-        transform 0.65s cubic-bezier(.27,2.1,.5,1.2),
+        transform 0.77s cubic-bezier(.27,2.1,.5,1.2),
         filter 0.5s;
     }
-    @media (min-width: 400px) {
-      .booster-container { max-width: 360px; max-height: 575px; }
+    .booster-front { z-index: 11; }
+    .booster-top {
+      z-index: 12;
+      transition: transform 0.44s cubic-bezier(.55,1.7,.33,1), opacity 0.36s;
+      transform: translateY(0) rotate(0deg);
+      opacity: 1;
+      pointer-events: none;
     }
-    @media (min-width: 600px) {
-      .booster-container { max-width: 400px; max-height: 638px; }
-    }
-    @media (min-width: 900px) {
-      .booster-container { max-width: 500px; max-height: 798px; }
+    .booster-top.open {
+      transform: translateY(-32%) rotate(-10deg) scale(1.08,1.03);
+      opacity: 0.94;
     }
     .btn {
       margin-top: 38px;
-      font-size: 1.2em;
-      padding: 13px 38px;
+      font-size: 1.15em;
+      padding: 11px 25px;
       border-radius: 9px;
       border: none;
       background: linear-gradient(90deg, #fffcb7 15%, #ffd446 50%, #ffed99 85%);
@@ -84,14 +76,32 @@
       outline: none;
     }
     .btn:active { filter: brightness(0.92);}
+    /* Vibration + scale */
+    @keyframes booster-vibe {
+      0% { transform: scale(1) rotate(0deg);}
+      10% { transform: scale(1.03) rotate(-1deg);}
+      20% { transform: scale(1.05) rotate(1deg);}
+      30% { transform: scale(1.09) rotate(-2deg);}
+      40% { transform: scale(1.06) rotate(1deg);}
+      50% { transform: scale(1.11) rotate(2deg);}
+      60% { transform: scale(1.07) rotate(-2deg);}
+      70% { transform: scale(1.13) rotate(1.5deg);}
+      80% { transform: scale(1.09) rotate(-2deg);}
+      90% { transform: scale(1.06) rotate(1deg);}
+      100% { transform: scale(1.13) rotate(0deg);}
+    }
+    .vibrating {
+      animation: booster-vibe 1s cubic-bezier(.41,2.5,.55,1.1) 1;
+    }
   </style>
 </head>
 <body>
 <div class="booster-zone">
-  <div class="booster-container">
-    <img src="img/booster-pack.png" class="booster-pack" id="booster">
-    <img src="img/booster-top.png" class="booster-top" id="boosterTop">
+  <div class="booster-container" id="boosterBox">
+    <img src="img/booster-back.png" class="booster-back">
     <img src="img/14.png" class="card-img" id="card">
+    <img src="img/booster-front.png" class="booster-front">
+    <img src="img/booster-top.png" class="booster-top" id="boosterTop">
   </div>
   <button class="btn" id="openBtn">Ouvrir le booster !</button>
 </div>
@@ -99,14 +109,22 @@
 const boosterTop = document.getElementById('boosterTop');
 const card = document.getElementById('card');
 const btn = document.getElementById('openBtn');
+const box = document.getElementById('boosterBox');
 
 btn.onclick = function() {
-  boosterTop.classList.add('open');
-  setTimeout(()=>{
-    card.classList.add('reveal');
-  }, 500);
   btn.disabled = true;
   btn.style.opacity = 0.7;
+  // 1. Booster vibre et grossit
+  box.classList.add('vibrating');
+  setTimeout(() => {
+    // 2. Languette s'ouvre, booster reste grossi
+    boosterTop.classList.add('open');
+    // 3. Après un petit délai, la carte sort
+    setTimeout(() => {
+      card.classList.add('reveal');
+      // 4. On pourrait ajouter un son ici, ou un effet particule
+    }, 360);
+  }, 1000);
 };
 </script>
 </body>
