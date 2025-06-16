@@ -107,8 +107,8 @@
       mask-repeat: no-repeat;
       -webkit-mask-position: center;
       mask-position: center;
-      -webkit-mask-size: contain;
-      mask-size: contain;
+      -webkit-mask-size: 100% 100%;
+      mask-size: 100% 100%;
       -webkit-mask-mode: alpha;
       mask-mode: alpha;
     }
@@ -230,17 +230,22 @@
 
     function addZoomEffect(cardId) {
       const popup = document.getElementById("popup");
-      popup.innerHTML = `
-        <div class="popup-card">
-          <div class="popup-inner" onmousemove="rotatePopup(event)" onmouseleave="resetPopup(event)">
-            <img src="img/${cardId}.png" class="main" alt="card" />
-            <div class="bump" style="background-image: url('img/${cardId}-bump.png');"></div>
-            <div class="holo"></div>
-            <div class="sparkles"></div>
-            <div class="halo"></div>
-          </div>
-        </div>
+      const wrapper = document.createElement("div");
+      wrapper.className = "popup-card";
+      const inner = document.createElement("div");
+      inner.className = "popup-inner";
+      inner.innerHTML = `
+        <img src="img/${cardId}.png" class="main" alt="card" />
+        <div class="bump" style="background-image: url('img/${cardId}-bump.png');"></div>
+        <div class="holo"></div>
+        <div class="sparkles"></div>
+        <div class="halo"></div>
       `;
+      inner.addEventListener("mousemove", rotatePopup);
+      inner.addEventListener("mouseleave", resetPopup);
+      wrapper.appendChild(inner);
+      popup.innerHTML = "";
+      popup.appendChild(wrapper);
       popup.classList.add("visible");
     }
 
