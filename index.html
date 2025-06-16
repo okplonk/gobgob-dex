@@ -126,31 +126,31 @@
       position: relative;
     }
 
-    /* Halo clair diffus en haut */
+    /* Halo clair diffus en haut renforcé */
     .popup-card-inner::before {
       content: "";
       position: absolute;
       top: 0;
-      left: 10%;
-      right: 10%;
-      height: 40%;
+      left: 5%;
+      right: 5%;
+      height: 60%;
       border-radius: 50% / 100%;
       pointer-events: none;
-      background: radial-gradient(circle at top center, rgba(200, 180, 255, 0.6), transparent 70%);
-      filter: blur(30px);
+      background: radial-gradient(circle at top center, rgba(200, 180, 255, 0.85), transparent 80%);
+      filter: blur(50px);
       z-index: 10;
     }
 
-    /* Halo sombre dégradé en bas */
+    /* Halo sombre dégradé en bas renforcé */
     .popup-card-inner::after {
       content: "";
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 40%;
+      height: 60%;
       pointer-events: none;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
       border-radius: 0 0 20px 20px;
       z-index: 10;
     }
