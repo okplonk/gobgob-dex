@@ -1,7 +1,24 @@
+:root {
+  --rarity-n1: #b84fff;
+  --rarity-n2: #38e8ff;
+
+  --rarity-hr1: #38f8a6;
+  --rarity-hr2: #1de6a2;
+
+  --rarity-sr1: #ffd700;
+  --rarity-sr2: #ff9f00;
+
+  --rarity-ssr1: #ff6a00;
+  --rarity-ssr2: #ff3e00;
+
+  --rarity-ur1: #ffffff;
+  --rarity-ur2: #00cfff;
+}
+
 .popup-card-inner {
+  position: relative;
   width: 100%;
   height: 100%;
-  position: relative;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -9,110 +26,64 @@
   transform-style: preserve-3d;
   will-change: transform;
   overflow: hidden;
-
-  /* Masque de forme basé sur alpha PNG */
-  mask-image: url("img/alpha-mask.png");
-  mask-size: 100% 100%;
-  mask-repeat: no-repeat;
-  mask-position: center;
-
-  -webkit-mask-image: url("img/alpha-mask.png");
-  -webkit-mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-position: center;
+  isolation: isolate;
+  border-radius: 16px;
 }
 
-/* Couche d’effet holographique */
-.popup-card-inner::before {
+.popup-card-inner::before,
+.popup-card-inner::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
   mix-blend-mode: screen;
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    rgba(255, 255, 255, 0.4),
-    transparent 60%
-  );
-  transition: opacity 0.3s;
+  z-index: 2;
+  transition: all 0.4s ease;
+  opacity: 0.4;
 }
-
-/* ------------------ Rareté Boostée ------------------ */
 
 .popup-card-inner.n::before {
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    rgba(180, 70, 255, 0.6),
-    transparent 65%
-  );
-  animation: pulse-n 2s infinite ease-in-out;
+  background: linear-gradient(130deg, var(--rarity-n1), var(--rarity-n2));
+  animation: holoGradient 6s ease-in-out infinite alternate;
 }
-
 .popup-card-inner.hr::before {
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    rgba(0, 255, 120, 0.6),
-    transparent 65%
-  );
-  animation: pulse-hr 2s infinite ease-in-out;
+  background: linear-gradient(130deg, var(--rarity-hr1), var(--rarity-hr2));
+  animation: holoGradient 6s ease-in-out infinite alternate;
 }
-
 .popup-card-inner.sr::before {
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    rgba(255, 220, 0, 0.7),
-    transparent 65%
-  );
-  animation: pulse-sr 2s infinite ease-in-out;
+  background: linear-gradient(130deg, var(--rarity-sr1), var(--rarity-sr2));
+  animation: holoGradient 6s ease-in-out infinite alternate;
 }
-
 .popup-card-inner.ssr::before {
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    rgba(255, 140, 0, 0.7),
-    transparent 65%
-  );
-  animation: pulse-ssr 2s infinite ease-in-out;
+  background: linear-gradient(130deg, var(--rarity-ssr1), var(--rarity-ssr2));
+  animation: holoGradient 6s ease-in-out infinite alternate;
+}
+.popup-card-inner.ur::after {
+  background-image: url("https://assets.codepen.io/13471/sparkles.gif"),
+    url("https://assets.codepen.io/13471/holo.png");
+  background-blend-mode: overlay;
+  background-size: cover;
+  animation: holoSparkle 12s ease-in-out infinite;
+  opacity: 0.6;
 }
 
-.popup-card-inner.ur::before {
-  background: repeating-radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    #fff 0%,
-    #00f 10%,
-    #f0f 20%,
-    #0ff 30%,
-    #fff 40%
-  );
-  background-size: 200% 200%;
-  animation: holo-glow 1.5s infinite alternate;
-  opacity: 0.7;
+@keyframes holoGradient {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
-/* ------------------ Animations ------------------ */
-
-@keyframes pulse-n {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50%      { opacity: 0.6; transform: scale(1.05); }
-}
-
-@keyframes pulse-hr {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50%      { opacity: 0.7; transform: scale(1.08); }
-}
-
-@keyframes pulse-sr {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50%      { opacity: 0.8; transform: scale(1.1); }
-}
-
-@keyframes pulse-ssr {
-  0%, 100% { opacity: 0.5; transform: scale(1); }
-  50%      { opacity: 0.9; transform: scale(1.12); }
-}
-
-@keyframes holo-glow {
-  from { filter: hue-rotate(0deg) brightness(1.2); }
-  to   { filter: hue-rotate(360deg) brightness(1.6); }
+@keyframes holoSparkle {
+  0%, 100% {
+    background-position: 50% 50%;
+    filter: brightness(1.2) contrast(1.25);
+  }
+  25% {
+    background-position: 30% 40%;
+  }
+  50% {
+    background-position: 70% 60%;
+  }
+  75% {
+    background-position: 50% 50%;
+  }
 }
