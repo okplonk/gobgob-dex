@@ -2,119 +2,356 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Gobgob Minimal</title>
+  <title>Gobgob DEX</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      background: #23282f;
-      color: #fff;
       font-family: sans-serif;
+      background-color: #f8f8f8;
+      text-align: center;
+      padding: 20px;
       margin: 0;
-      padding: 0;
     }
-    .booster-zone {
-      min-height: 100vh;
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 5px;
+      border-radius: 8px;
+      border: 1px solid #aaa;
+      outline: none;
+    }
+    #progress-text {
+      margin-top: 20px;
+      font-size: 1.1em;
+    }
+    #progress-bar-container {
+      width: 90%;
+      max-width: 320px;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      margin: 10px auto;
+      overflow: hidden;
+      display: block;
+    }
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(to right, #5cd9ff, #4fc87a);
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .card-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+      margin-right: 2vw;
+      margin-left: 2vw;
+    }
+    .card {
+      width: 30vw;
+      min-width: 90px;
+      max-width: 120px;
+      aspect-ratio: 6/9.5;
+      perspective: 1000px;
+      animation: fadeInUp 0.4s ease forwards;
+      opacity: 0;
+      position: relative;
+      cursor: pointer;
+      background: transparent;
+      margin-bottom: 8px;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s cubic-bezier(.5,1.5,.5,1), filter 0.2s;
+      background-color: transparent;
+      will-change: transform;
+    }
+    .card:not(.missing):hover .card-inner {
+      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+      z-index: 2;
+    }
+    .card.missing .card-inner {
+      filter: grayscale(100%) brightness(0.6) contrast(0.8);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .hidden { display: none !important; }
+    #popup {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      visibility: hidden;
+    }
+    .popup-card {
+      width: 92vw;
+      max-width: 320px;
+      height: 65vw;
+      max-height: 480px;
+      perspective: 1000px;
+      margin: 0 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .booster {
-      position: relative;
-      width: 320px;
-      height: 510px;
-      cursor: pointer;
-      user-select: none;
-      perspective: 800px;
+    .popup-card-inner {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      transition: transform 0.2s cubic-bezier(.5,1.5,.5,1);
+      will-change: transform;
     }
-    /* 3D TILT */
-    .booster.tilted {
-      box-shadow: 0 12px 60px #000c;
+    #popup.visible {
+      visibility: visible;
     }
-    /* Layering */
-    .booster-tab { z-index: 40; position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; transition: transform .36s cubic-bezier(.36,2.2,.36,1), opacity .45s;}
-    .booster-tab.pop { transform: translateY(-32%) rotate(-15deg) scale(1.08);}
-    .booster-tab.faded, .booster-tab.fade-out { opacity: 0;}
-    .booster-top { z-index: 30; position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; transition: transform .55s cubic-bezier(.44,1.15,.43,1), opacity .5s;}
-    .booster-back { z-index: 10; position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; transition: transform .55s cubic-bezier(.44,1.15,.43,1), opacity .5s;}
-    .move-down { transform: translateY(200px);}
-    .fade-out { opacity: 0;}
-    .card-img { z-index: 20; position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; transition: transform .36s cubic-bezier(.42,1.3,.4,1), opacity .3s;}
-    .card-img.in-front { transform: scale(1.13) translateY(-20px); z-index:45; }
-    .card-img.gone { opacity: 0; transform: scale(0.83) translateY(-80px) rotate(-6deg);}
-    /* Vibration */
-    @keyframes booster-vibe {
-      0% { transform: scale(1) rotate(0deg);}
-      10% { transform: scale(1.02) rotate(-2deg);}
-      20% { transform: scale(1.04) rotate(2deg);}
-      30% { transform: scale(1.08) rotate(-2deg);}
-      40% { transform: scale(1.04) rotate(2deg);}
-      50% { transform: scale(1.09) rotate(2deg);}
-      60% { transform: scale(1.07) rotate(-2deg);}
-      70% { transform: scale(1.11) rotate(1.5deg);}
-      80% { transform: scale(1.09) rotate(-2deg);}
-      90% { transform: scale(1.04) rotate(1deg);}
-      100% { transform: scale(1.13) rotate(0deg);}
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
-    .vibrating { animation: booster-vibe .45s cubic-bezier(.41,2.5,.55,1.1) 1; }
+    @media (max-width: 600px) {
+      .card-grid {
+        gap: 5px;
+      }
+      .card {
+        min-width: 70px;
+        max-width: 32vw;
+        margin-bottom: 4px;
+      }
+      .popup-card {
+        max-width: 98vw;
+        height: 73vw;
+        max-height: 88vw;
+      }
+    }
   </style>
 </head>
 <body>
-<div class="booster-zone">
-  <div class="booster" id="booster">
-    <img src="img/booster-tab.png" class="booster-tab" id="tab">
-    <img src="img/booster-top.png" class="booster-top" id="top">
-    <img src="img/14.png" class="card-img" id="card">
-    <img src="img/booster-back.png" class="booster-back" id="back">
+  <h1>Gobgob DEX</h1>
+  <input type="text" id="username" placeholder="Entre ton pseudo Twitch" autocapitalize="off" autocomplete="off">
+  <button onclick="loadCollection()">Afficher</button>
+  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
+  <div id="progress-text"></div>
+  <div id="progress-bar-container">
+    <div id="progress-bar"></div>
   </div>
-</div>
-<script>
-const boosterBox = document.getElementById('booster');
+  <div class="card-grid" id="cards"></div>
+  <div id="popup" onclick="hidePopup()">
+    <div class="popup-card">
+      <div class="popup-card-inner" id="popup-inner"></div>
+    </div>
+  </div>
+  <script>
+    let allCards = [];
+    let showMissing = true;
 
-// 3D tilt effet
-boosterBox.addEventListener('mousemove', (e) => {
-  const rect = boosterBox.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width;
-  const y = (e.clientY - rect.top) / rect.height;
-  const tiltX = (x-0.5)*22, tiltY = (0.5-y)*19;
-  boosterBox.style.transform = `perspective(900px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) scale(1.03)`;
-  boosterBox.classList.add('tilted');
-});
-boosterBox.addEventListener('mouseleave', () => {
-  boosterBox.style.transform = "";
-  boosterBox.classList.remove('tilted');
-});
-boosterBox.addEventListener('mouseenter', () => {
-  boosterBox.classList.add('tilted');
-});
+    async function fetchCards() {
+      const res = await fetch("cards.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [id, nom, rarete] = line.split(",");
+        return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim() };
+      });
+    }
 
-// Séquence ouverture
-boosterBox.addEventListener('click', () => {
-  const tab = document.getElementById('tab');
-  const top = document.getElementById('top');
-  const back = document.getElementById('back');
-  const card = document.getElementById('card');
-  boosterBox.classList.add('vibrating');
-  tab.classList.add('pop');
-  setTimeout(() => {
-    boosterBox.classList.remove('vibrating');
-    tab.classList.add('faded');
-    top.classList.add('move-down');
-    back.classList.add('move-down');
-    setTimeout(() => {
-      tab.classList.add('fade-out');
-      top.classList.add('fade-out');
-      back.classList.add('fade-out');
-      card.classList.add('in-front');
-      setTimeout(() => {
-        card.classList.add('gone');
-        setTimeout(() => {
-          boosterBox.style.opacity = "0";
-          boosterBox.style.pointerEvents = "none";
-        }, 680);
-      }, 600);
-    }, 520);
-  }, 460);
-});
-</script>
+    async function fetchCollection() {
+      const res = await fetch("collection.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [pseudo, id] = line.split(",");
+        return { pseudo: pseudo.trim().toLowerCase(), id: parseInt(id) };
+      });
+    }
+
+    function addTiltEffect(card) {
+      // Seulement sur desktop
+      if (window.matchMedia("(pointer: fine)").matches) {
+        card.addEventListener("mousemove", e => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = -(y - centerY) / 3;
+          const rotateY = (x - centerX) / 3;
+          card.querySelector('.card-inner').style.transform =
+            `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+        });
+        card.addEventListener("mouseleave", () => {
+          card.querySelector('.card-inner').style.transform =
+            "rotateX(0deg) rotateY(0deg)";
+        });
+      }
+    }
+
+    // Gyro global vars
+    let currentGyroHandler = null;
+    let gyroActive = false;
+
+    function addZoomEffect(cardId) {
+      const popup = document.getElementById("popup");
+      const inner = document.getElementById("popup-inner");
+      inner.style.backgroundImage = `url(img/${cardId}.png)`;
+      popup.classList.add("visible");
+
+      // On gère effet 3D selon l'appareil
+      if (window.matchMedia("(pointer: coarse)").matches) {
+        // Mobile/tablette = gyro
+        enableGyroOnPopup(inner);
+      } else {
+        // Desktop = souris
+        inner.addEventListener("mousemove", onPopupMouseMove);
+        inner.addEventListener("mouseleave", onPopupMouseLeave);
+      }
+    }
+
+    function onPopupMouseMove(e) {
+      const inner = e.currentTarget;
+      const rect = inner.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = -(y - centerY) / 8;
+      const rotateY = (x - centerX) / 8;
+      inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+    }
+    function onPopupMouseLeave(e) {
+      const inner = e.currentTarget;
+      inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+    }
+
+    function enableGyroOnPopup(inner) {
+      // On clean si déjà actif
+      disableGyroOnPopup();
+      gyroActive = true;
+
+      // Pour iOS 13+ il faut demander la permission au user
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(permissionState => {
+          if (permissionState === 'granted') {
+            window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
+              applyGyroToPopup(inner, e);
+            });
+          }
+        }).catch(console.error);
+      } else {
+        // Android ou iOS <13
+        window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
+          applyGyroToPopup(inner, e);
+        });
+      }
+    }
+
+    function disableGyroOnPopup() {
+      if (gyroActive && currentGyroHandler) {
+        window.removeEventListener('deviceorientation', currentGyroHandler);
+        currentGyroHandler = null;
+        gyroActive = false;
+      }
+      // Et reset le style
+      const inner = document.getElementById("popup-inner");
+      if (inner) inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+      // Retire aussi les listeners souris
+      inner.removeEventListener("mousemove", onPopupMouseMove);
+      inner.removeEventListener("mouseleave", onPopupMouseLeave);
+    }
+
+    function applyGyroToPopup(inner, event) {
+      // event.beta = X (-180 à 180), event.gamma = Y (-90 à 90)
+      let x = event.beta;   // vertical, phone tilt up/down
+      let y = event.gamma;  // horizontal, phone tilt left/right
+
+      // Clamp pour éviter les débordements chelous
+      if (x > 90) x = 90;
+      if (x < -90) x = -90;
+      if (y > 90) y = 90;
+      if (y < -90) y = -90;
+
+      // Axes inversés, sensibilité augmentée (/2)
+      const rotateX = -(x - 0) / 2;
+      const rotateY = -(y - 0) / 2;
+      inner.style.transform =
+        `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
+    }
+
+    function hidePopup() {
+      document.getElementById("popup").classList.remove("visible");
+      disableGyroOnPopup();
+    }
+
+    async function loadCollection() {
+      const username = document.getElementById("username").value.toLowerCase();
+      const collection = await fetchCollection();
+      const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
+      const container = document.getElementById("cards");
+      container.innerHTML = "";
+
+      let index = 0;
+      for (const card of allCards) {
+        const div = document.createElement("div");
+        div.className = "card";
+        div.style.animationDelay = `${index * 50}ms`;
+
+        const inner = document.createElement("div");
+        inner.className = "card-inner";
+        inner.style.backgroundImage = `url(img/${card.id}.png)`;
+        inner.title = `${card.name} (${card.rarity})`;
+        div.appendChild(inner);
+
+        const isOwned = owned.has(card.id);
+        if (!isOwned) {
+          div.classList.add("missing");
+          if (!showMissing) div.classList.add("hidden");
+        } else {
+          addTiltEffect(div);
+          div.onclick = () => addZoomEffect(card.id);
+        }
+
+        container.appendChild(div);
+        index++;
+      }
+
+      const ownedCount = owned.size;
+      const totalCount = allCards.length || 1;
+      const percent = (ownedCount / totalCount) * 100;
+      document.getElementById("progress-text").textContent =
+        `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-bar").style.width = percent + "%";
+    }
+
+    function toggleMissing() {
+      showMissing = !showMissing;
+      document.querySelectorAll(".card.missing").forEach(card => {
+        card.classList.toggle("hidden", !showMissing);
+      });
+    }
+
+    fetchCards().then(cards => allCards = cards);
+  </script>
 </body>
 </html>
