@@ -10,184 +10,127 @@
       text-align: center;
       padding: 20px;
     }
-    h1 {
-      font-size: 3em;
-      margin-bottom: 10px;
-    }
+    h1 { font-size: 3em; margin-bottom: 10px; }
     input, button {
       padding: 10px;
       font-size: 1em;
       margin: 5px;
     }
-    #progress-text {
-      margin-top: 20px;
-      font-size: 1.1em;
-    }
+    #progress-text { margin-top: 20px; font-size: 1.1em; }
     #progress-bar-container {
-      width: 300px;
-      height: 20px;
-      background: #ddd;
-      border-radius: 10px;
-      margin: 10px auto;
-      overflow: hidden;
-      display: block;
+      width: 300px; height: 20px;
+      background: #ddd; border-radius: 10px;
+      margin: 10px auto; overflow: hidden; display: block;
     }
     #progress-bar {
-      height: 100%;
-      width: 0;
+      height: 100%; width: 0;
       background: linear-gradient(to right, #5cd9ff, #4fc87a);
-      border-radius: 10px;
-      transition: width 0.3s ease;
+      border-radius: 10px; transition: width 0.3s ease;
     }
     .card-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: flex; flex-wrap: wrap; gap: 10px;
       justify-content: center;
       margin-top: 30px;
-      margin-right: 10%;
-      margin-left: 10%;
+      margin-right: 10%; margin-left: 10%;
     }
     .card {
-      width: 120px;
-      height: 190px;
-      perspective: 1000px;
+      width: 120px; height: 190px; perspective: 1000px;
       animation: fadeInUp 0.4s ease forwards;
-      opacity: 0;
-      position: relative;
-      cursor: pointer;
+      opacity: 0; position: relative; cursor: pointer;
     }
     .card-inner {
-      width: 100%;
-      height: 100%;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
+      width: 100%; height: 100%;
+      background-size: contain; background-repeat: no-repeat; background-position: center;
       transition: transform 0.2s ease, filter 0.2s ease;
       background-color: transparent;
     }
     .card:not(.missing):hover .card-inner {
-      filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
-      z-index: 2;
+      filter: drop-shadow(0 8px 15px rgba(0,0,0,0.3)); z-index: 2;
     }
     .card.missing .card-inner {
-      filter: grayscale(100%) brightness(0.6) contrast(0.8);
-      opacity: 0.7;
-      pointer-events: none;
+      filter: grayscale(100%) brightness(0.6) contrast(0.8); opacity: 0.7; pointer-events: none;
     }
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
     #popup {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      visibility: hidden;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 9999; visibility: hidden;
     }
-    .popup-card {
-      width: 300px;
-      height: 450px;
-      perspective: 1000px;
-    }
+    .popup-card { width: 300px; height: 450px; perspective: 1000px; }
     .popup-card-inner {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      overflow: hidden;
-      border-radius: 18px;
-      background: none;
-      transition: transform 0.2s ease;
-      isolation: isolate;
+      width: 100%; height: 100%; position: relative; overflow: hidden; border-radius: 18px;
+      background: none; transition: transform 0.2s ease; isolation: isolate;
       box-shadow: 0 6px 24px 4px #0006, 0 0px 0px 2.5px #fff3 inset;
     }
     .popup-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      user-select: none;
-      pointer-events: none;
-      transition: filter 0.1s, transform 0.1s;
-      z-index: 1;
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: contain; user-select: none; pointer-events: none;
+      transition: filter 0.1s, transform 0.1s; z-index: 1;
     }
-    .popup-img.base {
-      filter: contrast(1.08) brightness(1.10);
-    }
-    .popup-img.shadow {
-      z-index: 2;
-      filter: brightness(0) blur(0.7px) opacity(0.10);
-      mix-blend-mode: multiply;
-    }
-    .popup-img.light {
-      z-index: 3;
-      filter: brightness(9) blur(0.8px) opacity(0.06);
-      mix-blend-mode: screen;
-    }
+    .popup-img.base { filter: contrast(1.08) brightness(1.10);}
+    .popup-img.shadow { z-index: 2; filter: brightness(0) blur(0.7px) opacity(0.10); mix-blend-mode: multiply; }
+    .popup-img.light { z-index: 3; filter: brightness(9) blur(0.8px) opacity(0.06); mix-blend-mode: screen; }
     /* --- LIGHT / GRAIN / HALO --- */
     .card-grain-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 18px;
-      z-index: 3;
-      opacity: 0.13;
-      mix-blend-mode: soft-light;
+      position: absolute; inset: 0; pointer-events: none; border-radius: 18px; z-index: 3;
+      opacity: 0.13; mix-blend-mode: soft-light;
       background-image: url('data:image/svg+xml;utf8,<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="128" height="128" filter="url(%23noise)" opacity="0.46" /></svg>');
-      background-size: 60px 60px;
-      background-repeat: repeat;
+      background-size: 60px 60px; background-repeat: repeat;
     }
     .card-light-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 18px;
-      z-index: 4;
-      opacity: 0.17;
-      mix-blend-mode: soft-light;
+      position: absolute; inset: 0; pointer-events: none; border-radius: 18px; z-index: 4;
+      opacity: 0.17; mix-blend-mode: soft-light;
       background:
         radial-gradient(circle at 32% 18%, #fff 0%, transparent 68%),
         radial-gradient(ellipse at 50% 85%, #0005 0 30%, transparent 72%);
       transition: background 0.18s;
     }
     .card-light-bright {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      border-radius: 18px;
-      z-index: 5;
-      opacity: 0.26;  /* <== HALO PLUS FORT */
+      position: absolute; inset: 0; pointer-events: none; border-radius: 18px; z-index: 5;
+      opacity: 0.26;
       mix-blend-mode: screen;
-      background:
-        radial-gradient(circle at 50% 50%, #fff9 0 17%, transparent 44%);
+      background: radial-gradient(circle at 50% 50%, #fff9 0 17%, transparent 44%);
       transition: background 0.12s;
     }
     .emboss-effect {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      mix-blend-mode: soft-light;
-      opacity: 0.32;
-      background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
-      z-index: 10;
-      transition: background 0.15s;
+      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
+      opacity: 0.32; background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
+      z-index: 10; transition: background 0.15s;
     }
-    /* --- HOLO EFFECTS --- */
-    .holo-glare, .holo-rainbow, .holo-sparkles {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
+    /* --- CONIC HOLO EFFECT --- */
+    .holo-conic {
+      position: absolute; inset: 0; pointer-events: none; z-index: 12;
       border-radius: 18px;
-      z-index: 7;
-      transition: opacity 0.3s;
+      opacity: 0.15;
+      mix-blend-mode: color-dodge;
+      background: conic-gradient(from 120deg at 60% 30%, #ffedfa, #cafffd, #ffeaaa, #ffd5fc, #ffd6d6, #ffedfa);
+      transition: background 0.1s;
+      filter: blur(1.1px) brightness(1.13);
+    }
+    /* --- LIGHT RIM --- */
+    .card-light-rim {
+      position: absolute; inset: 0; pointer-events: none; border-radius: 20px; z-index: 19;
+      box-shadow: 0 0 0 2.5px #fff9, 0 0 24px 8px #fff6;
+      mix-blend-mode: screen;
+      opacity: 0.15;
+    }
+    /* --- FOIL MOIRE HEX --- */
+    .card-foil-moire {
+      position: absolute; inset: 0; pointer-events: none; z-index: 17;
+      opacity: 0.085;
+      mix-blend-mode: color-dodge;
+      background: url('data:image/svg+xml;utf8,<svg width="36" height="36" xmlns="http://www.w3.org/2000/svg"><g opacity="0.19"><polygon points="18,1 35,10 35,28 18,37 1,28 1,10" fill="none" stroke="white" stroke-width="1.3"/></g></svg>');
+      background-size: 36px 36px;
+      background-repeat: repeat;
+      transition: background-position 0.12s;
+    }
+    /* --- HOLO EFFECTS (arc-en-ciel, glare, sparkles) --- */
+    .holo-glare, .holo-rainbow, .holo-sparkles {
+      position: absolute; inset: 0; pointer-events: none; border-radius: 18px; z-index: 7; transition: opacity 0.3s;
     }
     .holo-rainbow {
-      opacity: 0.13;
-      z-index: 6;
+      opacity: 0.13; z-index: 6;
       mix-blend-mode: color-dodge;
       background: conic-gradient(from 0deg, #f4aaff, #aaf4ff, #fff1aa, #ffaaf4, #f4aaff);
       animation: holoRainbowAnim 8s linear infinite;
@@ -200,18 +143,10 @@
     .holo-glare {
       z-index: 8;
       background: linear-gradient(115deg, transparent 32%, #fff 51%, transparent 63%);
-      background-size: 300% 300%;
-      background-position: 60% 0;
-      mix-blend-mode: lighten;
-      opacity: 0.04;
-      transition: opacity 0.2s;
+      background-size: 300% 300%; background-position: 60% 0;
+      mix-blend-mode: lighten; opacity: 0.04; transition: opacity 0.2s;
     }
-    .holo-sparkles {
-      z-index: 9;
-      background: none;
-      opacity: 0.14;
-      pointer-events: none;
-    }
+    .holo-sparkles { z-index: 9; background: none; opacity: 0.14; pointer-events: none; }
     @keyframes sparkle-anim {
       0%,100% { opacity: 0.08; transform: scale(0.7) rotate(0deg);}
       10% { opacity: 0.7;}
@@ -220,117 +155,28 @@
     }
     /* --- GLITCH BANDS --- */
     .glitch-bands-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 20;
-      pointer-events: none;
-      border-radius: 18px;
-      mix-blend-mode: lighten;
+      position: absolute; inset: 0; z-index: 20; pointer-events: none; border-radius: 18px; mix-blend-mode: lighten;
     }
     .glitch-band {
-      position: absolute;
-      left: 0; width: 100%;
-      height: 7%;
-      overflow: hidden;
-      pointer-events: none;
-      border-radius: 2.5px;
-      will-change: transform, filter;
-      opacity: 0.87;
+      position: absolute; left: 0; width: 100%; height: 7%; overflow: hidden; pointer-events: none; border-radius: 2.5px; will-change: transform, filter; opacity: 0.87;
     }
     .glitch-band img {
-      position: absolute;
-      left: 0; top: 0; width: 100%; height: 100%;
-      object-fit: cover;
-      pointer-events: none;
-      filter: none;
-      z-index: 1;
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; filter: none; z-index: 1;
     }
     .glitch-band.chroma img {
       filter: drop-shadow(1.5px 0 0 #3ff) drop-shadow(-1.5px 0 0 #f3f);
-      mix-blend-mode: lighten;
-      opacity: 0.65;
-      z-index: 2;
+      mix-blend-mode: lighten; opacity: 0.65; z-index: 2;
     }
     .glitch-noise-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 30;
-      pointer-events: none;
-      border-radius: 18px;
+      position: absolute; inset: 0; z-index: 30; pointer-events: none; border-radius: 18px;
       background-image: url('data:image/svg+xml;utf8,<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" /></filter><rect width="128" height="128" filter="url(%23noise)" opacity="0.48"/></svg>');
-      background-size: 60px 60px;
-      opacity: 0.22;
-      animation: noise-move 0.27s steps(2) infinite alternate;
-      mix-blend-mode: color-dodge;
+      background-size: 60px 60px; opacity: 0.22; animation: noise-move 0.27s steps(2) infinite alternate; mix-blend-mode: color-dodge;
     }
-    @keyframes noise-move {
-      to { background-position: 13px 11px; }
-    }
-    /* --- GLITCH FX classique, pour compat --- */
-    .glitch-effect {
-      pointer-events: none;
-      position: absolute;
-      inset: 0;
-      z-index: 15;
-      border-radius: 18px;
-      mix-blend-mode: lighten;
-      background: none;
-      animation: glitch-anim 1.2s infinite linear;
-      overflow: hidden;
-    }
-    .glitch-slice {
-      position: absolute;
-      left: 0; width: 100%;
-      height: 8%;
-      opacity: 0.35;
-      background: transparent;
-      pointer-events: none;
-      filter: hue-rotate(180deg) brightness(1.8);
-      animation: glitch-slice-anim 1s infinite;
-    }
-    .glitch-chroma {
-      position: absolute;
-      inset: 0;
-      border-radius: 18px;
-      opacity: 0.22;
-      mix-blend-mode: screen;
-      background: repeating-linear-gradient(90deg, #00eaff88 0px, #f2a8ff77 24px, #ffea0077 50px, #00eaff88 62px);
-      filter: blur(1.2px);
-      animation: glitch-chroma-anim 1.4s infinite linear;
-      z-index: 16;
-    }
-    @keyframes glitch-anim {
-      0%,100% { filter: none; }
-      15% { filter: brightness(1.12) hue-rotate(20deg);}
-      17% { filter: brightness(0.92) hue-rotate(-18deg);}
-      45% { filter: brightness(1.17) hue-rotate(7deg);}
-      60% { filter: brightness(0.98) hue-rotate(-17deg);}
-      67% { filter: brightness(1.07) hue-rotate(6deg);}
-      80% { filter: brightness(0.97);}
-    }
-    @keyframes glitch-slice-anim {
-      0%,100% { left:0;}
-      12% { left: -8px;}
-      19% { left: 11px;}
-      23% { left: -7px;}
-      28% { left: 0;}
-    }
-    @keyframes glitch-chroma-anim {
-      0%,100% { background-position: 0 0;}
-      100% { background-position: 62px 0;}
-    }
-    #popup.visible {
-      visibility: visible;
-    }
+    @keyframes noise-move { to { background-position: 13px 11px; } }
+    #popup.visible { visibility: visible; }
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(20px) scale(0.95);}
+      to { opacity: 1; transform: translateY(0) scale(1);}
     }
   </style>
 </head>
@@ -341,13 +187,9 @@
   <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
 
   <div id="progress-text"></div>
-  <div id="progress-bar-container">
-    <div id="progress-bar"></div>
-  </div>
-
+  <div id="progress-bar-container"><div id="progress-bar"></div></div>
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet holo, lumière, grain et glitch -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
@@ -358,6 +200,7 @@
         <div class="card-light-layer" id="card-light-layer"></div>
         <div class="card-light-bright" id="card-light-bright"></div>
         <div class="emboss-effect" id="emboss"></div>
+        <!-- les layers dynamiques seront ajoutés en JS -->
       </div>
     </div>
   </div>
@@ -389,12 +232,9 @@
     function addTiltEffect(card) {
       card.addEventListener("mousemove", e => {
         const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = -(y - centerY) / 3;
-        const rotateY = (x - centerX) / 3;
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const centerX = rect.width / 2, centerY = rect.height / 2;
+        const rotateX = -(y - centerY) / 3, rotateY = (x - centerX) / 3;
         card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
       card.addEventListener("mouseleave", () => {
@@ -415,23 +255,19 @@
       inner.style.transform = "";
 
       popup.classList.add("visible");
-      // GLITCH FX pour la carte ID 14
-      if (cardId === 14) {
-        setupGlitchLayer(inner);
-      } else {
-        removeGlitchLayer(inner);
-      }
+      // ---- layers dynamiques ----
+      if (cardId === 14) setupGlitchLayer(inner); else removeGlitchLayer(inner);
       setupLightAndGrainLayer(inner);
       setupHoloEffectLayer(inner, rarity, cardId);
+      setupConicLayer(inner);
+      setupLightRim(inner);
+      setupFoilMoire(inner, rarity);
 
       function updateEffect(e) {
         const rect = inner.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = -(y - centerY) / 6;
-        const rotateY = (x - centerX) / 6;
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const centerX = rect.width / 2, centerY = rect.height / 2;
+        const rotateX = -(y - centerY) / 6, rotateY = (x - centerX) / 6;
         inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
 
         // Bump/emboss
@@ -442,11 +278,10 @@
         imgLight.style.transform = `translate(${dx}px, ${dy}px)`;
 
         // Emboss gradient
-        const percentX = Math.round((x / rect.width) * 100);
-        const percentY = Math.round((y / rect.height) * 100);
+        const percentX = Math.round((x / rect.width) * 100), percentY = Math.round((y / rect.height) * 100);
         emboss.style.background = `radial-gradient(circle at ${percentX}% ${percentY - 10}%, #fff7 40%, #aaa3 65%, transparent 95%)`;
 
-        // HOLO GLARE (déplacement)
+        // HOLO GLARE
         let holoGlare = inner.querySelector('.holo-glare');
         if(holoGlare) {
           let bgX = Math.round((x / rect.width) * 100);
@@ -459,6 +294,20 @@
         if (halo) {
           halo.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, #fff 0 17%, transparent 44%)`;
         }
+        // Conic halo
+        let conic = inner.querySelector('.holo-conic');
+        if (conic) {
+          const angle = Math.round(Math.atan2(y-centerY, x-centerX) * 180 / Math.PI + 180);
+          conic.style.background = `
+            conic-gradient(
+              from ${angle}deg at ${percentX}% ${percentY}%,
+              #ffedfa, #cafffd, #ffeaaa, #ffd5fc, #ffd6d6, #ffedfa
+            )
+          `;
+        }
+        // Moire pattern : faire bouger le foil avec la souris
+        let moire = inner.querySelector('.card-foil-moire');
+        if(moire) moire.style.backgroundPosition = `${percentX/2}px ${percentY/2}px`;
       }
       inner.onmousemove = updateEffect;
       inner.onmouseleave = function() {
@@ -476,6 +325,11 @@
         if (halo) {
           halo.style.background = "radial-gradient(circle at 50% 50%, #fff9 0 17%, transparent 44%)";
         }
+        // Conic halo
+        let conic = inner.querySelector('.holo-conic');
+        if(conic) conic.style.background = `conic-gradient(from 120deg at 60% 30%, #ffedfa, #cafffd, #ffeaaa, #ffd5fc, #ffd6d6, #ffedfa)`;
+        let moire = inner.querySelector('.card-foil-moire');
+        if(moire) moire.style.backgroundPosition = `0px 0px`;
       };
     }
 
@@ -487,12 +341,8 @@
       document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
       // Remove holo and glitch layers
-      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles, .glitch-effect, .glitch-chroma, .glitch-bands-layer, .glitch-noise-layer');
+      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles, .glitch-effect, .glitch-chroma, .glitch-bands-layer, .glitch-noise-layer, .holo-conic, .card-light-rim, .card-foil-moire');
       layers.forEach(layer => layer.remove());
-      // Annule l'animation glitch si présente
-      let inner = document.getElementById("popup-inner");
-      if(inner._glitchRaf) cancelAnimationFrame(inner._glitchRaf);
-      inner._glitchRaf = null;
     }
 
     // ==== HOLO EFFECT (color sparkles, rareté) ====
@@ -500,7 +350,6 @@
       // Remove previous
       let layers = inner.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles');
       layers.forEach(layer => layer.remove());
-
       // Sparkle colors by rarity
       let sparkleColors = [];
       if (rarity === "UR") {
@@ -520,41 +369,15 @@
       // Intensité
       let rainbowOpacity, glareOpacity, sparklesOpacity, sparkleCount;
       switch(rarity) {
-        case "UR":
-          rainbowOpacity = 0.22;
-          glareOpacity = 0.08;
-          sparklesOpacity = 0.28;
-          sparkleCount = 21;
-          break;
-        case "SSR":
-          rainbowOpacity = 0.13;
-          glareOpacity = 0.065;
-          sparklesOpacity = 0.18;
-          sparkleCount = 13;
-          break;
-        case "SR":
-          rainbowOpacity = 0.08;
-          glareOpacity = 0.04;
-          sparklesOpacity = 0.13;
-          sparkleCount = 8;
-          break;
-        case "HR":
-          rainbowOpacity = 0.05;
-          glareOpacity = 0.025;
-          sparklesOpacity = 0.07;
-          sparkleCount = 5;
-          break;
-        default: // N
-          rainbowOpacity = 0.035;
-          glareOpacity = 0.015;
-          sparklesOpacity = 0.05;
-          sparkleCount = 2;
-          break;
+        case "UR":   rainbowOpacity = 0.22; glareOpacity = 0.08; sparklesOpacity = 0.28; sparkleCount = 21; break;
+        case "SSR":  rainbowOpacity = 0.13; glareOpacity = 0.065; sparklesOpacity = 0.18; sparkleCount = 13; break;
+        case "SR":   rainbowOpacity = 0.08; glareOpacity = 0.04; sparklesOpacity = 0.13; sparkleCount = 8; break;
+        case "HR":   rainbowOpacity = 0.05; glareOpacity = 0.025; sparklesOpacity = 0.07; sparkleCount = 5; break;
+        default:     rainbowOpacity = 0.035; glareOpacity = 0.015; sparklesOpacity = 0.05; sparkleCount = 2; break;
       }
       // Rainbow calque
       let rainbow = document.createElement('div');
-      rainbow.className = 'holo-rainbow';
-      rainbow.style.opacity = rainbowOpacity;
+      rainbow.className = 'holo-rainbow'; rainbow.style.opacity = rainbowOpacity;
       inner.appendChild(rainbow);
       // Glare
       let glare = document.createElement('div');
@@ -564,27 +387,19 @@
       inner.appendChild(glare);
       // Sparkles
       let sp = document.createElement('div');
-      sp.className = 'holo-sparkles';
-      sp.style.opacity = sparklesOpacity;
-      sp.style.background = 'none';
-      sp.innerHTML = '';
+      sp.className = 'holo-sparkles'; sp.style.opacity = sparklesOpacity; sp.style.background = 'none'; sp.innerHTML = '';
       for(let i=0;i<sparkleCount;i++){
         let star = document.createElement('div');
         let x = Math.random()*82+8, y=Math.random()*78+9, s=1+Math.random()*2.2;
         let dur = 2.2 + Math.random()*2.8;
         star.style.position = 'absolute';
-        star.style.left = x+'%';
-        star.style.top = y+'%';
-        star.style.width = (7*s)+'px';
-        star.style.height = (7*s)+'px';
+        star.style.left = x+'%'; star.style.top = y+'%';
+        star.style.width = (7*s)+'px'; star.style.height = (7*s)+'px';
         star.style.pointerEvents = 'none';
         star.style.opacity = 0.7+0.2*Math.random();
         star.style.animation = `sparkle-anim ${dur}s ease-in-out ${Math.random()*2}s infinite`;
         let color = sparkleColors[i%sparkleColors.length];
-        star.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 20 20">
-          <polygon points="10,1 12,8 19,10 12,12 10,19 8,12 1,10 8,8"
-            fill="${color}" fill-opacity="0.95"/>
-        </svg>`;
+        star.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 20 20"><polygon points="10,1 12,8 19,10 12,12 10,19 8,12 1,10 8,8" fill="${color}" fill-opacity="0.95"/></svg>`;
         sp.appendChild(star);
       }
       inner.appendChild(sp);
@@ -592,68 +407,51 @@
 
     // ==== LIGHT + GRAIN pour toutes les cartes popup ====
     function setupLightAndGrainLayer(inner) {
-      if (!inner.querySelector('.card-grain-layer')) {
-        let grain = document.createElement('div');
-        grain.className = 'card-grain-layer';
-        inner.appendChild(grain);
-      }
-      if (!inner.querySelector('.card-light-layer')) {
-        let light = document.createElement('div');
-        light.className = 'card-light-layer';
-        light.id = 'card-light-layer';
-        inner.appendChild(light);
-      }
-      if (!inner.querySelector('.card-light-bright')) {
-        let halo = document.createElement('div');
-        halo.className = 'card-light-bright';
-        halo.id = 'card-light-bright';
-        inner.appendChild(halo);
-      }
+      if (!inner.querySelector('.card-grain-layer')) inner.appendChild(document.createElement('div')).className = 'card-grain-layer';
+      if (!inner.querySelector('.card-light-layer')) { let light = document.createElement('div'); light.className = 'card-light-layer'; light.id = 'card-light-layer'; inner.appendChild(light);}
+      if (!inner.querySelector('.card-light-bright')) { let halo = document.createElement('div'); halo.className = 'card-light-bright'; halo.id = 'card-light-bright'; inner.appendChild(halo);}
     }
 
-    // ==== SUPER GLITCH POUR LA 14 ====
+    // ==== CONIC HALO ====
+    function setupConicLayer(inner) {
+      if(!inner.querySelector('.holo-conic')) { let c = document.createElement('div'); c.className = 'holo-conic'; inner.appendChild(c);}
+    }
+
+    // ==== LIGHT RIM ====
+    function setupLightRim(inner) {
+      if(!inner.querySelector('.card-light-rim')) { let r = document.createElement('div'); r.className = 'card-light-rim'; inner.appendChild(r);}
+    }
+
+    // ==== FOIL MOIRE (HEX) : HR/SR/SSR/UR ====
+    function setupFoilMoire(inner, rarity) {
+      let needFoil = ["HR","SR","SSR","UR"].includes(rarity);
+      let moire = inner.querySelector('.card-foil-moire');
+      if (needFoil && !moire) { let m = document.createElement('div'); m.className = 'card-foil-moire'; inner.appendChild(m);}
+      if (!needFoil && moire) moire.remove();
+    }
+
+    // ==== GLITCH FX POUR LA CARTE ID 14 ====
     function setupGlitchLayer(inner) {
       removeGlitchLayer(inner);
-
       // ---- BANDES GLITCH ----
-      let bandsLayer = document.createElement('div');
-      bandsLayer.className = 'glitch-bands-layer';
+      let bandsLayer = document.createElement('div'); bandsLayer.className = 'glitch-bands-layer';
       let baseImg = document.getElementById("popup-img-base");
       let src = baseImg ? baseImg.src : "";
-      let bandCount = 13;
-      let bands = [];
+      let bandCount = 13, bands = [];
       for (let i = 0; i < bandCount; i++) {
         let band = document.createElement('div');
-        band.className = 'glitch-band';
-        band.style.top = (i * (100 / bandCount)) + "%";
-        band.style.height = (7 + Math.random()*2) + "%";
-        let img = document.createElement('img');
-        img.src = src;
-        band.appendChild(img);
-
+        band.className = 'glitch-band'; band.style.top = (i * (100 / bandCount)) + "%"; band.style.height = (7 + Math.random()*2) + "%";
+        let img = document.createElement('img'); img.src = src; band.appendChild(img);
         if (Math.random() > 0.7) {
           let chroma = document.createElement('div');
-          chroma.className = 'glitch-band chroma';
-          chroma.style.top = band.style.top;
-          chroma.style.height = band.style.height;
-          let img2 = document.createElement('img');
-          img2.src = src;
-          chroma.appendChild(img2);
-          bandsLayer.appendChild(chroma);
-          bands.push(chroma);
+          chroma.className = 'glitch-band chroma'; chroma.style.top = band.style.top; chroma.style.height = band.style.height;
+          let img2 = document.createElement('img'); img2.src = src; chroma.appendChild(img2);
+          bandsLayer.appendChild(chroma); bands.push(chroma);
         }
-
-        bandsLayer.appendChild(band);
-        bands.push(band);
+        bandsLayer.appendChild(band); bands.push(band);
       }
       inner.appendChild(bandsLayer);
-
-      // ---- NOISE (grain fort) ----
-      let noise = document.createElement('div');
-      noise.className = 'glitch-noise-layer';
-      inner.appendChild(noise);
-
-      // ---- Animation dynamique (offset, chroma, hue) ----
+      let noise = document.createElement('div'); noise.className = 'glitch-noise-layer'; inner.appendChild(noise);
       let raf, last = 0;
       function animateGlitch(now) {
         if (now - last > 70) {
@@ -666,8 +464,7 @@
             let bright = chroma ? 1.15 + Math.random()*0.2 : 1 + Math.random()*0.08;
             let sat = chroma ? 1.65 + Math.random()*1.2 : 1.18 + Math.random()*0.09;
             band.style.transform = `translateX(${dx}px)`;
-            band.style.filter =
-              `hue-rotate(${hue}deg) brightness(${bright}) saturate(${sat})`;
+            band.style.filter = `hue-rotate(${hue}deg) brightness(${bright}) saturate(${sat})`;
             band.style.opacity = chroma
               ? (0.29 + Math.random()*0.25)
               : (0.61 + Math.random()*0.19);
@@ -677,11 +474,8 @@
         raf = requestAnimationFrame(animateGlitch);
       }
       animateGlitch();
-
-      // Pour nettoyer quand on ferme
       inner._glitchRaf = raf;
     }
-
     function removeGlitchLayer(inner) {
       let glitches = inner.querySelectorAll('.glitch-effect, .glitch-chroma, .glitch-bands-layer, .glitch-noise-layer');
       glitches.forEach(g=>g.remove());
@@ -716,7 +510,6 @@
           addTiltEffect(div);
           div.onclick = () => addZoomEffect(card.id, card.rarity);
         }
-
         container.appendChild(div);
         index++;
       }
@@ -735,7 +528,6 @@
       });
     }
 
-    // Chargement initial des cartes
     fetchCards().then(cards => allCards = cards);
   </script>
 </body>
