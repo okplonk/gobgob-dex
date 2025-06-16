@@ -140,10 +140,10 @@
     .card__shine {
       pointer-events: none;
       position: absolute;
-      left: -10%; top: -10%; /* dépasse ! */
-      width: 120%;
-      height: 120%;
-      border-radius: 30px;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
       z-index: 3;
       background-blend-mode: lighten,screen,color-dodge,lighten;
       background-image:
@@ -157,7 +157,7 @@
       transition: opacity 0.2s;
       will-change: transform, background-position;
       transform-style: preserve-3d;
-      box-shadow: 0 0 40px 12px #fff7, 0 0 120px 20px #fff2;
+      box-shadow: none;
       mix-blend-mode: lighten;
     }
     .card__shine.ur {
@@ -272,7 +272,7 @@
       const shine = document.createElement('div');
       shine.className = getShineClassForRarity(rarity);
 
-      // 💎 MASKING combo : alpha-mask.png + silhouette carte (png)
+      // MASKING combo : alpha-mask.png + silhouette carte (png)
       shine.style.webkitMaskImage = `
         url('img/alpha-mask.png'),
         url(img/${cardId}.png)
@@ -290,6 +290,12 @@
       shine.style.webkitMaskPosition = "center, center";
       shine.style.maskPosition = "center, center";
 
+      shine.style.position = 'absolute';
+      shine.style.top = '0'; shine.style.left = '0';
+      shine.style.width = '100%'; shine.style.height = '100%';
+      shine.style.borderRadius = '22px';
+      shine.style.zIndex = '3';
+
       popupCard.appendChild(shine);
 
       const img = popupCard.querySelector('.popup-card-inner');
@@ -301,7 +307,6 @@
         shine.style.setProperty('--my', y + '%');
         shine.style.setProperty('--posx', x + '%');
         shine.style.setProperty('--posy', y + '%');
-        // Parallaxe : grain bouge plus lentement
         let grainX = Math.round(50 + (x - 50) * 0.5);
         let grainY = Math.round(50 + (y - 50) * 0.5);
         shine.style.setProperty('--grain-x', grainX + '%');
@@ -319,8 +324,8 @@
             img.style.filter = "brightness(1.13) contrast(1.11) saturate(1.13)";
           }
         }
-        // Le shine suit EXACTEMENT la même rotation que la carte :
-        shine.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.09)`;
+        // Appliquer le même transform sur le shine
+        shine.style.transform = img.style.transform;
       };
       popupCard.onmouseleave = () => {
         shine.style.setProperty('--mx', '50%');
