@@ -102,7 +102,6 @@
       box-shadow: 0 8px 32px 8px #0006;
       background: none;
       transition: transform 0.2s ease;
-      /* stacking context for blend modes */
       isolation: isolate;
     }
     .popup-img {
@@ -129,7 +128,6 @@
       filter: brightness(9) blur(0.8px) opacity(0.06);
       mix-blend-mode: screen;
     }
-
     /* --- HOLO EFFECTS --- */
     .holo-glare, .holo-rainbow, .holo-sparkles {
       position: absolute;
@@ -137,54 +135,105 @@
       pointer-events: none;
       border-radius: 18px;
       z-index: 5;
-      opacity: 0.85;
-      mix-blend-mode: lighten;
       transition: opacity 0.3s;
     }
     .holo-rainbow {
-      opacity: 0.66;
+      opacity: 0.13;
       z-index: 4;
       mix-blend-mode: color-dodge;
       background: conic-gradient(from 0deg, #f4aaff, #aaf4ff, #fff1aa, #ffaaf4, #f4aaff);
-      animation: holoRainbowAnim 6s linear infinite;
-      filter: blur(0.7px) brightness(1.08) saturate(1.15);
+      animation: holoRainbowAnim 8s linear infinite;
+      filter: blur(0.7px) brightness(1.08) saturate(1.07);
     }
     @keyframes holoRainbowAnim {
-      0% { filter: hue-rotate(0deg); }
+      0% { filter: hue-rotate(0deg);}
       100% { filter: hue-rotate(360deg);}
     }
     .holo-glare {
-      opacity: 0.13;
       z-index: 6;
       background: linear-gradient(115deg, transparent 32%, #fff 51%, transparent 63%);
       background-size: 300% 300%;
       background-position: 60% 0;
       mix-blend-mode: lighten;
+      opacity: 0.04;
       transition: opacity 0.2s;
-      /* animated by JS */
     }
     .holo-sparkles {
-      opacity: 0.38;
       z-index: 7;
-      background: url('data:image/svg+xml;utf8,<svg width="120" height="180" xmlns="http://www.w3.org/2000/svg"><g fill="white" opacity="0.7"><circle cx="60" cy="50" r="2"/><circle cx="25" cy="120" r="1.4"/><circle cx="90" cy="80" r="2.7"/><circle cx="40" cy="160" r="1.8"/><circle cx="110" cy="30" r="1.2"/></g></svg>') repeat;
-      background-size: 90px 130px;
-      animation: sparkles-move 3s linear infinite;
-      filter: blur(0.5px) brightness(1.5);
+      background: none;
+      opacity: 0.14;
       pointer-events: none;
-    }
-    @keyframes sparkles-move {
-      0% { background-position: 0 0;}
-      100% { background-position: 45px 65px;}
     }
     .emboss-effect {
       position: absolute;
       inset: 0;
       pointer-events: none;
       mix-blend-mode: soft-light;
-      opacity: 0.35;
+      opacity: 0.32;
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
       z-index: 10;
       transition: background 0.15s;
+    }
+    /* SPARKLE SVG ANIM */
+    @keyframes sparkle-anim {
+      0%,100% { opacity: 0.08; transform: scale(0.7) rotate(0deg);}
+      10% { opacity: 0.7;}
+      50% { opacity: 1; transform: scale(1.1) rotate(11deg);}
+      80% { opacity: 0.6;}
+    }
+    /* GLITCH FX */
+    .glitch-effect {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 15;
+      border-radius: 18px;
+      mix-blend-mode: lighten;
+      background: none;
+      animation: glitch-anim 1.2s infinite linear;
+      overflow: hidden;
+    }
+    .glitch-slice {
+      position: absolute;
+      left: 0; width: 100%;
+      height: 8%;
+      opacity: 0.35;
+      background: transparent;
+      pointer-events: none;
+      filter: hue-rotate(180deg) brightness(1.8);
+      animation: glitch-slice-anim 1s infinite;
+    }
+    /* Chroma */
+    .glitch-chroma {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      opacity: 0.22;
+      mix-blend-mode: screen;
+      background: repeating-linear-gradient(90deg, #00eaff88 0px, #f2a8ff77 24px, #ffea0077 50px, #00eaff88 62px);
+      filter: blur(1.2px);
+      animation: glitch-chroma-anim 1.4s infinite linear;
+      z-index: 16;
+    }
+    @keyframes glitch-anim {
+      0%,100% { filter: none; }
+      15% { filter: brightness(1.12) hue-rotate(20deg);}
+      17% { filter: brightness(0.92) hue-rotate(-18deg);}
+      45% { filter: brightness(1.17) hue-rotate(7deg);}
+      60% { filter: brightness(0.98) hue-rotate(-17deg);}
+      67% { filter: brightness(1.07) hue-rotate(6deg);}
+      80% { filter: brightness(0.97);}
+    }
+    @keyframes glitch-slice-anim {
+      0%,100% { left:0;}
+      12% { left: -8px;}
+      19% { left: 11px;}
+      23% { left: -7px;}
+      28% { left: 0;}
+    }
+    @keyframes glitch-chroma-anim {
+      0%,100% { background-position: 0 0;}
+      100% { background-position: 62px 0;}
     }
     #popup.visible {
       visibility: visible;
@@ -214,14 +263,14 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet holographique façon simeydotme -->
+  <!-- Popup avec effet holo & glitch -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img class="popup-img base" id="popup-img-base">
         <img class="popup-img shadow" id="popup-img-shadow">
         <img class="popup-img light" id="popup-img-light">
-        <!-- HOLO FX LAYER INSERTED HERE -->
+        <!-- HOLO FX LAYER inserted by JS -->
         <div class="emboss-effect" id="emboss"></div>
       </div>
     </div>
@@ -258,13 +307,10 @@
         const y = e.clientY - rect.top;
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-
         const rotateX = -(y - centerY) / 3;
         const rotateY = (x - centerX) / 3;
-
         card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
-
       card.addEventListener("mouseleave", () => {
         card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
       });
@@ -283,7 +329,13 @@
       inner.style.transform = "";
 
       popup.classList.add("visible");
-      setupHoloEffectLayer(inner, rarity);
+      // GLITCH FX pour la carte ID 14
+      if (cardId === 14) {
+        setupGlitchLayer(inner);
+      } else {
+        removeGlitchLayer(inner);
+      }
+      setupHoloEffectLayer(inner, rarity, cardId);
 
       function updateEffect(e) {
         const rect = inner.getBoundingClientRect();
@@ -310,13 +362,13 @@
         // HOLO GLARE (déplacement)
         let holoGlare = inner.querySelector('.holo-glare');
         if(holoGlare) {
-          // translate la position du glare selon la souris
           let bgX = Math.round((x / rect.width) * 100);
           holoGlare.style.backgroundPosition = `${bgX}% 0%`;
-          holoGlare.style.opacity = 0.09 + 0.18 * Math.abs((x-centerX)/rect.width) + 0.06 * Math.abs((y-centerY)/rect.height);
+          // Légère intensité selon déplacement
+          holoGlare.style.opacity = parseFloat(holoGlare.dataset.baseOpacity || 0.08) +
+            0.06 * Math.abs((x-centerX)/rect.width) + 0.02 * Math.abs((y-centerY)/rect.height);
         }
       }
-
       inner.onmousemove = updateEffect;
       inner.onmouseleave = function() {
         inner.style.transform = "rotateX(0deg) rotateY(0deg)";
@@ -326,7 +378,7 @@
         let holoGlare = inner.querySelector('.holo-glare');
         if(holoGlare) {
           holoGlare.style.backgroundPosition = "60% 0";
-          holoGlare.style.opacity = 0.13;
+          holoGlare.style.opacity = holoGlare.dataset.baseOpacity || 0.08;
         }
       };
     }
@@ -338,68 +390,130 @@
       document.getElementById("popup-img-shadow").style.transform = "";
       document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
-      // Remove holo layers
-      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles');
+      // Remove holo and glitch layers
+      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles, .glitch-effect, .glitch-chroma');
       layers.forEach(layer => layer.remove());
     }
 
-    // ==== HOLO EFFECT (Simeydotme style) ====
-    function setupHoloEffectLayer(inner, rarity) {
+    // ==== HOLO EFFECT (color sparkles, rareté) ====
+    function setupHoloEffectLayer(inner, rarity, cardId) {
       // Remove previous
       let layers = inner.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles');
       layers.forEach(layer => layer.remove());
 
-      // Par rareté : intensité de chaque calque
-      let holoRainbow = false, holoGlare = false, sparkles = false;
-      let rainbowOpacity = 0, glareOpacity = 0.08, sparklesOpacity = 0;
+      // Sparkle colors by rarity
+      let sparkleColors = [];
+      if (rarity === "UR") {
+        sparkleColors = [
+          "#fe59f8","#53fcfc","#ffe96a","#ff7754","#b2ff60",
+          "#fe8eff","#91cfff","#ffe44e","#fdc070","#aaffb7"
+        ];
+      } else if (rarity === "SSR" || rarity === "SR") {
+        sparkleColors = [
+          "#ffe070","#ffd700","#ffeedd","#ffd0c9","#96deff","#fdc070","#ffb3fa"
+        ];
+      } else if (rarity === "HR") {
+        sparkleColors = ["#7df8ff","#a5f2e9","#e0fff9","#b3e7ff"];
+      } else { // N
+        sparkleColors = ["#dff4ff","#ffffff","#c5e5ff"];
+      }
+      // Intensité
+      let rainbowOpacity, glareOpacity, sparklesOpacity, sparkleCount;
       switch(rarity) {
         case "UR":
-          holoRainbow = true; rainbowOpacity = 1.0;
-          holoGlare = true;   glareOpacity = 0.24;
-          sparkles = true;    sparklesOpacity = 0.44;
+          rainbowOpacity = 0.22;
+          glareOpacity = 0.08;
+          sparklesOpacity = 0.28;
+          sparkleCount = 21;
           break;
         case "SSR":
-          holoRainbow = true; rainbowOpacity = 0.78;
-          holoGlare = true;   glareOpacity = 0.17;
-          sparkles = true;    sparklesOpacity = 0.30;
+          rainbowOpacity = 0.13;
+          glareOpacity = 0.065;
+          sparklesOpacity = 0.18;
+          sparkleCount = 13;
           break;
         case "SR":
-          holoRainbow = true; rainbowOpacity = 0.53;
-          holoGlare = true;   glareOpacity = 0.11;
-          sparkles = true;    sparklesOpacity = 0.18;
+          rainbowOpacity = 0.08;
+          glareOpacity = 0.04;
+          sparklesOpacity = 0.13;
+          sparkleCount = 8;
           break;
         case "HR":
-          holoRainbow = true; rainbowOpacity = 0.26;
-          holoGlare = true;   glareOpacity = 0.06;
-          sparkles = false;   sparklesOpacity = 0;
+          rainbowOpacity = 0.05;
+          glareOpacity = 0.025;
+          sparklesOpacity = 0.07;
+          sparkleCount = 5;
           break;
         default: // N
-          holoRainbow = false;
-          holoGlare = true;   glareOpacity = 0.04;
-          sparkles = false;
+          rainbowOpacity = 0.035;
+          glareOpacity = 0.015;
+          sparklesOpacity = 0.05;
+          sparkleCount = 2;
           break;
       }
-      // Calque rainbow (conic gradient animé)
-      if(holoRainbow) {
-        let rainbow = document.createElement('div');
-        rainbow.className = 'holo-rainbow';
-        rainbow.style.opacity = rainbowOpacity;
-        inner.appendChild(rainbow);
+      // Rainbow calque
+      let rainbow = document.createElement('div');
+      rainbow.className = 'holo-rainbow';
+      rainbow.style.opacity = rainbowOpacity;
+      inner.appendChild(rainbow);
+      // Glare
+      let glare = document.createElement('div');
+      glare.className = 'holo-glare';
+      glare.style.opacity = glareOpacity;
+      glare.dataset.baseOpacity = glareOpacity;
+      inner.appendChild(glare);
+      // Sparkles
+      let sp = document.createElement('div');
+      sp.className = 'holo-sparkles';
+      sp.style.opacity = sparklesOpacity;
+      sp.style.background = 'none';
+      sp.innerHTML = '';
+      for(let i=0;i<sparkleCount;i++){
+        let star = document.createElement('div');
+        let x = Math.random()*82+8, y=Math.random()*78+9, s=1+Math.random()*2.2;
+        let dur = 2.2 + Math.random()*2.8;
+        star.style.position = 'absolute';
+        star.style.left = x+'%';
+        star.style.top = y+'%';
+        star.style.width = (7*s)+'px';
+        star.style.height = (7*s)+'px';
+        star.style.pointerEvents = 'none';
+        star.style.opacity = 0.7+0.2*Math.random();
+        star.style.animation = `sparkle-anim ${dur}s ease-in-out ${Math.random()*2}s infinite`;
+        // Arc-en-ciel pour UR, couleurs pastel pour autres
+        let color = sparkleColors[i%sparkleColors.length];
+        star.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 20 20">
+          <polygon points="10,1 12,8 19,10 12,12 10,19 8,12 1,10 8,8"
+            fill="${color}" fill-opacity="0.95"/>
+        </svg>`;
+        sp.appendChild(star);
       }
-      // Calque glare (suivi souris)
-      if(holoGlare) {
-        let glare = document.createElement('div');
-        glare.className = 'holo-glare';
-        glare.style.opacity = glareOpacity;
-        inner.appendChild(glare);
+      inner.appendChild(sp);
+    }
+
+    // ==== GLITCH FX POUR LA CARTE ID 14 ====
+    function setupGlitchLayer(inner) {
+      removeGlitchLayer(inner);
+      // Lignes qui tremblent
+      for (let i=0;i<7;i++) {
+        let slice = document.createElement('div');
+        slice.className = 'glitch-slice glitch-effect';
+        slice.style.top = (i*13+Math.random()*2)+'%';
+        slice.style.height = (7+Math.random()*4)+'%';
+        slice.style.background = i%2==0 ? '#00eaff' : '#ff6dd9';
+        slice.style.opacity = 0.12 + Math.random()*0.13;
+        slice.style.animationDelay = `${Math.random()*0.7}s`;
+        slice.style.filter += ` blur(${Math.random()*1.2}px)`;
+        inner.appendChild(slice);
       }
-      // Calque sparkles (SVG étoile animée)
-      if(sparkles) {
-        let sp = document.createElement('div');
-        sp.className = 'holo-sparkles';
-        sp.style.opacity = sparklesOpacity;
-        inner.appendChild(sp);
-      }
+      // Chroma "grain" holo
+      let chroma = document.createElement('div');
+      chroma.className = 'glitch-chroma';
+      inner.appendChild(chroma);
+    }
+    function removeGlitchLayer(inner) {
+      let glitches = inner.querySelectorAll('.glitch-effect, .glitch-chroma');
+      glitches.forEach(g=>g.remove());
     }
 
     async function loadCollection() {
