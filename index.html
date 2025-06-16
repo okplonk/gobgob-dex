@@ -124,11 +124,32 @@
       justify-content: center;
       transition: transform 0.2s ease;
       position: relative;
+      overflow: hidden; /* important pour le reflet */
+    }
+
+    /* Reflet animé */
+    .popup-card-inner::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      filter: blur(20px);
+      animation: shineMove 3s linear infinite;
+      pointer-events: none;
+      border-radius: 20px;
+      z-index: 15;
     }
 
     /* Halo clair diffus en haut renforcé */
-    .popup-card-inner::before {
-      content: "";
+    .popup-card-inner .halo-light {
       position: absolute;
       top: 0;
       left: 5%;
@@ -139,11 +160,11 @@
       background: radial-gradient(circle at top center, rgba(200, 180, 255, 0.85), transparent 80%);
       filter: blur(50px);
       z-index: 10;
+      transform-style: preserve-3d;
     }
 
     /* Halo sombre dégradé en bas renforcé */
-    .popup-card-inner::after {
-      content: "";
+    .popup-card-inner .halo-shadow {
       position: absolute;
       bottom: 0;
       left: 0;
@@ -153,6 +174,7 @@
       background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
       border-radius: 0 0 20px 20px;
       z-index: 10;
+      transform-style: preserve-3d;
     }
 
     .popup-card-inner img {
@@ -161,7 +183,8 @@
       object-fit: contain;
       pointer-events: none;
       position: relative;
-      z-index: 20; /* devant les halos */
+      z-index: 20; /* devant les halos et reflet */
+      transform-style: preserve-3d;
     }
 
     #popup.visible {
@@ -189,6 +212,16 @@
       background-blend-mode: screen;
       animation: holoShift 3s linear infinite;
       box-shadow: 0 0 40px 10px rgba(255, 255, 255, 0.4);
+    }
+
+    @keyframes shineMove {
+      0% {
+        transform: translateX(-100%) translateY(-100%);
+      }
+
+      100% {
+        transform: translateX(100%) translateY(100%);
+      }
     }
 
     @keyframes holoShift {
@@ -235,6 +268,8 @@
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img id="popup-img" alt="Carte affichée" />
+        <div class="halo-light"></div>
+        <div class="halo-shadow"></div>
       </div>
     </div>
   </div>
@@ -337,6 +372,11 @@
       popup.classList.remove("visible");
       const inner = document.getElementById("popup-inner");
       inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+      // Reset halos rotation
+      const haloLight = inner.querySelector(".halo-light");
+      const haloShadow = inner.querySelector(".halo-shadow");
+      if (haloLight) haloLight.style.transform = "rotateX(0deg) rotateY(0deg)";
+      if (haloShadow) haloShadow.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
     document.getElementById("popup-inner").addEventListener("mousemove", (e) => {
@@ -348,12 +388,24 @@
       const centerY = rect.height / 2;
       const rotateX = -(y - centerY) / 6;
       const rotateY = (x - centerX) / 6;
-      container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+
+      const transformValue = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+      container.style.transform = transformValue;
+
+      // Appliquer la même rotation aux halos
+      const haloLight = container.querySelector(".halo-light");
+      const haloShadow = container.querySelector(".halo-shadow");
+      if (haloLight) haloLight.style.transform = transformValue;
+      if (haloShadow) haloShadow.style.transform = transformValue;
     });
 
     document.getElementById("popup-inner").addEventListener("mouseleave", () => {
       const container = document.getElementById("popup-inner");
       container.style.transform = "rotateX(0deg) rotateY(0deg)";
+      const haloLight = container.querySelector(".halo-light");
+      const haloShadow = container.querySelector(".halo-shadow");
+      if (haloLight) haloLight.style.transform = "rotateX(0deg) rotateY(0deg)";
+      if (haloShadow) haloShadow.style.transform = "rotateX(0deg) rotateY(0deg)";
     });
 
     async function loadCollection() {
