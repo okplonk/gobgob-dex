@@ -2,213 +2,127 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Gobgob DEX Test ID66</title>
+  <title>Gobgob DEX Card Holo Demo</title>
   <style>
+    :root {
+      --holo1: #00fff7;
+      --holo2: #ffd700;
+      --holo3: #ff00f7;
+      --holo4: #a0ff00;
+      --holo5: #ffffff;
+    }
     body {
-      background: #202124;
-      font-family: sans-serif;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      color: #fff;
-      margin: 30px 0 10px;
-    }
-    .open-btn {
-      font-size: 1.2em;
-      padding: 10px 24px;
-      margin-top: 32px;
-      border-radius: 10px;
-      border: none;
-      background: #77e0f3;
-      color: #181c22;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    /* -- POPUP -- */
-    #popup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: #111;
       display: flex;
-      align-items: center;
       justify-content: center;
-      z-index: 9000;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity 0.25s;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
     }
-    #popup.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-    .popup-card {
-      width: 340px;
-      height: 500px;
+    .card-holo-container {
+      width: 380px;
+      height: 600px;
       position: relative;
-      perspective: 1200px;
+      perspective: 1000px;
       user-select: none;
     }
-    .popup-card-inner {
+    .card-holo-inner {
       width: 100%;
       height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      border-radius: 26px;
-      box-shadow: 0 10px 60px 0 #000b;
-      overflow: visible;
-      transition: box-shadow 0.2s;
-    }
-    .popup-card-inner img,
-    .popup-card-inner .foil-layer {
       position: absolute;
       left: 0; top: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      pointer-events: none;
-      border-radius: 26px;
-      /* Smoother edges */
-    }
-    .popup-card-inner img {
-      z-index: 1;
-    }
-    .popup-card-inner .ui-layer {
-      z-index: 2;
-      /* Possible extra glow */
-      filter: drop-shadow(0 0 12px #fff8) drop-shadow(0 0 6px #fff4);
-      pointer-events: none;
-    }
-    .popup-card-inner .foil-layer {
-      z-index: 3;
-      pointer-events: none;
-      /* On masque tout sauf les parties blanches du PNG foil */
-      mask-image: url('img/66-foil.png');
-      mask-size: contain;
-      mask-repeat: no-repeat;
-      mask-position: center;
-      -webkit-mask-image: url('img/66-foil.png');
-      -webkit-mask-size: contain;
-      -webkit-mask-repeat: no-repeat;
-      -webkit-mask-position: center;
-      mix-blend-mode: lighten;
-      /* Un petit "lighten" pour pop sur fond sombre */
-      background: 
-        /* Layer: Grain SVG */
-        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="4" seed="6"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.2" fill="white"/></svg>'),
-        /* Layer: Shine animé */
-        linear-gradient(120deg, rgba(255,255,255,0.40) 10%, rgba(255,230,210,0.14) 40%, rgba(140,210,255,0.11) 60%, rgba(255,255,255,0.28) 90%);
-      background-blend-mode: lighten, color-dodge;
-      opacity: 0.86;
-      animation: foilmove 3.2s linear infinite alternate;
-      /* Bouge tout l'ensemble pour du dynamisme */
-    }
-    @keyframes foilmove {
-      0% { background-position: 0 0, 0 0; }
-      100% { background-position: 120px 80px, 60px 180px; }
-    }
-
-    /* -- 3D Hover pour la carte -- */
-    .popup-card-inner {
-      transition: transform 0.17s cubic-bezier(.12,.94,.34,1.22), box-shadow 0.15s;
+      border-radius: 30px;
+      box-shadow: 0 12px 60px 0 #000b, 0 2px 10px #0008;
+      overflow: hidden;
+      background: #222;
+      /* Effet 3D */
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
       will-change: transform;
     }
-    .popup-card-inner.is-tilting {
-      box-shadow: 0 20px 64px 0 #000c, 0 0px 0 2px #fff2;
+    .card-holo-inner:hover {
+      transform: rotateY(14deg) rotateX(5deg) scale(1.035);
+      box-shadow: 0 20px 60px 0 #00fff855, 0 2px 20px #ffd70099;
     }
 
-    /* Fermer la popup sur la croix */
-    .close-btn {
+    /* --- BASE ILLUSTRATION --- */
+    .card-base {
       position: absolute;
-      top: -35px;
-      right: 0;
-      background: #fff;
-      color: #222;
-      border: none;
-      font-size: 1.6em;
-      border-radius: 50%;
-      width: 44px;
-      height: 44px;
-      cursor: pointer;
-      box-shadow: 0 2px 8px #0008;
-      z-index: 10000;
-      transition: background 0.18s;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+      object-fit: cover;
+      pointer-events: none;
     }
-    .close-btn:hover {
-      background: #ffe25e;
-      color: #863;
+    /* --- FOIL EFFECT --- */
+    .card-foil-holo {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+      /* Zone holo : le mask ! */
+      -webkit-mask-image: url('img/66-foil.png');
+      mask-image: url('img/66-foil.png');
+      -webkit-mask-size: cover;
+      mask-size: cover;
+      /* Le layer Holo visible uniquement dans la zone foil */
+      pointer-events: none;
+      mix-blend-mode: color-dodge;
+      opacity: .75;
+      animation: holoMove 6s infinite linear;
+    }
+    /* Animation de gradient qui bouge */
+    .card-foil-holo::before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: 
+        linear-gradient(120deg, var(--holo1), var(--holo2), var(--holo3), var(--holo4), var(--holo5), var(--holo1));
+      background-size: 400% 400%;
+      animation: holoGradient 5s linear infinite;
+      opacity: 0.8;
+      mix-blend-mode: screen;
+      border-radius: 30px;
+    }
+    @keyframes holoGradient {
+      0% { background-position: 0% 40%; }
+      50% { background-position: 100% 60%; }
+      100% { background-position: 0% 40%; }
+    }
+    @keyframes holoMove {
+      0% { filter: brightness(1) contrast(2) saturate(1.4) hue-rotate(0deg);}
+      100% { filter: brightness(1.05) contrast(2.1) saturate(1.5) hue-rotate(360deg);}
+    }
+
+    /* --- FRAME/UI LAYER --- */
+    .card-ui {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      z-index: 3;
+      object-fit: cover;
+      pointer-events: none;
+      /* On peut ajouter un mini effet glow ici aussi */
+      filter: drop-shadow(0 2px 4px #fff8) drop-shadow(0 0 12px #ffd70044);
+      /* ou juste laisser à 1 */
+    }
+    /* -- GLOW outline au hover sur la frame -- */
+    .card-holo-inner:hover .card-ui {
+      filter: drop-shadow(0 2px 10px #fff8) drop-shadow(0 0 22px #ffd700aa);
     }
   </style>
 </head>
 <body>
-  <h1>Test Popup Carte Gobgob #66<br><span style="font-size:0.7em; color:#ddd">Effet foil maské, UI séparé</span></h1>
-  <button class="open-btn" onclick="openPopup66()">Afficher la carte 66</button>
-
-  <div id="popup">
-    <div class="popup-card">
-      <button class="close-btn" onclick="closePopup()" title="Fermer">&times;</button>
-      <div class="popup-card-inner" id="popup-card-inner">
-        <!-- Les layers JS vont ici -->
-      </div>
+  <div class="card-holo-container">
+    <div class="card-holo-inner">
+      <!-- Illustration de base -->
+      <img src="img/66.png" alt="Gobgob Momijix" class="card-base" />
+      <!-- FOIL HOLO effect (masqué par foil alpha PNG) -->
+      <div class="card-foil-holo"></div>
+      <!-- Frame/texte (UI) -->
+      <img src="img/66-ui.png" alt="UI Frame" class="card-ui" />
     </div>
   </div>
-
-  <script>
-    function openPopup66() {
-      // Nettoie la carte
-      const container = document.getElementById('popup-card-inner');
-      container.innerHTML = '';
-      // LAYER 1 : Illustration
-      const illu = document.createElement('img');
-      illu.src = 'img/66.png';      // Illustration de base
-      illu.alt = '';
-      container.appendChild(illu);
-      // LAYER 2 : UI
-      const ui = document.createElement('img');
-      ui.src = 'img/66-ui.png';    // Calque UI : étoiles, SR...
-      ui.className = 'ui-layer';
-      ui.alt = '';
-      container.appendChild(ui);
-      // LAYER 3 : Foil
-      const foil = document.createElement('div');
-      foil.className = 'foil-layer';
-      container.appendChild(foil);
-
-      // Show popup
-      document.getElementById('popup').classList.add('visible');
-    }
-
-    function closePopup() {
-      document.getElementById('popup').classList.remove('visible');
-    }
-
-    // --- Effet 3D follow mouse ---
-    const cardInner = document.getElementById('popup-card-inner');
-    let mouseDown = false;
-
-    document.querySelector('.popup-card').addEventListener('mousemove', function(e) {
-      const card = cardInner;
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = -(y - centerY) / 11;
-      const rotateY = (x - centerX) / 13;
-      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
-      card.classList.add("is-tilting");
-    });
-    document.querySelector('.popup-card').addEventListener('mouseleave', function() {
-      cardInner.style.transform = "";
-      cardInner.classList.remove("is-tilting");
-    });
-
-    // Ferme popup si click sur fond (pas sur la carte)
-    document.getElementById('popup').addEventListener('mousedown', function(e) {
-      if (e.target === this) closePopup();
-    });
-  </script>
 </body>
 </html>
