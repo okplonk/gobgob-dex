@@ -98,6 +98,9 @@
       overflow: hidden;
       background: #333;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .popup-card-inner {
       width: 100%;
@@ -110,7 +113,9 @@
       position: absolute;
       top: 0; left: 0;
       transition: transform 0.2s ease;
-      /* L'effet sera ajouté par JS */
+      /* Booste artwork sous shine */
+      filter: brightness(1.13) contrast(1.11) saturate(1.13);
+      will-change: filter;
     }
     #popup.visible {
       visibility: visible;
@@ -126,72 +131,84 @@
       }
     }
 
-    /* HOLO FX (identiques à la démo précédente, à garder pour le rendu) */
-    .holo-effect {
+    /* --- Simeydotme style shine overlay --- */
+    .card__shine {
       pointer-events: none;
       position: absolute;
       inset: 0;
-      z-index: 2;
       border-radius: 22px;
-      mix-blend-mode: lighten;
-      background:
-        linear-gradient(125deg, #55f 10%, #6ff 40%, #f0f 70%, #fffb 90%),
-        repeating-linear-gradient(120deg, #fff2 0 3px, transparent 3px 20px),
-        linear-gradient(85deg, #fff2 0 70%, transparent 90% 100%);
-      opacity: 0.70;
-      animation: holo-gradient 5s linear infinite;
+      z-index: 10;
+      /* 4 layers: grain, bands, holo gradient, glare */
+      background-blend-mode: screen, soft-light, overlay, lighten;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'), /* grain */
+        repeating-linear-gradient(125deg, #fff2 0 4px, transparent 4px 16px),
+        linear-gradient(120deg, #7fffd430 0%, #fff0 60%, #e993ff50 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff5 10%, #fff0 70%);
+      background-size: cover, 280% 220%, 100% 100%, 120% 120%;
+      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+      opacity: 0.39;
+      animation: shine-anim 6s linear infinite;
+      transition: opacity 0.2s;
     }
-    @keyframes holo-gradient {
-      0%   { background-position: 0 0, 0 0, 0 0;}
-      100% { background-position: 320px 480px, 80px 180px, 30px 240px;}
+    @keyframes shine-anim {
+      100% {
+        background-position: center, 100% 0, center, center;
+      }
     }
-    .sparkle {
-      pointer-events: none;
-      position: absolute;
-      z-index: 3;
-      border-radius: 50%;
-      width: 5px;
-      height: 5px;
-      background: white;
-      filter: blur(0.5px) drop-shadow(0 0 5px #fff8);
-      opacity: 0.7;
-      animation: sparkle-flicker 1.5s infinite alternate;
+
+    /* Optionally border (UR, SSR, etc) */
+    .card__shine.gold {
+      box-shadow: 0 0 22px 2px #fff8, 0 0 48px 10px #ffd90080;
+      border: 2.5px solid #ffd900c9;
+      opacity: 0.44;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
+        repeating-linear-gradient(120deg, #fff8 0 3px, transparent 3px 17px),
+        linear-gradient(115deg, #ffd90099 0%, #fff0 55%, #e993ff50 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff5 10%, #fff0 70%);
     }
-    @keyframes sparkle-flicker {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.2; }
+    .card__shine.ur {
+      box-shadow: 0 0 25px 3px #fff, 0 0 60px 12px #46e3ffb7;
+      border: 2.5px solid #3beeffb9;
+      opacity: 0.43;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
+        repeating-linear-gradient(120deg, #fff6 0 3px, transparent 3px 16px),
+        linear-gradient(120deg, #45f6ff88 0%, #8cfaf990 60%, #b491ff90 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff7 8%, #fff0 70%);
     }
-    .holo-light {
-      pointer-events: none;
-      position: absolute;
-      z-index: 4;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      border-radius: 22px;
-      background: radial-gradient(circle at 50% 50%, #fff7 0 60px, transparent 180px);
-      mix-blend-mode: lighten;
-      opacity: 0.35;
-      transition: background .13s;
+    .card__shine.ssr {
+      box-shadow: 0 0 18px 2px #fff, 0 0 36px 8px #ff8c0059;
+      border: 2.5px solid #ff8c00b8;
+      opacity: 0.44;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
+        repeating-linear-gradient(120deg, #fff6 0 3px, transparent 3px 17px),
+        linear-gradient(120deg, #ffb34780 0%, #ffd70055 60%, #ff8c0060 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff7 9%, #fff0 70%);
     }
-    .holo-border {
-      pointer-events: none;
-      position: absolute;
-      z-index: 5;
-      inset: 0;
-      border-radius: 22px;
-      box-shadow: 0 0 16px 2px #fff, 0 0 40px 8px #00ffea99;
-      border: 2.5px solid transparent;
-      background: linear-gradient(135deg,#f5d300,#51ffdb,#e943ff,#7bffb8,#f5d300);
-      background-size: 400% 400%;
-      animation: holo-border-anim 2.2s linear infinite;
-      mix-blend-mode: screen;
-      opacity: 0.45;
+    .card__shine.hr {
+      box-shadow: 0 0 16px 2px #fff, 0 0 24px 6px #7bffb86e;
+      border: 2.5px solid #4cffb5d0;
+      opacity: 0.39;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
+        repeating-linear-gradient(120deg, #fff4 0 3px, transparent 3px 13px),
+        linear-gradient(120deg, #a3f9c980 0%, #b4ffb890 60%, #77ffc780 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff6 12%, #fff0 70%);
     }
-    @keyframes holo-border-anim {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 100% 50%; }
+    .card__shine.n {
+      opacity: 0.33;
+      box-shadow: 0 0 10px 0 #fff, 0 0 18px 4px #ae69fa66;
+      border: 2.5px solid #ae69fa48;
+      background-image:
+        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
+        repeating-linear-gradient(120deg, #fff2 0 3px, transparent 3px 16px),
+        linear-gradient(120deg, #c3a6fd80 0%, #d3bfff88 60%, #ae69fa77 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff3 10%, #fff0 70%);
     }
+
   </style>
 </head>
 <body>
@@ -205,14 +222,11 @@
   </div>
   <div class="card-grid" id="cards"></div>
   <div id="popup" onclick="hidePopup()">
-    <div class="popup-card">
-      <!-- le contenu dynamique ira ici -->
-    </div>
+    <div class="popup-card"></div>
   </div>
   <script>
     let allCards = [];
     let showMissing = true;
-    let lastPopupSparkles = [];
 
     async function fetchCards() {
       const res = await fetch("cards.csv");
@@ -248,89 +262,34 @@
       });
     }
 
-    // HOLO EFFECTS ------
-    function getGradientForRarity(rarity) {
-      // Tu peux personnaliser ici selon la rareté !
+    // Get CSS class for shine per rarity
+    function getShineClassForRarity(rarity) {
       switch(rarity) {
-        case "UR":
-          return `linear-gradient(125deg,#c1fff7 10%,#79ff6f 40%,#a9a1ff 70%,#fff 90%),repeating-linear-gradient(120deg,#fff6 0 3px,transparent 3px 20px),linear-gradient(85deg,#fff7 0 70%,transparent 90% 100%)`;
-        case "SSR":
-          return `linear-gradient(125deg,#ffb347 10%,#ffd700 40%,#fff2cc 70%,#ff8c00 90%),repeating-linear-gradient(120deg,#fff7 0 3px,transparent 3px 20px),linear-gradient(85deg,#fff7 0 70%,transparent 90% 100%)`;
-        case "SR":
-          return `linear-gradient(125deg,#ffe57f 10%,#ffeb3b 40%,#fff9c4 70%,#ffd600 90%),repeating-linear-gradient(120deg,#fff6 0 3px,transparent 3px 20px),linear-gradient(85deg,#fff5 0 70%,transparent 90% 100%)`;
-        case "HR":
-          return `linear-gradient(125deg,#66ff6a 10%,#a0ffd6 40%,#d3ffea 70%,#a0ffb8 90%),repeating-linear-gradient(120deg,#fff7 0 3px,transparent 3px 20px),linear-gradient(85deg,#fff4 0 70%,transparent 90% 100%)`;
-        case "N":
-        default:
-          return `linear-gradient(125deg,#c3a6fd 10%,#d3bfff 40%,#ae69fa 70%,#eee 90%),repeating-linear-gradient(120deg,#fff3 0 3px,transparent 3px 20px),linear-gradient(85deg,#fff2 0 70%,transparent 90% 100%)`;
+        case "UR": return "card__shine ur";
+        case "SSR": return "card__shine ssr";
+        case "SR": return "card__shine gold";
+        case "HR": return "card__shine hr";
+        case "N": default: return "card__shine n";
       }
-    }
-    function getBorderForRarity(rarity) {
-      switch(rarity) {
-        case "UR":
-          return "linear-gradient(135deg,#00fff2,#ef6eff,#ffe56c,#ff992f,#00fff2)";
-        case "SSR":
-          return "linear-gradient(135deg,#ffb347,#ffd700,#fff2cc,#ff8c00,#ffb347)";
-        case "SR":
-          return "linear-gradient(135deg,#ffe57f,#ffd600,#ffeb3b,#ffe57f)";
-        case "HR":
-          return "linear-gradient(135deg,#66ff6a,#a0ffd6,#d3ffea,#a0ffb8,#66ff6a)";
-        case "N":
-        default:
-          return "linear-gradient(135deg,#c3a6fd,#d3bfff,#ae69fa,#eee,#c3a6fd)";
-      }
-    }
-    function createSparkles(container, count = 18) {
-      // Nettoie les sparkles précédentes
-      container.querySelectorAll('.sparkle').forEach(e => e.remove());
-      let sparkles = [];
-      for (let i = 0; i < count; i++) {
-        const sparkle = document.createElement('div');
-        sparkle.className = 'sparkle';
-        const px = Math.random() * 96 + 2;
-        const py = Math.random() * 96 + 2;
-        sparkle.style.left = px + '%';
-        sparkle.style.top = py + '%';
-        const s = 3 + Math.random() * 5;
-        sparkle.style.width = s + 'px';
-        sparkle.style.height = s + 'px';
-        sparkle.style.animationDelay = (Math.random() * 1.5) + 's';
-        container.appendChild(sparkle);
-        sparkles.push(sparkle);
-      }
-      return sparkles;
     }
 
     function addPopupHoloFX(popupCard, rarity) {
-      // Nettoie les anciens effets
-      popupCard.querySelectorAll('.holo-effect, .holo-border, .holo-light, .sparkle').forEach(e => e.remove());
-      // Holo-effect
-      const holo = document.createElement('div');
-      holo.className = 'holo-effect';
-      holo.style.background = getGradientForRarity(rarity);
-      popupCard.appendChild(holo);
+      // Nettoie tout
+      popupCard.querySelectorAll('.card__shine').forEach(e => e.remove());
+      // Shine
+      const shine = document.createElement('div');
+      shine.className = getShineClassForRarity(rarity);
+      popupCard.appendChild(shine);
 
-      // Holo-border
-      const border = document.createElement('div');
-      border.className = 'holo-border';
-      border.style.background = getBorderForRarity(rarity);
-      popupCard.appendChild(border);
-
-      // Holo-light
-      const light = document.createElement('div');
-      light.className = 'holo-light';
-      light.id = 'holo-light';
-      popupCard.appendChild(light);
-
-      // Sparkles
-      lastPopupSparkles = createSparkles(popupCard, 18);
-
-      // Effet lumière qui suit la souris
+      // Effet shine animé au suivi souris
       popupCard.onmousemove = e => {
         const rect = popupCard.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
         const y = ((e.clientY - rect.top) / rect.height) * 100;
-        light.style.background = `radial-gradient(circle at ${x}% ${y}%, #fff9 0 60px, transparent 180px)`;
+        shine.style.setProperty('--mx', x + '%');
+        shine.style.setProperty('--my', y + '%');
+        shine.style.setProperty('--posx', x + '%');
+        shine.style.setProperty('--posy', y + '%');
         // Tilt aussi
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
@@ -339,13 +298,15 @@
         popupCard.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`;
       };
       popupCard.onmouseleave = () => {
-        light.style.background = `radial-gradient(circle at 50% 50%, #fff7 0 60px, transparent 180px)`;
+        shine.style.setProperty('--mx', '50%');
+        shine.style.setProperty('--my', '50%');
+        shine.style.setProperty('--posx', '50%');
+        shine.style.setProperty('--posy', '50%');
         popupCard.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
       };
     }
 
     function addZoomEffect(cardId) {
-      // Trouve la carte pour choper la rareté et nom
       const card = allCards.find(c => c.id === cardId);
       const popup = document.getElementById("popup");
       const popupCard = popup.querySelector(".popup-card");
@@ -360,7 +321,7 @@
       inner.title = `${card.name} (${card.rarity})`;
       popupCard.appendChild(inner);
 
-      // Ajoute les effets Holo
+      // Ajoute le shine Simeydotme
       addPopupHoloFX(popupCard, card.rarity);
 
       // Affiche le popup
