@@ -66,7 +66,6 @@
       cursor: pointer;
       background: transparent;
       margin-bottom: 8px;
-      overflow: visible;
     }
     .card-inner {
       width: 100%;
@@ -77,8 +76,6 @@
       transition: transform 0.2s cubic-bezier(.5,1.5,.5,1), filter 0.2s;
       background-color: transparent;
       will-change: transform;
-      position: relative;
-      z-index: 1;
     }
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
@@ -110,7 +107,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
     }
     .popup-card-inner {
       width: 100%;
@@ -120,22 +116,6 @@
       background-position: center;
       transition: transform 0.2s cubic-bezier(.5,1.5,.5,1);
       will-change: transform;
-      position: relative;
-      z-index: 1;
-    }
-    .popup-halo-overlay {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 2;
-      mask-image: url('img/alpha-mask.png');
-      mask-size: 100% 100%;
-      mask-repeat: no-repeat;
-      -webkit-mask-image: url('img/alpha-mask.png');
-      -webkit-mask-size: 100% 100%;
-      -webkit-mask-repeat: no-repeat;
     }
     #popup.visible {
       visibility: visible;
@@ -180,7 +160,6 @@
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner"></div>
-      <canvas class="popup-halo-overlay"></canvas>
     </div>
   </div>
   <script>
@@ -207,81 +186,9 @@
       });
     }
 
-    // ----------- POPUP HOLO TRACKING HALO ONLY -----------
-    function drawTrackingHalo(canvas, x, y, intensity=1) {
-      const ctx = canvas.getContext("2d");
-      const w = canvas.width, h = canvas.height;
-      ctx.clearRect(0,0,w,h);
-
-      // default: centre
-      x = (typeof x === 'number') ? x : w/2;
-      y = (typeof y === 'number') ? y : h/2;
-
-      // Grand halo, bleuté/blanc pour "holo"
-      let grad1 = ctx.createRadialGradient(x, y, w*0.04, x, y, w*0.5);
-      grad1.addColorStop(0, `rgba(255,255,255,${0.60*intensity})`);
-      grad1.addColorStop(0.30, `rgba(150,210,255,${0.20*intensity})`);
-      grad1.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.globalCompositeOperation = "lighter";
-      ctx.fillStyle = grad1;
-      ctx.fillRect(0,0,w,h);
-
-      // Petit halo plus vif, léger doré
-      let grad2 = ctx.createRadialGradient(x, y, 0, x, y, w*0.20);
-      grad2.addColorStop(0, `rgba(255,255,255,${0.25*intensity})`);
-      grad2.addColorStop(0.65, `rgba(255,230,150,${0.07*intensity})`);
-      grad2.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = grad2;
-      ctx.fillRect(0,0,w,h);
-
-      ctx.globalCompositeOperation = "source-over";
-    }
-
-    function setHaloToCenter(canvas) {
-      drawTrackingHalo(canvas, canvas.width/2, canvas.height/2, 1.0);
-    }
-
-    function addTrackingHaloToPopup() {
-      const inner = document.getElementById("popup-inner");
-      const halo = document.querySelector('.popup-halo-overlay');
-      halo.width = inner.offsetWidth;
-      halo.height = inner.offsetHeight;
-      setHaloToCenter(halo);
-
-      // Remove old listeners
-      inner.onmousemove = null;
-      inner.onmouseleave = null;
-      inner.ontouchstart = null;
-      inner.ontouchmove = null;
-      inner.ontouchend = null;
-
-      if (window.matchMedia("(pointer: fine)").matches) {
-        inner.onmousemove = (e) => updateHaloToPointer(halo, e, inner, false);
-        inner.onmouseleave = () => setHaloToCenter(halo);
-      } else {
-        inner.ontouchstart = (e) => updateHaloToPointer(halo, e, inner, true);
-        inner.ontouchmove = (e) => updateHaloToPointer(halo, e, inner, true);
-        inner.ontouchend = () => setHaloToCenter(halo);
-      }
-    }
-
-    function updateHaloToPointer(canvas, event, refElem, mobile) {
-      const rect = refElem.getBoundingClientRect();
-      let x, y;
-      if (mobile && event.touches && event.touches.length > 0) {
-        x = event.touches[0].clientX - rect.left;
-        y = event.touches[0].clientY - rect.top;
-      } else {
-        x = event.clientX - rect.left;
-        y = event.clientY - rect.top;
-      }
-      drawTrackingHalo(canvas, x / rect.width * canvas.width, y / rect.height * canvas.height, 1.04);
-    }
-
-    // ----------- RESTE DU CODE NORMAL -----------
     function addTiltEffect(card) {
+      // Seulement sur desktop
       if (window.matchMedia("(pointer: fine)").matches) {
-        const inner = card.querySelector('.card-inner');
         card.addEventListener("mousemove", e => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -290,12 +197,12 @@
           const centerY = rect.height / 2;
           const rotateX = -(y - centerY) / 3;
           const rotateY = (x - centerX) / 3;
-          inner.style.transform =
+          card.querySelector('.card-inner').style.transform =
             `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
         });
         card.addEventListener("mouseleave", () => {
-          const inner = card.querySelector('.card-inner');
-          inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+          card.querySelector('.card-inner').style.transform =
+            "rotateX(0deg) rotateY(0deg)";
         });
       }
     }
@@ -310,35 +217,52 @@
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
-      // Redessine le halo dans le popup et active le tracking
-      const canvas = document.querySelector('.popup-halo-overlay');
-      canvas.width = inner.offsetWidth;
-      canvas.height = inner.offsetHeight;
-      setHaloToCenter(canvas);
-      addTrackingHaloToPopup();
-
-      // On gère effet 3D selon l'appareil (mais ici on ne tilt que l'image, pas le halo)
+      // On gère effet 3D selon l'appareil
       if (window.matchMedia("(pointer: coarse)").matches) {
-        enableGyroOnPopup(inner, canvas);
+        // Mobile/tablette = gyro
+        enableGyroOnPopup(inner);
+      } else {
+        // Desktop = souris
+        inner.addEventListener("mousemove", onPopupMouseMove);
+        inner.addEventListener("mouseleave", onPopupMouseLeave);
       }
     }
 
-    function enableGyroOnPopup(inner, canvas) {
+    function onPopupMouseMove(e) {
+      const inner = e.currentTarget;
+      const rect = inner.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotateX = -(y - centerY) / 8;
+      const rotateY = (x - centerX) / 8;
+      inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+    }
+    function onPopupMouseLeave(e) {
+      const inner = e.currentTarget;
+      inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+    }
+
+    function enableGyroOnPopup(inner) {
+      // On clean si déjà actif
       disableGyroOnPopup();
       gyroActive = true;
 
+      // Pour iOS 13+ il faut demander la permission au user
       if (typeof DeviceOrientationEvent !== 'undefined' &&
           typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(permissionState => {
           if (permissionState === 'granted') {
             window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
-              applyGyroToPopup(inner, canvas, e);
+              applyGyroToPopup(inner, e);
             });
           }
         }).catch(console.error);
       } else {
+        // Android ou iOS <13
         window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
-          applyGyroToPopup(inner, canvas, e);
+          applyGyroToPopup(inner, e);
         });
       }
     }
@@ -349,24 +273,30 @@
         currentGyroHandler = null;
         gyroActive = false;
       }
+      // Et reset le style
       const inner = document.getElementById("popup-inner");
       if (inner) inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-      // Listeners gérés dans addTrackingHaloToPopup
+      // Retire aussi les listeners souris
+      inner.removeEventListener("mousemove", onPopupMouseMove);
+      inner.removeEventListener("mouseleave", onPopupMouseLeave);
     }
 
-    function applyGyroToPopup(inner, canvas, event) {
-      let x = event.beta;
-      let y = event.gamma;
+    function applyGyroToPopup(inner, event) {
+      // event.beta = X (-180 à 180), event.gamma = Y (-90 à 90)
+      let x = event.beta;   // vertical, phone tilt up/down
+      let y = event.gamma;  // horizontal, phone tilt left/right
+
+      // Clamp pour éviter les débordements chelous
       if (x > 90) x = 90;
       if (x < -90) x = -90;
       if (y > 90) y = 90;
       if (y < -90) y = -90;
+
+      // Axes inversés, sensibilité augmentée (/2)
       const rotateX = -(x - 0) / 2;
       const rotateY = -(y - 0) / 2;
       inner.style.transform =
         `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
-      // Halo suit le centre (tu peux améliorer pour qu'il suive l'accéléro si tu veux)
-      setHaloToCenter(canvas);
     }
 
     function hidePopup() {
@@ -422,17 +352,6 @@
     }
 
     fetchCards().then(cards => allCards = cards);
-
-    // Si resize, on resize le halo du popup
-    window.addEventListener('resize', () => {
-      const canvas = document.querySelector('.popup-halo-overlay');
-      const popupInner = document.getElementById("popup-inner");
-      if (canvas && popupInner) {
-        canvas.width = popupInner.offsetWidth;
-        canvas.height = popupInner.offsetHeight;
-        setHaloToCenter(canvas);
-      }
-    });
   </script>
 </body>
 </html>
