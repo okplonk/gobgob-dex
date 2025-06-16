@@ -160,10 +160,10 @@
       pointer-events: none;
       border-radius: 18px;
       z-index: 5;
-      opacity: 0.14;
+      opacity: 0.26;  /* <== HALO PLUS FORT */
       mix-blend-mode: screen;
       background:
-        radial-gradient(circle at 50% 50%, #fff9 0 10%, transparent 35%);
+        radial-gradient(circle at 50% 50%, #fff9 0 17%, transparent 44%);
       transition: background 0.12s;
     }
     .emboss-effect {
@@ -212,14 +212,61 @@
       opacity: 0.14;
       pointer-events: none;
     }
-    /* SPARKLE SVG ANIM */
     @keyframes sparkle-anim {
       0%,100% { opacity: 0.08; transform: scale(0.7) rotate(0deg);}
       10% { opacity: 0.7;}
       50% { opacity: 1; transform: scale(1.1) rotate(11deg);}
       80% { opacity: 0.6;}
     }
-    /* GLITCH FX */
+    /* --- GLITCH BANDS --- */
+    .glitch-bands-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      border-radius: 18px;
+      mix-blend-mode: lighten;
+    }
+    .glitch-band {
+      position: absolute;
+      left: 0; width: 100%;
+      height: 7%;
+      overflow: hidden;
+      pointer-events: none;
+      border-radius: 2.5px;
+      will-change: transform, filter;
+      opacity: 0.87;
+    }
+    .glitch-band img {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      filter: none;
+      z-index: 1;
+    }
+    .glitch-band.chroma img {
+      filter: drop-shadow(1.5px 0 0 #3ff) drop-shadow(-1.5px 0 0 #f3f);
+      mix-blend-mode: lighten;
+      opacity: 0.65;
+      z-index: 2;
+    }
+    .glitch-noise-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      border-radius: 18px;
+      background-image: url('data:image/svg+xml;utf8,<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" /></filter><rect width="128" height="128" filter="url(%23noise)" opacity="0.48"/></svg>');
+      background-size: 60px 60px;
+      opacity: 0.22;
+      animation: noise-move 0.27s steps(2) infinite alternate;
+      mix-blend-mode: color-dodge;
+    }
+    @keyframes noise-move {
+      to { background-position: 13px 11px; }
+    }
+    /* --- GLITCH FX classique, pour compat --- */
     .glitch-effect {
       pointer-events: none;
       position: absolute;
@@ -241,7 +288,6 @@
       filter: hue-rotate(180deg) brightness(1.8);
       animation: glitch-slice-anim 1s infinite;
     }
-    /* Chroma */
     .glitch-chroma {
       position: absolute;
       inset: 0;
@@ -308,7 +354,6 @@
         <img class="popup-img base" id="popup-img-base">
         <img class="popup-img shadow" id="popup-img-shadow">
         <img class="popup-img light" id="popup-img-light">
-        <!-- EFFETS JS -->
         <div class="card-grain-layer"></div>
         <div class="card-light-layer" id="card-light-layer"></div>
         <div class="card-light-bright" id="card-light-bright"></div>
@@ -412,7 +457,7 @@
         // Halo blanc mobile (light-bright)
         const halo = inner.querySelector(".card-light-bright");
         if (halo) {
-          halo.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, #fff 0 12%, transparent 33%)`;
+          halo.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, #fff 0 17%, transparent 44%)`;
         }
       }
       inner.onmousemove = updateEffect;
@@ -429,7 +474,7 @@
         // Halo blanc mobile
         const halo = inner.querySelector(".card-light-bright");
         if (halo) {
-          halo.style.background = "radial-gradient(circle at 50% 50%, #fff9 0 10%, transparent 35%)";
+          halo.style.background = "radial-gradient(circle at 50% 50%, #fff9 0 17%, transparent 44%)";
         }
       };
     }
@@ -442,8 +487,12 @@
       document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
       // Remove holo and glitch layers
-      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles, .glitch-effect, .glitch-chroma');
+      let layers = document.querySelectorAll('.holo-glare, .holo-rainbow, .holo-sparkles, .glitch-effect, .glitch-chroma, .glitch-bands-layer, .glitch-noise-layer');
       layers.forEach(layer => layer.remove());
+      // Annule l'animation glitch si présente
+      let inner = document.getElementById("popup-inner");
+      if(inner._glitchRaf) cancelAnimationFrame(inner._glitchRaf);
+      inner._glitchRaf = null;
     }
 
     // ==== HOLO EFFECT (color sparkles, rareté) ====
@@ -531,7 +580,6 @@
         star.style.pointerEvents = 'none';
         star.style.opacity = 0.7+0.2*Math.random();
         star.style.animation = `sparkle-anim ${dur}s ease-in-out ${Math.random()*2}s infinite`;
-        // Arc-en-ciel pour UR, couleurs pastel pour autres
         let color = sparkleColors[i%sparkleColors.length];
         star.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 20 20">
           <polygon points="10,1 12,8 19,10 12,12 10,19 8,12 1,10 8,8"
@@ -563,29 +611,82 @@
       }
     }
 
-    // ==== GLITCH FX POUR LA CARTE ID 14 ====
+    // ==== SUPER GLITCH POUR LA 14 ====
     function setupGlitchLayer(inner) {
       removeGlitchLayer(inner);
-      // Lignes qui tremblent
-      for (let i=0;i<7;i++) {
-        let slice = document.createElement('div');
-        slice.className = 'glitch-slice glitch-effect';
-        slice.style.top = (i*13+Math.random()*2)+'%';
-        slice.style.height = (7+Math.random()*4)+'%';
-        slice.style.background = i%2==0 ? '#00eaff' : '#ff6dd9';
-        slice.style.opacity = 0.12 + Math.random()*0.13;
-        slice.style.animationDelay = `${Math.random()*0.7}s`;
-        slice.style.filter += ` blur(${Math.random()*1.2}px)`;
-        inner.appendChild(slice);
+
+      // ---- BANDES GLITCH ----
+      let bandsLayer = document.createElement('div');
+      bandsLayer.className = 'glitch-bands-layer';
+      let baseImg = document.getElementById("popup-img-base");
+      let src = baseImg ? baseImg.src : "";
+      let bandCount = 13;
+      let bands = [];
+      for (let i = 0; i < bandCount; i++) {
+        let band = document.createElement('div');
+        band.className = 'glitch-band';
+        band.style.top = (i * (100 / bandCount)) + "%";
+        band.style.height = (7 + Math.random()*2) + "%";
+        let img = document.createElement('img');
+        img.src = src;
+        band.appendChild(img);
+
+        if (Math.random() > 0.7) {
+          let chroma = document.createElement('div');
+          chroma.className = 'glitch-band chroma';
+          chroma.style.top = band.style.top;
+          chroma.style.height = band.style.height;
+          let img2 = document.createElement('img');
+          img2.src = src;
+          chroma.appendChild(img2);
+          bandsLayer.appendChild(chroma);
+          bands.push(chroma);
+        }
+
+        bandsLayer.appendChild(band);
+        bands.push(band);
       }
-      // Chroma "grain" holo
-      let chroma = document.createElement('div');
-      chroma.className = 'glitch-chroma';
-      inner.appendChild(chroma);
+      inner.appendChild(bandsLayer);
+
+      // ---- NOISE (grain fort) ----
+      let noise = document.createElement('div');
+      noise.className = 'glitch-noise-layer';
+      inner.appendChild(noise);
+
+      // ---- Animation dynamique (offset, chroma, hue) ----
+      let raf, last = 0;
+      function animateGlitch(now) {
+        if (now - last > 70) {
+          bands.forEach((band, i) => {
+            let dx = Math.round(Math.random() * 22 - 11);
+            let chroma = band.classList.contains("chroma");
+            let hue = chroma
+              ? (Math.random() > 0.65 ? (Math.random() * 180 - 90) : 0)
+              : (Math.random() > 0.8 ? (Math.random() * 60 - 30) : 0);
+            let bright = chroma ? 1.15 + Math.random()*0.2 : 1 + Math.random()*0.08;
+            let sat = chroma ? 1.65 + Math.random()*1.2 : 1.18 + Math.random()*0.09;
+            band.style.transform = `translateX(${dx}px)`;
+            band.style.filter =
+              `hue-rotate(${hue}deg) brightness(${bright}) saturate(${sat})`;
+            band.style.opacity = chroma
+              ? (0.29 + Math.random()*0.25)
+              : (0.61 + Math.random()*0.19);
+          });
+          last = now;
+        }
+        raf = requestAnimationFrame(animateGlitch);
+      }
+      animateGlitch();
+
+      // Pour nettoyer quand on ferme
+      inner._glitchRaf = raf;
     }
+
     function removeGlitchLayer(inner) {
-      let glitches = inner.querySelectorAll('.glitch-effect, .glitch-chroma');
+      let glitches = inner.querySelectorAll('.glitch-effect, .glitch-chroma, .glitch-bands-layer, .glitch-noise-layer');
       glitches.forEach(g=>g.remove());
+      if(inner._glitchRaf) cancelAnimationFrame(inner._glitchRaf);
+      inner._glitchRaf = null;
     }
 
     async function loadCollection() {
