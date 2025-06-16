@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test Pack Opening Vertical Pluie - Carte 14</title>
+  <title>Pack Opening Vertical Synchro + Halo - Carte 14</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; text-align: center; font-family: sans-serif; }
@@ -11,7 +11,8 @@
       height: 100vh; width: 100vw;
     }
     .pack-opening-card {
-      width: 320px; height: 480px; position: relative; overflow: hidden; border-radius: 18px; box-shadow: 0 8px 40px #000c;
+      width: 320px; height: 480px; position: relative; overflow: visible; border-radius: 18px;
+      box-shadow: 0 8px 40px #000c;
       background: #181c20;
       margin: 32px auto 0 auto;
       user-select: none;
@@ -25,9 +26,6 @@
     }
     .card-bw { filter: grayscale(1) brightness(0.75) contrast(1.13); }
     .card-color { transition: clip-path 0.3s; }
-    #particle-canvas {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;
-    }
     .open-btn {
       margin-top: 16px; font-size: 1.35em; padding: 14px 34px; border-radius: 9px; border: none;
       background: linear-gradient(90deg, #fffcb7 15%, #ffd446 50%, #ffed99 85%);
@@ -44,15 +42,31 @@
       letter-spacing: 1px;
       text-shadow: 0 2px 8px #000a;
     }
+    /* Pour placer le canvas "derrière" la carte */
+    .halo-canvas {
+      position: absolute;
+      top: -30px; left: -30px;
+      width: 380px; height: 540px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .front-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 320px; height: 480px;
+      pointer-events: none;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
   <div class="pack-opening-zone">
     <div class="title">Pack Opening Gobgob - Carte 14</div>
-    <div class="pack-opening-card" id="packCard">
+    <div class="pack-opening-card" id="packCard" style="overflow:visible;">
+      <canvas id="halo-canvas" class="halo-canvas" width="380" height="540"></canvas>
       <div class="card-bw" id="bw" style="background-image: url('img/14.png')"></div>
       <div class="card-color" id="color" style="background-image: url('img/14.png')"></div>
-      <canvas id="particle-canvas" width="320" height="480"></canvas>
+      <canvas id="particle-canvas" class="front-canvas" width="320" height="480"></canvas>
     </div>
     <button class="open-btn" id="openBtn">Ouvrir la carte !</button>
   </div>
@@ -62,90 +76,139 @@ const openBtn = document.getElementById('openBtn');
 const color = document.getElementById('color');
 const bw = document.getElementById('bw');
 const card = document.getElementById('packCard');
-const canvas = document.getElementById('particle-canvas');
-const ctx = canvas.getContext('2d');
+const frontCanvas = document.getElementById('particle-canvas');
+const haloCanvas = document.getElementById('halo-canvas');
+const frontCtx = frontCanvas.getContext('2d');
+const haloCtx = haloCanvas.getContext('2d');
 
 function startPackAnimation() {
   color.style.clipPath = "inset(0 0 100% 0)";
-  canvas.width = cardW; canvas.height = cardH;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+  frontCanvas.width = cardW; frontCanvas.height = cardH;
+  haloCanvas.width = 380; haloCanvas.height = 540;
+  frontCtx.clearRect(0,0,cardW,cardH);
+  haloCtx.clearRect(0,0,380,540);
 
   let start = null;
   const duration = 1600; // ms
-  const particles = [];
+  const borderParticles = [];
+  const haloParticles = [];
   let animDone = false;
   openBtn.disabled = true;
   openBtn.style.opacity = 0.65;
 
-  // On va déterminer la vitesse de chute de la "frontière" : 
-  // En px/ms
+  // Vitesse de la ligne frontière
   const revealSpeed = cardH / duration;
 
-  function spawnParticlesAtTop() {
-    // Grosse pluie de particules brillantes au sommet à chaque frame
-    for (let i = 0; i < 100; i++) {
-      const x = Math.random() * cardW;
-      // La vitesse de base = vitesse de révélation + variation random
-      const baseVy = revealSpeed * (13 + Math.random() * 10); // un peu + rapide que la front
-      const angle = (Math.random()-0.5)*Math.PI/9;
-      const vx = Math.cos(angle) * (Math.random()*1.5); // petit écart latéral
-      const vy = Math.abs(Math.sin(angle) * (Math.random()*1.2)) + baseVy;
-      const colorList = [
-        "#fff", "#ffe066", "#fffbe6", "#9ffcff", "#f9f06b",
-        "#fffb", "#fff9", "#ffe9", "#fffd", "#fcf5ff"
-      ];
-      const glowColor = colorList[Math.floor(Math.random()*colorList.length)];
-      particles.push({
-        x: x,
-        y: 0,
-        vx, vy,
-        r: 3.7 + Math.random()*2.5,
-        color: glowColor,
-        life: 0,
-        maxLife: 18 + Math.random()*18,
-        glow: true
-      });
-    }
-    // Grosses "étincelles" (moins nombreuses)
-    for (let i=0; i<8; i++) {
-      const x = Math.random() * cardW;
-      const vy = revealSpeed * (18 + Math.random()*10);
-      particles.push({
-        x: x, y: 0,
-        vx: (Math.random()-0.5)*0.8, vy,
-        r: 16 + Math.random()*14,
+  // ---- Particules Halo (arrière) ----
+  function spawnHaloParticles() {
+    // Emet du centre (ou random large pour effet épique)
+    for (let i = 0; i < 22; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r0 = 80 + Math.random()*60;
+      const x0 = 190 + Math.cos(angle)*r0;
+      const y0 = 270 + Math.sin(angle)*r0;
+      const speed = 1.2 + Math.random()*2;
+      const dir = angle + (Math.random()-0.5)*0.4;
+      haloParticles.push({
+        x: x0, y: y0,
+        vx: Math.cos(dir)*speed,
+        vy: Math.sin(dir)*speed,
+        r: 1.7 + Math.random()*1.2,
         color: "#fff",
         life: 0,
-        maxLife: 15 + Math.random()*8,
+        maxLife: 60+Math.random()*30,
         glow: true
       });
     }
   }
 
-  function drawParticles() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for (let i=particles.length-1; i>=0; i--) {
-      const p = particles[i];
-      ctx.save();
+  function drawHaloParticles() {
+    haloCtx.clearRect(0,0,380,540);
+    for (let i=haloParticles.length-1; i>=0; i--) {
+      const p = haloParticles[i];
+      haloCtx.save();
+      haloCtx.shadowColor = p.color;
+      haloCtx.shadowBlur = 26 + Math.random()*16;
+      haloCtx.globalAlpha = Math.max(0, 1 - p.life/p.maxLife)*0.8;
+      haloCtx.beginPath();
+      haloCtx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+      haloCtx.fillStyle = p.color;
+      haloCtx.fill();
+      haloCtx.globalAlpha = 1;
+      haloCtx.restore();
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life += 1;
+      if (p.x < 0 || p.x > 380 || p.y < 0 || p.y > 540 || p.life > p.maxLife)
+        haloParticles.splice(i,1);
+    }
+  }
+
+  // ---- Particules sur la frontière ----
+  function spawnBorderParticles(frontY) {
+    // Génère beaucoup de particules centrées sur la ligne du front
+    for (let i = 0; i < 90; i++) {
+      const x = Math.random() * cardW;
+      const y = frontY + (Math.random()-0.5)*20; // Dispersion autour du front
+      const vx = (Math.random()-0.5)*1.5;
+      const vy = 1.6 + Math.random()*1.7; // descend doucement pour effet reveal
+      const colorList = [
+        "#fff", "#ffe066", "#fffbe6", "#9ffcff", "#f9f06b",
+        "#fffb", "#fff9", "#ffe9", "#fffd", "#fcf5ff"
+      ];
+      const glowColor = colorList[Math.floor(Math.random()*colorList.length)];
+      borderParticles.push({
+        x: x,
+        y: y,
+        vx, vy,
+        r: 3.4 + Math.random()*2.7,
+        color: glowColor,
+        life: 0,
+        maxLife: 22 + Math.random()*22,
+        glow: true
+      });
+    }
+    // Grosses "étincelles" 
+    for (let i=0; i<7; i++) {
+      const x = Math.random() * cardW;
+      borderParticles.push({
+        x: x,
+        y: frontY,
+        vx: (Math.random()-0.5)*1.2, vy: 2 + Math.random()*1.5,
+        r: 16 + Math.random()*11,
+        color: "#fff",
+        life: 0,
+        maxLife: 14 + Math.random()*11,
+        glow: true
+      });
+    }
+  }
+
+  function drawBorderParticles() {
+    frontCtx.clearRect(0,0,cardW,cardH);
+    for (let i=borderParticles.length-1; i>=0; i--) {
+      const p = borderParticles[i];
+      frontCtx.save();
       if (p.glow) {
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 16 + Math.random()*16;
+        frontCtx.shadowColor = p.color;
+        frontCtx.shadowBlur = 16 + Math.random()*16;
       } else {
-        ctx.shadowBlur = 0;
+        frontCtx.shadowBlur = 0;
       }
-      ctx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
-      ctx.fillStyle = p.color;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-      ctx.restore();
+      frontCtx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife);
+      frontCtx.beginPath();
+      frontCtx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+      frontCtx.fillStyle = p.color;
+      frontCtx.fill();
+      frontCtx.globalAlpha = 1;
+      frontCtx.restore();
 
       p.x += p.vx;
       p.y += p.vy;
       p.life += 1;
-      // On retire les particules SEULEMENT quand elles sont totalement sorties du cadre
-      if (p.y > cardH + p.r*1.5 || p.life > p.maxLife) particles.splice(i, 1);
+      // Particules supprimées UNIQUEMENT quand elles sortent du cadre ou sont mortes
+      if (p.y > cardH + p.r*2 || p.x < -10 || p.x > cardW+10 || p.life > p.maxLife)
+        borderParticles.splice(i, 1);
     }
   }
 
@@ -160,9 +223,13 @@ function startPackAnimation() {
     const rotate = Math.sin(progress*27)*2 + (Math.random()-0.5)*1.4;
     card.style.transform = `translate(${vibration}px, ${-vibration/2}px) rotate(${rotate}deg)`;
 
-    // On génère les particules EN HAUT pendant toute la révélation
-    if (!animDone) spawnParticlesAtTop();
-    drawParticles();
+    // Frontière Y = ligne de progression
+    const frontY = cardH - progress*cardH;
+    if (!animDone) spawnBorderParticles(frontY);
+    if (!animDone && progress < 1) spawnHaloParticles();
+
+    drawBorderParticles();
+    drawHaloParticles();
 
     if (progress < 1) {
       requestAnimationFrame(step);
@@ -170,10 +237,12 @@ function startPackAnimation() {
       color.style.clipPath = "none";
       card.style.transform = ""; // stop vibration
       animDone = true;
-      // Continue à dessiner les particules jusqu'à ce qu'il n'en reste plus
+      // Continue à dessiner les particules jusqu'à disparition complète
       function finishParticles() {
-        drawParticles();
-        if (particles.length > 0) {
+        let anyLeft = borderParticles.length + haloParticles.length > 0;
+        drawBorderParticles();
+        drawHaloParticles();
+        if (anyLeft) {
           requestAnimationFrame(finishParticles);
         } else {
           openBtn.disabled = false;
