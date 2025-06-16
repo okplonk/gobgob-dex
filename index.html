@@ -56,6 +56,8 @@
       opacity: 0;
       position: relative;
       cursor: pointer;
+      background: none;
+      overflow: visible;
     }
     .card-inner {
       width: 100%;
@@ -63,8 +65,11 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      transition: transform 0.2s ease, filter 0.2s ease;
+      transition: transform 0.2s cubic-bezier(.45,.6,.5,1.45), filter 0.2s;
       background-color: transparent;
+      will-change: transform, filter;
+      border-radius: 20px;
+      z-index: 2;
     }
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
@@ -95,8 +100,8 @@
       position: relative;
       border-radius: 22px;
       box-shadow: 0 8px 32px 0 #000c, 0 0 0 2px #fff3;
-      overflow: hidden;
-      background: #333;
+      overflow: visible; /* <<--- plus de coupe */
+      background: none;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -113,10 +118,11 @@
       z-index: 1;
       position: absolute;
       top: 0; left: 0;
-      transition: transform 0.2s cubic-bezier(.45,.6,.5,1.45);
+      transition: transform 0.22s cubic-bezier(.45,.6,.5,1.45);
       filter: brightness(1.13) contrast(1.11) saturate(1.13);
       will-change: filter, transform;
       transform-style: preserve-3d;
+      box-shadow: 0 2px 12px #0003;
     }
     #popup.visible {
       visibility: visible;
@@ -134,59 +140,46 @@
     .card__shine {
       pointer-events: none;
       position: absolute;
-      inset: 0;
-      border-radius: 22px;
-      z-index: 10;
+      left: -10%; top: -10%; /* dépasse ! */
+      width: 120%;
+      height: 120%;
+      border-radius: 30px;
+      z-index: 3;
       background-blend-mode: lighten,screen,color-dodge,lighten;
       background-image:
-        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.22"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.21"/></svg>'),
         repeating-linear-gradient(125deg, #ffffff22 0 6px, transparent 6px 20px),
         linear-gradient(120deg,#7fffd430 0%,#fff0 60%,#e993ff50 100%),
         radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff5 10%,#fff0 70%);
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-size: 100% 100%, 220% 200%, 180% 180%, 120% 120%;
       background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      opacity: 0.35;
-      animation: shine-anim 6s linear infinite;
+      opacity: 0.38;
       transition: opacity 0.2s;
+      will-change: transform, background-position;
       transform-style: preserve-3d;
-    }
-    @keyframes shine-anim {
-      100% {
-        background-position: var(--grain-x,50%) var(--grain-y,50%), 100% 0, center, center;
-      }
+      box-shadow: 0 0 40px 12px #fff7, 0 0 120px 20px #fff2;
+      mix-blend-mode: lighten;
     }
     .card__shine.ur {
-      box-shadow: 0 0 30px 5px #fff, 0 0 100px 18px #49e7ffbb;
       border: 2.5px solid #3beeffb9;
-      opacity: 0.6;
-      mix-blend-mode: color-dodge;
+      opacity: 0.55;
       background-image:
-        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.18"/></svg>'),
-        repeating-linear-gradient(125deg,#ffffff22 0 6px,transparent 6px 20px),
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.17"/></svg>'),
+        repeating-linear-gradient(125deg,#ffffff44 0 7px,transparent 7px 24px),
         linear-gradient(120deg,#f6d365 0%,#fda085 10%,#fcb69f 20%,#a1c4fd 40%,#c2e9fb 60%,#fccb90 80%,#fd6e6a 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff6 12%,#fff0 80%);
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff9 12%,#fff0 80%);
       background-blend-mode: lighten,screen,color-dodge,lighten;
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
-      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      animation: shine-anim 5s linear infinite;
-      transform-style: preserve-3d;
     }
     .card__shine.gold {
-      box-shadow: 0 0 22px 2px #fff8, 0 0 48px 10px #ffd90080;
       border: 2.5px solid #ffd900c9;
       opacity: 0.44;
       background-image:
-        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.18"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.16"/></svg>'),
         repeating-linear-gradient(120deg,#fff8 0 3px,transparent 3px 17px),
         linear-gradient(115deg,#ffd90099 0%,#fff0 55%,#e993ff50 100%),
         radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff5 10%,#fff0 70%);
-      background-blend-mode: lighten,screen,color-dodge,lighten;
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
-      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      transform-style: preserve-3d;
     }
     .card__shine.ssr {
-      box-shadow: 0 0 18px 2px #fff, 0 0 36px 8px #ff8c0059;
       border: 2.5px solid #ff8c00b8;
       opacity: 0.44;
       background-image:
@@ -194,38 +187,24 @@
         repeating-linear-gradient(120deg,#fff6 0 3px,transparent 3px 17px),
         linear-gradient(120deg,#ffb34780 0%,#ffd70055 60%,#ff8c0060 100%),
         radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff7 9%,#fff0 70%);
-      background-blend-mode: lighten,screen,color-dodge,lighten;
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
-      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      transform-style: preserve-3d;
     }
     .card__shine.hr {
-      box-shadow: 0 0 16px 2px #fff, 0 0 24px 6px #7bffb86e;
       border: 2.5px solid #4cffb5d0;
-      opacity: 0.39;
+      opacity: 0.42;
       background-image:
-        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.15"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.14"/></svg>'),
         repeating-linear-gradient(120deg,#fff4 0 3px,transparent 3px 13px),
         linear-gradient(120deg,#a3f9c980 0%,#b4ffb890 60%,#77ffc780 100%),
         radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff6 12%,#fff0 70%);
-      background-blend-mode: lighten,screen,color-dodge,lighten;
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
-      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      transform-style: preserve-3d;
     }
     .card__shine.n {
-      opacity: 0.33;
-      box-shadow: 0 0 10px 0 #fff, 0 0 18px 4px #ae69fa66;
+      opacity: 0.27;
       border: 2.5px solid #ae69fa48;
       background-image:
-        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.12"/></svg>'),
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.11"/></svg>'),
         repeating-linear-gradient(120deg,#fff2 0 3px,transparent 3px 16px),
         linear-gradient(120deg,#c3a6fd80 0%,#d3bfff88 60%,#ae69fa77 100%),
         radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff3 10%,#fff0 70%);
-      background-blend-mode: lighten,screen,color-dodge,lighten;
-      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
-      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
-      transform-style: preserve-3d;
     }
   </style>
 </head>
@@ -303,12 +282,12 @@
         shine.style.setProperty('--my', y + '%');
         shine.style.setProperty('--posx', x + '%');
         shine.style.setProperty('--posy', y + '%');
-        // Le grain suit aussi le tilt (plus lent)
-        let grainX = Math.round(50 + (x - 50) * 1.2);
-        let grainY = Math.round(50 + (y - 50) * 1.2);
+        // Parallaxe : grain bouge plus lentement
+        let grainX = Math.round(50 + (x - 50) * 0.5);
+        let grainY = Math.round(50 + (y - 50) * 0.5);
         shine.style.setProperty('--grain-x', grainX + '%');
         shine.style.setProperty('--grain-y', grainY + '%');
-        // Rotation 3D carte
+        // Rotation 3D carte & shine
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
         const rotateX = -(e.clientY - rect.top - centerY) / 9;
@@ -321,6 +300,7 @@
             img.style.filter = "brightness(1.13) contrast(1.11) saturate(1.13)";
           }
         }
+        // Le shine suit EXACTEMENT la même rotation que la carte :
         shine.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.09)`;
       };
       popupCard.onmouseleave = () => {
