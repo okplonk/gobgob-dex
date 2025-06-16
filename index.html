@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Mini Booster Opening Gobgob</title>
+  <title>Booster Popup Gobgob</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
@@ -10,19 +10,19 @@
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .booster-container {
+    .popup-booster-container {
       position: relative;
-      width: 120px; height: 191.5px; /* ratio exact 1200x1915 */
+      width: 320px; height: 510px; /* comme ton popup */
       margin: 0 auto;
       user-select: none;
       touch-action: manipulation;
-      perspective: 600px;
+      perspective: 1200px;
       z-index: 1;
-      /* transition removed, done in animation */
+      background: transparent;
     }
     .booster-back, .card-img, .booster-front, .booster-top {
       position: absolute; left: 0; top: 0; width: 100%; height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       pointer-events: none;
       user-drag: none; user-select: none;
     }
@@ -30,6 +30,7 @@
     .card-img {
       z-index: 2;
       opacity: 0;
+      /* Sort du booster en "popant" un peu plus haut, puis redescend au bon endroit */
       filter: drop-shadow(0 12px 40px #000a) brightness(0.85);
       transform: translateY(37%) scale(0.9) rotate(2.3deg);
       transition:
@@ -39,13 +40,13 @@
     }
     .card-img.reveal {
       opacity: 1;
-      /* Vient bien au-dessus du booster */
-      transform: translateY(-120%) scale(1.04) rotate(-1.5deg);
-      filter: drop-shadow(0 6px 40px #fff6) drop-shadow(0 0px 35px #ffe33a44) brightness(1.13);
+      /* Sort juste du booster puis se place exactement dessus */
+      transform: translateY(-9%) scale(1) rotate(0deg);
+      filter: drop-shadow(0 4px 40px #fff6) drop-shadow(0 0px 35px #ffe33a44) brightness(1.05);
       z-index: 12;
       transition:
         opacity 0.7s cubic-bezier(.22,2.4,.55,1.2),
-        transform 0.77s cubic-bezier(.27,2.1,.5,1.2),
+        transform 0.8s cubic-bezier(.27,2.1,.5,1.2),
         filter 0.5s;
     }
     .booster-front { z-index: 11; }
@@ -57,8 +58,24 @@
       pointer-events: none;
     }
     .booster-top.open {
-      transform: translateY(-32%) rotate(-10deg) scale(1.08,1.03);
-      opacity: 0.94;
+      transform: translateY(-26%) rotate(-10deg) scale(1.05,1.01);
+      opacity: 0.96;
+    }
+    .vibrating {
+      animation: booster-vibe 1s cubic-bezier(.41,2.5,.55,1.1) 1;
+    }
+    @keyframes booster-vibe {
+      0% { transform: scale(1) rotate(0deg);}
+      10% { transform: scale(1.03) rotate(-1deg);}
+      20% { transform: scale(1.05) rotate(1deg);}
+      30% { transform: scale(1.09) rotate(-2deg);}
+      40% { transform: scale(1.06) rotate(1deg);}
+      50% { transform: scale(1.11) rotate(2deg);}
+      60% { transform: scale(1.07) rotate(-2deg);}
+      70% { transform: scale(1.13) rotate(1.5deg);}
+      80% { transform: scale(1.09) rotate(-2deg);}
+      90% { transform: scale(1.06) rotate(1deg);}
+      100% { transform: scale(1.13) rotate(0deg);}
     }
     .btn {
       margin-top: 38px;
@@ -76,28 +93,11 @@
       outline: none;
     }
     .btn:active { filter: brightness(0.92);}
-    /* Vibration + scale */
-    @keyframes booster-vibe {
-      0% { transform: scale(1) rotate(0deg);}
-      10% { transform: scale(1.03) rotate(-1deg);}
-      20% { transform: scale(1.05) rotate(1deg);}
-      30% { transform: scale(1.09) rotate(-2deg);}
-      40% { transform: scale(1.06) rotate(1deg);}
-      50% { transform: scale(1.11) rotate(2deg);}
-      60% { transform: scale(1.07) rotate(-2deg);}
-      70% { transform: scale(1.13) rotate(1.5deg);}
-      80% { transform: scale(1.09) rotate(-2deg);}
-      90% { transform: scale(1.06) rotate(1deg);}
-      100% { transform: scale(1.13) rotate(0deg);}
-    }
-    .vibrating {
-      animation: booster-vibe 1s cubic-bezier(.41,2.5,.55,1.1) 1;
-    }
   </style>
 </head>
 <body>
 <div class="booster-zone">
-  <div class="booster-container" id="boosterBox">
+  <div class="popup-booster-container" id="boosterBox">
     <img src="img/booster-back.png" class="booster-back">
     <img src="img/14.png" class="card-img" id="card">
     <img src="img/booster-front.png" class="booster-front">
@@ -117,13 +117,12 @@ btn.onclick = function() {
   // 1. Booster vibre et grossit
   box.classList.add('vibrating');
   setTimeout(() => {
-    // 2. Languette s'ouvre, booster reste grossi
+    // 2. Languette s'ouvre
     boosterTop.classList.add('open');
-    // 3. Après un petit délai, la carte sort
+    // 3. Après un petit délai, la carte sort et reste sur le booster
     setTimeout(() => {
       card.classList.add('reveal');
-      // 4. On pourrait ajouter un son ici, ou un effet particule
-    }, 360);
+    }, 380);
   }, 1000);
 };
 </script>
