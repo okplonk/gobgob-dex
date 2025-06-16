@@ -2,156 +2,121 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Pack Opening Vertical Synchro + Halo - Carte 14</title>
+  <title>Pack Opening Synchronisé + Halo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; text-align: center; font-family: sans-serif; }
-    .pack-opening-zone {
+    .zone {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       height: 100vh; width: 100vw;
     }
-    .pack-opening-card {
-      width: 320px; height: 480px; position: relative; overflow: visible; border-radius: 18px;
-      box-shadow: 0 8px 40px #000c;
-      background: #181c20;
-      margin: 32px auto 0 auto;
-      user-select: none;
-      transition: filter 0.18s;
-      will-change: transform;
+    .cardbox {
+      position: relative; width: 320px; height: 480px; margin: 32px auto 0 auto;
+      border-radius: 18px; box-shadow: 0 8px 40px #000c; background: #181c20; overflow: visible;
     }
-    .card-bw, .card-color {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background-size: contain; background-repeat: no-repeat; background-position: center;
+    .card-img { width: 100%; height: 100%; border-radius: 18px; position: absolute; top:0; left:0; }
+    .card-color {
+      clip-path: inset(0 0 100% 0);
+      transition: none;
       pointer-events: none;
+      z-index: 2;
     }
-    .card-bw { filter: grayscale(1) brightness(0.75) contrast(1.13); }
-    .card-color { transition: clip-path 0.3s; }
-    .open-btn {
-      margin-top: 16px; font-size: 1.35em; padding: 14px 34px; border-radius: 9px; border: none;
+    .card-bw {
+      filter: grayscale(1) brightness(0.75) contrast(1.13);
+      pointer-events: none;
+      z-index: 1;
+    }
+    canvas {
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10;
+    }
+    .btn {
+      margin-top: 16px; font-size: 1.25em; padding: 14px 34px; border-radius: 9px; border: none;
       background: linear-gradient(90deg, #fffcb7 15%, #ffd446 50%, #ffed99 85%);
       color: #302600; font-weight: bold; cursor: pointer;
       box-shadow: 0 2px 18px #0005;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       transition: filter 0.15s;
     }
-    .open-btn:active { filter: brightness(0.93); }
-    .title {
-      margin-top: 24px;
-      font-size: 2em;
-      font-weight: bold;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 8px #000a;
-    }
-    /* Pour placer le canvas "derrière" la carte */
-    .halo-canvas {
-      position: absolute;
-      top: -30px; left: -30px;
-      width: 380px; height: 540px;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .front-canvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 320px; height: 480px;
-      pointer-events: none;
-      z-index: 10;
-    }
+    .btn:active { filter: brightness(0.92); }
   </style>
 </head>
 <body>
-  <div class="pack-opening-zone">
-    <div class="title">Pack Opening Gobgob - Carte 14</div>
-    <div class="pack-opening-card" id="packCard" style="overflow:visible;">
-      <canvas id="halo-canvas" class="halo-canvas" width="380" height="540"></canvas>
-      <div class="card-bw" id="bw" style="background-image: url('img/14.png')"></div>
-      <div class="card-color" id="color" style="background-image: url('img/14.png')"></div>
-      <canvas id="particle-canvas" class="front-canvas" width="320" height="480"></canvas>
-    </div>
-    <button class="open-btn" id="openBtn">Ouvrir la carte !</button>
+<div class="zone">
+  <div class="cardbox" id="cardbox">
+    <img src="img/14.png" class="card-img card-bw" id="bw">
+    <img src="img/14.png" class="card-img card-color" id="color">
+    <canvas id="fx" width="320" height="480"></canvas>
   </div>
+  <button class="btn" id="openBtn">Ouvrir la carte !</button>
+</div>
 <script>
 const cardW = 320, cardH = 480;
-const openBtn = document.getElementById('openBtn');
 const color = document.getElementById('color');
-const bw = document.getElementById('bw');
-const card = document.getElementById('packCard');
-const frontCanvas = document.getElementById('particle-canvas');
-const haloCanvas = document.getElementById('halo-canvas');
-const frontCtx = frontCanvas.getContext('2d');
-const haloCtx = haloCanvas.getContext('2d');
+const openBtn = document.getElementById('openBtn');
+const canvas = document.getElementById('fx');
+const ctx = canvas.getContext('2d');
+let animating = false;
 
-function startPackAnimation() {
+function startAnim() {
+  if (animating) return;
+  animating = true;
+  openBtn.disabled = true;
+  openBtn.style.opacity = 0.7;
   color.style.clipPath = "inset(0 0 100% 0)";
-  frontCanvas.width = cardW; frontCanvas.height = cardH;
-  haloCanvas.width = 380; haloCanvas.height = 540;
-  frontCtx.clearRect(0,0,cardW,cardH);
-  haloCtx.clearRect(0,0,380,540);
+  ctx.clearRect(0,0,cardW,cardH);
 
   let start = null;
-  const duration = 1600; // ms
+  const duration = 1600;
   const borderParticles = [];
   const haloParticles = [];
-  let animDone = false;
-  openBtn.disabled = true;
-  openBtn.style.opacity = 0.65;
+  const maxHaloPerFrame = 7;
 
-  // Vitesse de la ligne frontière
-  const revealSpeed = cardH / duration;
-
-  // ---- Particules Halo (arrière) ----
   function spawnHaloParticles() {
-    // Emet du centre (ou random large pour effet épique)
-    for (let i = 0; i < 22; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const r0 = 80 + Math.random()*60;
-      const x0 = 190 + Math.cos(angle)*r0;
-      const y0 = 270 + Math.sin(angle)*r0;
-      const speed = 1.2 + Math.random()*2;
-      const dir = angle + (Math.random()-0.5)*0.4;
+    // Particules "halo" du centre vers l'extérieur
+    for (let i=0;i<maxHaloPerFrame;i++) {
+      const a = Math.random()*2*Math.PI;
+      const r0 = 80+Math.random()*30;
+      const speed = 0.7+Math.random()*1.4;
       haloParticles.push({
-        x: x0, y: y0,
-        vx: Math.cos(dir)*speed,
-        vy: Math.sin(dir)*speed,
-        r: 1.7 + Math.random()*1.2,
+        x: cardW/2, y: cardH/2+35,
+        vx: Math.cos(a)*speed, vy: Math.sin(a)*speed,
+        r: 1.5+Math.random()*1.1,
         color: "#fff",
-        life: 0,
-        maxLife: 60+Math.random()*30,
+        life: 0, maxLife: 60+Math.random()*25,
         glow: true
       });
     }
   }
-
-  function drawHaloParticles() {
-    haloCtx.clearRect(0,0,380,540);
-    for (let i=haloParticles.length-1; i>=0; i--) {
-      const p = haloParticles[i];
-      haloCtx.save();
-      haloCtx.shadowColor = p.color;
-      haloCtx.shadowBlur = 26 + Math.random()*16;
-      haloCtx.globalAlpha = Math.max(0, 1 - p.life/p.maxLife)*0.8;
-      haloCtx.beginPath();
-      haloCtx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
-      haloCtx.fillStyle = p.color;
-      haloCtx.fill();
-      haloCtx.globalAlpha = 1;
-      haloCtx.restore();
+  function drawParticles(list, localCtx) {
+    for (let i=list.length-1;i>=0;i--) {
+      const p = list[i];
+      localCtx.save();
+      if (p.glow) {
+        localCtx.shadowColor = p.color;
+        localCtx.shadowBlur = 13 + Math.random()*10;
+      } else {
+        localCtx.shadowBlur = 0;
+      }
+      localCtx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife);
+      localCtx.beginPath();
+      localCtx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
+      localCtx.fillStyle = p.color;
+      localCtx.fill();
+      localCtx.globalAlpha = 1;
+      localCtx.restore();
       p.x += p.vx;
       p.y += p.vy;
       p.life += 1;
-      if (p.x < 0 || p.x > 380 || p.y < 0 || p.y > 540 || p.life > p.maxLife)
-        haloParticles.splice(i,1);
+      if (p.x < -10 || p.x > cardW+10 || p.y < -10 || p.y > cardH+30 || p.life > p.maxLife)
+        list.splice(i,1);
     }
   }
-
-  // ---- Particules sur la frontière ----
-  function spawnBorderParticles(frontY) {
-    // Génère beaucoup de particules centrées sur la ligne du front
-    for (let i = 0; i < 90; i++) {
+  function spawnFrontParticles(frontY) {
+    for (let i = 0; i < 100; i++) {
       const x = Math.random() * cardW;
-      const y = frontY + (Math.random()-0.5)*20; // Dispersion autour du front
-      const vx = (Math.random()-0.5)*1.5;
-      const vy = 1.6 + Math.random()*1.7; // descend doucement pour effet reveal
+      const y = frontY + (Math.random()-0.5)*18;
+      const vx = (Math.random()-0.5)*1.2;
+      const vy = 2.0 + Math.random()*2.2;
       const colorList = [
         "#fff", "#ffe066", "#fffbe6", "#9ffcff", "#f9f06b",
         "#fffb", "#fff9", "#ffe9", "#fffd", "#fcf5ff"
@@ -161,90 +126,63 @@ function startPackAnimation() {
         x: x,
         y: y,
         vx, vy,
-        r: 3.4 + Math.random()*2.7,
+        r: 2.7 + Math.random()*2.5,
         color: glowColor,
         life: 0,
-        maxLife: 22 + Math.random()*22,
+        maxLife: 28 + Math.random()*18,
         glow: true
       });
     }
-    // Grosses "étincelles" 
-    for (let i=0; i<7; i++) {
+    // Quelques grosses étincelles
+    for (let i=0; i<6; i++) {
       const x = Math.random() * cardW;
       borderParticles.push({
         x: x,
         y: frontY,
-        vx: (Math.random()-0.5)*1.2, vy: 2 + Math.random()*1.5,
-        r: 16 + Math.random()*11,
+        vx: (Math.random()-0.5)*1.0, vy: 2.8 + Math.random()*1.6,
+        r: 12 + Math.random()*11,
         color: "#fff",
         life: 0,
-        maxLife: 14 + Math.random()*11,
+        maxLife: 19 + Math.random()*12,
         glow: true
       });
     }
   }
-
-  function drawBorderParticles() {
-    frontCtx.clearRect(0,0,cardW,cardH);
-    for (let i=borderParticles.length-1; i>=0; i--) {
-      const p = borderParticles[i];
-      frontCtx.save();
-      if (p.glow) {
-        frontCtx.shadowColor = p.color;
-        frontCtx.shadowBlur = 16 + Math.random()*16;
-      } else {
-        frontCtx.shadowBlur = 0;
-      }
-      frontCtx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife);
-      frontCtx.beginPath();
-      frontCtx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
-      frontCtx.fillStyle = p.color;
-      frontCtx.fill();
-      frontCtx.globalAlpha = 1;
-      frontCtx.restore();
-
-      p.x += p.vx;
-      p.y += p.vy;
-      p.life += 1;
-      // Particules supprimées UNIQUEMENT quand elles sortent du cadre ou sont mortes
-      if (p.y > cardH + p.r*2 || p.x < -10 || p.x > cardW+10 || p.life > p.maxLife)
-        borderParticles.splice(i, 1);
-    }
-  }
-
   function step(ts) {
     if (!start) start = ts;
     const progress = Math.min(1, (ts-start)/duration);
     const bottom = Math.round(cardH - cardH*progress);
     color.style.clipPath = `inset(0 0 ${bottom}px 0)`;
+    ctx.clearRect(0,0,cardW,cardH);
 
-    // Vibration dynamique
-    const vibration = Math.sin(progress*40)*4 + (Math.random()-0.5)*4;
-    const rotate = Math.sin(progress*27)*2 + (Math.random()-0.5)*1.4;
-    card.style.transform = `translate(${vibration}px, ${-vibration/2}px) rotate(${rotate}deg)`;
+    // Vibration
+    const vib = Math.sin(progress*44)*4 + (Math.random()-0.5)*3.6;
+    const rot = Math.sin(progress*31)*2.1 + (Math.random()-0.5)*1.0;
+    document.getElementById('cardbox').style.transform = `translate(${vib}px, ${-vib/2}px) rotate(${rot}deg)`;
 
-    // Frontière Y = ligne de progression
+    // Halo
+    spawnHaloParticles();
+    drawParticles(haloParticles, ctx);
+
+    // Particules de frontière
     const frontY = cardH - progress*cardH;
-    if (!animDone) spawnBorderParticles(frontY);
-    if (!animDone && progress < 1) spawnHaloParticles();
-
-    drawBorderParticles();
-    drawHaloParticles();
+    spawnFrontParticles(frontY);
+    drawParticles(borderParticles, ctx);
 
     if (progress < 1) {
       requestAnimationFrame(step);
     } else {
       color.style.clipPath = "none";
-      card.style.transform = ""; // stop vibration
-      animDone = true;
-      // Continue à dessiner les particules jusqu'à disparition complète
+      document.getElementById('cardbox').style.transform = "";
+      // Continue les particules jusqu'à disparition
       function finishParticles() {
-        let anyLeft = borderParticles.length + haloParticles.length > 0;
-        drawBorderParticles();
-        drawHaloParticles();
-        if (anyLeft) {
-          requestAnimationFrame(finishParticles);
-        } else {
+        ctx.clearRect(0,0,cardW,cardH);
+        let rest = borderParticles.length+haloParticles.length>0;
+        drawParticles(haloParticles, ctx);
+        drawParticles(borderParticles, ctx);
+        if (rest) requestAnimationFrame(finishParticles);
+        else {
+          animating = false;
           openBtn.disabled = false;
           openBtn.style.opacity = 1;
         }
@@ -255,7 +193,7 @@ function startPackAnimation() {
   requestAnimationFrame(step);
 }
 
-openBtn.addEventListener("click", startPackAnimation);
+openBtn.addEventListener("click", startAnim);
 </script>
 </body>
 </html>
