@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Stack Gobgob - Vibration Pop Sequence</title>
+  <title>Booster Clean Slide Gobgob</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
@@ -12,7 +12,7 @@
     }
     .popup-stack {
       position: relative;
-      width: 320px; height: 530px;
+      width: 320px; height: 520px;
       margin: 0 auto;
       user-select: none;
       touch-action: manipulation;
@@ -22,16 +22,11 @@
       position: absolute;
       left: 0; top: 0;
       width: 320px; height: 510px;
-      perspective: 1200px;
       z-index: 2;
       background: transparent;
       cursor: pointer;
-      transition: box-shadow 0.2s, filter 0.3s, transform 0.25s;
-      box-shadow: 0 2px 24px #000b;
+      transition: filter 0.2s, opacity 0.2s;
       opacity: 1;
-      transform: translateY(0) scale(1) rotate(0deg);
-      pointer-events: all;
-      overflow: visible;
       display: block;
     }
     .popup-booster-container.inactive {
@@ -40,71 +35,23 @@
       opacity: 0.86;
       z-index: 1;
       transform: translateY(34px) scale(0.93) rotate(-5deg);
-      box-shadow: 0 8px 44px #0006;
     }
     .popup-booster-container.hide {
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.4s, filter 0.4s;
-      filter: blur(3px);
+      transition: opacity 0.4s;
       z-index: -1;
       display: none;
     }
-    /* Calques */
-    .booster-tab    { z-index: 20; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; }
-    .booster-top    { z-index: 18; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; }
-    .card-img       { z-index: 14; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; }
-    .booster-back   { z-index: 8;  position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; }
-    .halo           { z-index: 25; pointer-events:none; position:absolute; left:0; top:0; width:100%; height:100%; border-radius:16px; mix-blend-mode:screen; opacity:0.92; background:radial-gradient(circle at 50% 40%, #fffbe6 0px, #fffbe6cc 50px, #fff8 100px, #ffe80000 240px); transition:background 0.09s;}
-    /* Animation */
-    @keyframes booster-vibe {
-      0% { transform: scale(1) rotate(0deg);}
-      10% { transform: scale(1.02) rotate(-2deg);}
-      20% { transform: scale(1.04) rotate(2deg);}
-      30% { transform: scale(1.08) rotate(-2deg);}
-      40% { transform: scale(1.04) rotate(2deg);}
-      50% { transform: scale(1.09) rotate(2deg);}
-      60% { transform: scale(1.07) rotate(-2deg);}
-      70% { transform: scale(1.11) rotate(1.5deg);}
-      80% { transform: scale(1.09) rotate(-2deg);}
-      90% { transform: scale(1.04) rotate(1deg);}
-      100% { transform: scale(1.13) rotate(0deg);}
-    }
-    .vibrating {
-      animation: booster-vibe 0.8s cubic-bezier(.41,2.5,.55,1.1) 1;
-    }
-    .booster-tab.pop {
-      transition: transform 0.35s cubic-bezier(.36,2.2,.36,1), opacity 0.3s;
-      transform: translateY(-30%) rotate(-15deg) scale(1.07);
-      opacity: 1;
-    }
-    .booster-tab.gone {
-      opacity: 0;
-      transition: opacity 0.22s;
-      pointer-events:none;
-    }
-    .booster-top.out,
-    .booster-back.out {
-      transition: transform 0.7s cubic-bezier(.36,2.2,.36,1), opacity 0.65s;
-      transform: translateY(140px) scale(1.05) rotate(8deg);
-      opacity: 0;
-    }
-    .card-img.in-front {
-      transition: transform 0.45s cubic-bezier(.44,2.3,.44,1), filter 0.44s;
-      transform: scale(1.11) translateY(-10px);
-      filter: drop-shadow(0 0px 60px #fff6);
-      z-index: 40 !important;
-    }
-    .card-img.gone {
-      transition: opacity 0.3s, transform 0.3s;
-      opacity: 0;
-      transform: scale(0.82) translateY(-70px) rotate(-10deg);
-    }
-    /* 3D tilt */
-    .popup-booster-container.tilted {
-      box-shadow: 0 12px 60px #000c;
-      transition: box-shadow 0.08s;
-    }
+    /* CALQUES, du dessus vers le fond */
+    .booster-tab    { z-index: 20; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: opacity 0.2s; }
+    .booster-tab.gone { opacity: 0; transition: opacity 0.2s; }
+    .booster-top    { z-index: 18; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.55s cubic-bezier(.44,1.15,.43,1), opacity 0.5s;}
+    .booster-back   { z-index: 8;  position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.55s cubic-bezier(.44,1.15,.43,1), opacity 0.5s;}
+    .move-down      { transform: translateY(200px); opacity: 0.05; }
+    .card-img       { z-index: 14; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.36s cubic-bezier(.42,1.3,.4,1), opacity 0.3s; }
+    .card-img.in-front { transform: scale(1.13) translateY(-20px); z-index:30; }
+    .card-img.gone { opacity: 0; transform: scale(0.83) translateY(-80px) rotate(-6deg);}
     @media (max-width: 400px) {
       .popup-stack { width: 98vw; max-width: 350px; }
       .popup-booster-container { width: 98vw; max-width: 350px;}
@@ -120,7 +67,6 @@
       <img src="img/booster-top.png" class="booster-top" id="top2">
       <img src="img/14.png" class="card-img" id="card2">
       <img src="img/booster-back.png" class="booster-back" id="back2">
-      <div class="halo" id="halo2"></div>
     </div>
     <!-- Booster 1 -->
     <div class="popup-booster-container" id="booster1">
@@ -128,35 +74,10 @@
       <img src="img/booster-top.png" class="booster-top" id="top1">
       <img src="img/14.png" class="card-img" id="card1">
       <img src="img/booster-back.png" class="booster-back" id="back1">
-      <div class="halo" id="halo1"></div>
     </div>
   </div>
 </div>
 <script>
-function addTiltAndHalo(boosterBox, halo) {
-  boosterBox.addEventListener('mousemove', (e) => {
-    const rect = boosterBox.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    // 3D tilt
-    const tiltX = (x-0.5)*22, tiltY = (0.5-y)*19;
-    boosterBox.style.transform = `perspective(900px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) scale(1.03)`;
-    boosterBox.classList.add('tilted');
-    // Halo
-    halo.style.background = `radial-gradient(circle at ${x*100}% ${y*100}%, #fffbe6 0px, #fffbe6cc 40px, #fff8 100px, #ffe80000 200px)`;
-  });
-  boosterBox.addEventListener('mouseleave', () => {
-    boosterBox.style.transform = "";
-    boosterBox.classList.remove('tilted');
-    halo.style.background = `radial-gradient(circle at 50% 40%, #fffbe6 0px, #fffbe6cc 50px, #fff8 100px, #ffe80000 240px)`;
-  });
-  boosterBox.addEventListener('mouseenter', () => {
-    boosterBox.classList.add('tilted');
-  });
-}
-addTiltAndHalo(document.getElementById('booster1'), document.getElementById('halo1'));
-addTiltAndHalo(document.getElementById('booster2'), document.getElementById('halo2'));
-
 function openBooster(num) {
   const booster = document.getElementById('booster'+num);
   const tab = document.getElementById('tab'+num);
@@ -168,45 +89,38 @@ function openBooster(num) {
   booster.removeEventListener('click', openBooster1);
   booster.removeEventListener('click', openBooster2);
 
-  // 1. Booster vibre
-  booster.classList.add('vibrating');
+  // 1. Booster vibre (optionnel : ici on enlève pour minimal, remets la classe si tu veux)
+  // 2. Languette disparait
+  tab.classList.add('gone');
   setTimeout(() => {
-    // 2. Languette pop
-    tab.classList.add('pop');
+    // 3. Top & back partent ensemble
+    top.classList.add('move-down');
+    back.classList.add('move-down');
+    // 4. Carte avance (zoom)
     setTimeout(() => {
-      // 3. Languette disparait
-      tab.classList.add('gone');
+      card.classList.add('in-front');
+      // 5. Carte disparait
       setTimeout(() => {
-        // 4. Top + Back glissent vers le bas puis fade
-        top.classList.add('out');
-        back.classList.add('out');
-        // 5. Carte avance (zoom)
+        card.classList.add('gone');
+        // 6. Booster disparait, passe au suivant
         setTimeout(() => {
-          card.classList.add('in-front');
-          // 6. Carte disparait
+          booster.classList.add('hide');
           setTimeout(() => {
-            card.classList.add('gone');
-            // 7. Booster disparait, passe au suivant
-            setTimeout(() => {
-              booster.classList.add('hide');
-              setTimeout(() => {
-                booster.style.display = "none";
-                if (num === 1) {
-                  const b2 = document.getElementById('booster2');
-                  b2.classList.remove('inactive');
-                } else {
-                  setTimeout(()=>{
-                    alert("Tous les boosters ouverts ! (redirige vers page classique)");
-                    // window.location.href = '/classique.html'; // ou callback, etc.
-                  }, 350);
-                }
-              }, 400);
-            }, 320);
-          }, 950);
-        }, 560);
-      }, 250);
-    }, 380);
-  }, 900);
+            booster.style.display = "none";
+            if (num === 1) {
+              const b2 = document.getElementById('booster2');
+              b2.classList.remove('inactive');
+            } else {
+              setTimeout(()=>{
+                alert("Tous les boosters ouverts ! (redirige vers page classique)");
+                // window.location.href = '/classique.html'; // ou callback, etc.
+              }, 250);
+            }
+          }, 300);
+        }, 600);
+      }, 820);
+    }, 400);
+  }, 200);
 }
 function openBooster1() { openBooster(1);}
 function openBooster2() { openBooster(2);}
