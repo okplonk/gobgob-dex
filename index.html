@@ -8,7 +8,16 @@
       font-family: sans-serif;
       background-color: #f8f8f8;
       text-align: center;
-      padding: 20px;
+      padding: 40px 20px;
+    }
+
+    .content-wrapper {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #fffdf7;
+      border-radius: 20px;
+      padding: 30px 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
     }
 
     h1 {
@@ -134,7 +143,6 @@
       box-shadow: 0 0 40px 10px rgba(255, 255, 255, 0.4);
     }
 
-    /* UR style holo */
     @keyframes holoShift {
       0% { filter: hue-rotate(0deg) brightness(1.1); }
       50% { filter: hue-rotate(180deg) brightness(1.3); }
@@ -154,17 +162,19 @@
   </style>
 </head>
 <body>
-  <h1>Gobgob DEX</h1>
-  <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
-  <button onclick="loadCollection()">Afficher</button>
-  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
+  <div class="content-wrapper">
+    <h1>Gobgob DEX</h1>
+    <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
+    <button onclick="loadCollection()">Afficher</button>
+    <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
 
-  <div id="progress-text"></div>
-  <div id="progress-bar-container">
-    <div id="progress-bar"></div>
+    <div id="progress-text"></div>
+    <div id="progress-bar-container">
+      <div id="progress-bar"></div>
+    </div>
+
+    <div class="card-grid" id="cards"></div>
   </div>
-
-  <div class="card-grid" id="cards"></div>
 
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
