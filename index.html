@@ -110,17 +110,39 @@
     .popup-card-inner {
       width: 100%;
       height: 100%;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      transition: transform 0.2s ease;
       position: relative;
       overflow: hidden;
       border-radius: 18px;
       box-shadow: 0 8px 32px 8px #0006;
+      background: none;
+      transition: transform 0.2s ease;
     }
 
-    /* --- EMBOSS EFFECT --- */
+    /* --- EMBOSS / BUMP MAP EFFECT --- */
+    .popup-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.1s, transform 0.1s;
+    }
+    .popup-img.base {
+      z-index: 1;
+    }
+    .popup-img.shadow {
+      z-index: 2;
+      filter: brightness(0) blur(0.7px) opacity(0.48);
+      mix-blend-mode: multiply;
+    }
+    .popup-img.light {
+      z-index: 3;
+      filter: brightness(10) blur(0.7px) opacity(0.33);
+      mix-blend-mode: screen;
+    }
+
     .emboss-effect {
       position: absolute;
       inset: 0;
@@ -128,7 +150,7 @@
       mix-blend-mode: soft-light;
       opacity: 0.7;
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
-      z-index: 2;
+      z-index: 4;
       transition: background 0.15s;
     }
 
@@ -161,10 +183,13 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet embossé -->
+  <!-- Popup avec effet emboss/bump map dynamique -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
+        <img class="popup-img base" id="popup-img-base">
+        <img class="popup-img shadow" id="popup-img-shadow">
+        <img class="popup-img light" id="popup-img-light">
         <div class="emboss-effect" id="emboss"></div>
       </div>
     </div>
@@ -217,7 +242,17 @@
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
       const emboss = document.getElementById("emboss");
-      inner.style.backgroundImage = `url(img/${cardId}.png)`;
+      const imgBase = document.getElementById("popup-img-base");
+      const imgShadow = document.getElementById("popup-img-shadow");
+      const imgLight = document.getElementById("popup-img-light");
+
+      // Charge l'image sur tous les calques
+      imgBase.src = imgShadow.src = imgLight.src = `img/${cardId}.png`;
+
+      // Reset transform
+      imgShadow.style.transform = imgLight.style.transform = "";
+      inner.style.transform = "";
+
       popup.classList.add("visible");
 
       function updateEffect(e) {
@@ -230,7 +265,15 @@
         const rotateY = (x - centerX) / 6;
         inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
 
-        // Déplace le reflet embossé (gradient dynamique)
+        // Calcul du déplacement light/shadow (bump map simulé)
+        const intensity = 4; // px (réglage de la force du relief)
+        const dx = (x - centerX) / rect.width * intensity;
+        const dy = (y - centerY) / rect.height * intensity;
+
+        imgShadow.style.transform = `translate(${-dx}px, ${-dy}px)`;
+        imgLight.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        // Déplacement dynamique du gradient embossé
         const percentX = Math.round((x / rect.width) * 100);
         const percentY = Math.round((y / rect.height) * 100);
         emboss.style.background = `radial-gradient(circle at ${percentX}% ${percentY - 10}%, #fff7 40%, #aaa3 65%, transparent 95%)`;
@@ -239,15 +282,18 @@
       inner.onmousemove = updateEffect;
       inner.onmouseleave = function() {
         inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+        imgShadow.style.transform = "";
+        imgLight.style.transform = "";
         emboss.style.background = "radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%)";
       };
     }
 
     function hidePopup() {
       document.getElementById("popup").classList.remove("visible");
-      // reset emboss pour le prochain popup (sinon bug visuel possible)
       document.getElementById("popup-inner").style.transform = "rotateX(0deg) rotateY(0deg)";
       document.getElementById("emboss").style.background = "radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%)";
+      document.getElementById("popup-img-shadow").style.transform = "";
+      document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
     }
 
