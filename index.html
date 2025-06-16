@@ -16,14 +16,16 @@
     border-radius: 12px;
     isolation: isolate;
   " onmousemove="rotateCard(event)" onmouseleave="resetCard()">
-    <!-- Overlay holo -->
+    
+    <!-- Effet holo -->
     <div style="
       position: absolute;
       inset: 0;
       background: linear-gradient(135deg, violet, cyan, gold);
       background-size: 300% 300%;
       animation: holoMove 5s linear infinite;
-      mix-blend-mode: screen;
+      mix-blend-mode: soft-light;
+      opacity: 0.3;
 
       mask-image: url('img/101.png');
       mask-mode: alpha;
@@ -38,7 +40,20 @@
       -webkit-mask-size: contain;
 
       pointer-events: none;
+      z-index: 2;
     "></div>
+
+    <!-- Halo lumineux -->
+    <div id="popup-halo" style="
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+      transition: transform 0.1s ease;
+      pointer-events: none;
+      z-index: 3;
+    "></div>
+
   </div>
 </div>
 
@@ -52,17 +67,27 @@
 <script>
 function rotateCard(e) {
   const card = e.currentTarget;
+  const halo = document.getElementById("popup-halo");
   const rect = card.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
   const centerX = rect.width / 2;
   const centerY = rect.height / 2;
+
   const rotateX = -(y - centerY) / 8;
   const rotateY = (x - centerX) / 8;
   card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+
+  // Halo se déplace vers la zone la plus "haute"
+  const haloX = 50 + (rotateY * 2); // effet inversé
+  const haloY = 50 - (rotateX * 2);
+  halo.style.background = `radial-gradient(circle at ${haloX}% ${haloY}%, rgba(255,255,255,0.4) 0%, transparent 60%)`;
 }
+
 function resetCard() {
   const card = document.getElementById("popup-inner");
+  const halo = document.getElementById("popup-halo");
   card.style.transform = "rotateX(0deg) rotateY(0deg)";
+  halo.style.background = `radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%)`;
 }
 </script>
