@@ -100,7 +100,7 @@
       position: relative;
       border-radius: 22px;
       box-shadow: 0 8px 32px 0 #000c, 0 0 0 2px #fff3;
-      overflow: visible; /* <<--- plus de coupe */
+      overflow: visible;
       background: none;
       cursor: pointer;
       display: flex;
@@ -267,10 +267,29 @@
         case "N": default: return "card__shine n";
       }
     }
-    function addPopupHoloFX(popupCard, rarity) {
+    function addPopupHoloFX(popupCard, rarity, cardId) {
       popupCard.querySelectorAll('.card__shine').forEach(e => e.remove());
       const shine = document.createElement('div');
       shine.className = getShineClassForRarity(rarity);
+
+      // 💎 MASKING combo : alpha-mask.png + silhouette carte (png)
+      shine.style.webkitMaskImage = `
+        url('img/alpha-mask.png'),
+        url(img/${cardId}.png)
+      `;
+      shine.style.maskImage = `
+        url('img/alpha-mask.png'),
+        url(img/${cardId}.png)
+      `;
+      shine.style.webkitMaskComposite = "intersect";
+      shine.style.maskComposite = "intersect";
+      shine.style.webkitMaskSize = "contain, contain";
+      shine.style.maskSize = "contain, contain";
+      shine.style.webkitMaskRepeat = "no-repeat, no-repeat";
+      shine.style.maskRepeat = "no-repeat, no-repeat";
+      shine.style.webkitMaskPosition = "center, center";
+      shine.style.maskPosition = "center, center";
+
       popupCard.appendChild(shine);
 
       const img = popupCard.querySelector('.popup-card-inner');
@@ -282,7 +301,7 @@
         shine.style.setProperty('--my', y + '%');
         shine.style.setProperty('--posx', x + '%');
         shine.style.setProperty('--posy', y + '%');
-        // Parallaxe : grain bouge plus lentement
+        // Parallaxe : grain bouge plus lentement
         let grainX = Math.round(50 + (x - 50) * 0.5);
         let grainY = Math.round(50 + (y - 50) * 0.5);
         shine.style.setProperty('--grain-x', grainX + '%');
@@ -328,7 +347,7 @@
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       inner.title = `${card.name} (${card.rarity})`;
       popupCard.appendChild(inner);
-      addPopupHoloFX(popupCard, rarity);
+      addPopupHoloFX(popupCard, rarity, cardId);
       popup.classList.add("visible");
     }
     function hidePopup() {
