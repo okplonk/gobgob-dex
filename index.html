@@ -1,44 +1,68 @@
 <div style="
-  position: relative;
   width: 300px;
   height: 450px;
-  background-image: url('img/101.png'); /* image de la carte PNG avec transparence */
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  border-radius: 12px;
-  overflow: hidden;
-  isolation: isolate;
+  perspective: 1000px;
+  margin: auto;
 ">
-  <!-- Effet holo par-dessus -->
-  <div style="
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, violet, cyan, gold);
-    background-size: 300% 300%;
-    animation: holoMove 5s linear infinite;
-    mix-blend-mode: screen;
+  <div id="popup-inner" style="
+    width: 100%;
+    height: 100%;
+    background-image: url('img/101.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease;
+    position: relative;
+    border-radius: 12px;
+    isolation: isolate;
+  " onmousemove="rotateCard(event)" onmouseleave="resetCard()">
+    <!-- Overlay holo -->
+    <div style="
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, violet, cyan, gold);
+      background-size: 300% 300%;
+      animation: holoMove 5s linear infinite;
+      mix-blend-mode: screen;
 
-    mask-image: url('img/101.png');
-    mask-mode: alpha;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
+      mask-image: url('img/101.png');
+      mask-mode: alpha;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      mask-size: contain;
 
-    -webkit-mask-image: url('img/101.png');
-    -webkit-mask-mode: alpha;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
-    -webkit-mask-size: contain;
+      -webkit-mask-image: url('img/101.png');
+      -webkit-mask-mode: alpha;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      -webkit-mask-size: contain;
 
-    pointer-events: none;
-  "></div>
+      pointer-events: none;
+    "></div>
+  </div>
 </div>
 
-<!-- Animation keyframes -->
 <style>
 @keyframes holoMove {
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
 }
 </style>
+
+<script>
+function rotateCard(e) {
+  const card = e.currentTarget;
+  const rect = card.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  const rotateX = -(y - centerY) / 8;
+  const rotateY = (x - centerX) / 8;
+  card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+}
+function resetCard() {
+  const card = document.getElementById("popup-inner");
+  card.style.transform = "rotateX(0deg) rotateY(0deg)";
+}
+</script>
