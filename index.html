@@ -144,6 +144,18 @@
       mix-blend-mode: screen;
     }
 
+    /* --- Effet visuel/holographique --- */
+    .card-effect-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      border-radius: 18px;
+      overflow: hidden;
+      background: none;
+      transition: background 0.2s;
+    }
+
     .emboss-effect {
       position: absolute;
       inset: 0;
@@ -151,12 +163,22 @@
       mix-blend-mode: soft-light;
       opacity: 0.35;
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
-      z-index: 4;
+      z-index: 6;
       transition: background 0.15s;
     }
 
     #popup.visible {
       visibility: visible;
+    }
+
+    @keyframes holoMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 120px 240px; }
+    }
+
+    @keyframes holoShine {
+      0% { background-position: -350px 0;}
+      100% { background-position: 350px 0;}
     }
 
     @keyframes fadeInUp {
@@ -184,13 +206,14 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet emboss/bump map dynamique -->
+  <!-- Popup avec effet emboss/bump map, particules, et holo -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img class="popup-img base" id="popup-img-base">
         <img class="popup-img shadow" id="popup-img-shadow">
         <img class="popup-img light" id="popup-img-light">
+        <div class="card-effect-layer" id="card-effect-layer"></div>
         <div class="emboss-effect" id="emboss"></div>
       </div>
     </div>
@@ -239,7 +262,7 @@
       });
     }
 
-    function addZoomEffect(cardId) {
+    function addZoomEffect(cardId, rarity) {
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
       const emboss = document.getElementById("emboss");
@@ -247,14 +270,12 @@
       const imgShadow = document.getElementById("popup-img-shadow");
       const imgLight = document.getElementById("popup-img-light");
 
-      // Charge l'image sur tous les calques
       imgBase.src = imgShadow.src = imgLight.src = `img/${cardId}.png`;
-
-      // Reset transform
       imgShadow.style.transform = imgLight.style.transform = "";
       inner.style.transform = "";
 
       popup.classList.add("visible");
+      setupEffectLayer(rarity);
 
       function updateEffect(e) {
         const rect = inner.getBoundingClientRect();
@@ -266,15 +287,15 @@
         const rotateY = (x - centerX) / 6;
         inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
 
-        // Calcul du déplacement light/shadow (bump map simulé)
-        const intensity = 4; // px (réglage de la force du relief)
+        // Bump/emboss
+        const intensity = 4;
         const dx = (x - centerX) / rect.width * intensity;
         const dy = (y - centerY) / rect.height * intensity;
 
         imgShadow.style.transform = `translate(${-dx}px, ${-dy}px)`;
         imgLight.style.transform = `translate(${dx}px, ${dy}px)`;
 
-        // Déplacement dynamique du gradient embossé
+        // Emboss gradient
         const percentX = Math.round((x / rect.width) * 100);
         const percentY = Math.round((y / rect.height) * 100);
         emboss.style.background = `radial-gradient(circle at ${percentX}% ${percentY - 10}%, #fff7 40%, #aaa3 65%, transparent 95%)`;
@@ -296,6 +317,117 @@
       document.getElementById("popup-img-shadow").style.transform = "";
       document.getElementById("popup-img-light").style.transform = "";
       document.getElementById("popup-inner").onmousemove = null;
+      document.getElementById("card-effect-layer").innerHTML = "";
+      document.getElementById("card-effect-layer").style.background = "";
+      document.getElementById("card-effect-layer").style.animation = "";
+    }
+
+    // ==== EFFETS PARTICULES ET HOLOGRAPHIQUES ====
+    function setupEffectLayer(rarity) {
+      const effectLayer = document.getElementById('card-effect-layer');
+      effectLayer.innerHTML = "";
+      effectLayer.style.background = "";
+      effectLayer.style.animation = "";
+
+      // Réglages par rareté
+      let particleColors = [];
+      let holo = false;
+      let shine = false;
+
+      switch(rarity) {
+        case "UR":
+          particleColors = ["#ff2fd7","#18f0ff","#ffe959","#ff9232","#b8ff69"];
+          holo = true;
+          shine = true;
+          break;
+        case "SSR":
+          particleColors = ["#ffab2f","#ff9232","#ffe959"];
+          holo = true;
+          shine = true;
+          break;
+        case "SR":
+          particleColors = ["#ffe959","#fff7be","#ffd700"];
+          holo = true;
+          shine = false;
+          break;
+        case "HR":
+          particleColors = ["#3fff6e","#60e7c5","#bbffc6"];
+          break;
+        default: // "N"
+          particleColors = ["#b65cff","#8e56ef"];
+          break;
+      }
+
+      // Canvas particules
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 450;
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      effectLayer.appendChild(canvas);
+      animateParticles(canvas, particleColors, rarity);
+
+      // Holographie : calque de rayures holo
+      if (holo) {
+        effectLayer.style.background =
+          "repeating-linear-gradient(120deg,rgba(255,255,255,0.09) 0px,rgba(255,255,255,0.16) 14px,rgba(255,255,255,0.05) 26px)";
+        effectLayer.style.animation = "holoMove 5s linear infinite";
+      }
+      // Shine dynamique arc-en-ciel (pour SSR/UR)
+      if (shine) {
+        let shineDiv = document.createElement('div');
+        shineDiv.style.position = "absolute";
+        shineDiv.style.inset = 0;
+        shineDiv.style.borderRadius = "18px";
+        shineDiv.style.pointerEvents = "none";
+        shineDiv.style.background =
+          "linear-gradient(112deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.25) 48%, rgba(255,255,255,0.65) 53%, rgba(255,255,255,0.25) 57%, rgba(255,255,255,0) 74%)";
+        shineDiv.style.mixBlendMode = "color-dodge";
+        shineDiv.style.opacity = "0.85";
+        shineDiv.style.animation = "holoShine 3.6s linear infinite";
+        effectLayer.appendChild(shineDiv);
+      }
+    }
+
+    // Particules dynamiques selon la rareté
+    function animateParticles(canvas, colors, rarity) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      let particles = [];
+      let rarityStep = ["N","HR","SR","SSR","UR"].indexOf(rarity);
+      let count = 12 + rarityStep*11;
+
+      for(let i=0;i<count;i++){
+        let angle = Math.random()*2*Math.PI;
+        let dist = 55 + Math.random()*165 + (rarityStep*4);
+        let size = 2.2 + Math.random()*3.4 + (rarity==="UR"?1.6:0);
+        let speed = 0.008 + Math.random()*0.007 + (rarity==="UR"?0.008:0);
+        let color = colors[Math.floor(Math.random()*colors.length)];
+        particles.push({angle, dist, size, color, speed, aOffset:Math.random()*100});
+      }
+
+      let running = true;
+      function draw() {
+        if (!running) return;
+        ctx.clearRect(0,0,w,h);
+        particles.forEach(p=>{
+          p.angle += p.speed;
+          let x = w/2 + Math.cos(p.angle)*p.dist;
+          let y = h/2 + Math.sin(p.angle)*p.dist;
+          ctx.globalAlpha = 0.31 + 0.27*Math.sin(Date.now()/650 + p.aOffset);
+          ctx.beginPath();
+          ctx.arc(x,y,p.size,0,2*Math.PI);
+          ctx.fillStyle = p.color;
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 10 + rarityStep*2;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+      // Stop particles on close
+      canvas.closest("#card-effect-layer").parentNode.closest("#popup").addEventListener("click", ()=>{running=false;}, {once:true});
     }
 
     async function loadCollection() {
@@ -323,7 +455,7 @@
           if (!showMissing) div.classList.add("hidden");
         } else {
           addTiltEffect(div);
-          div.onclick = () => addZoomEffect(card.id);
+          div.onclick = () => addZoomEffect(card.id, card.rarity);
         }
 
         container.appendChild(div);
