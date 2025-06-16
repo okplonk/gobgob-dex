@@ -11,11 +11,17 @@
       padding: 40px 20px;
     }
 
-    h1 {
+    /* Embossed text for the main title */
+    .emboss-text {
       font-size: 3em;
+      color: #888;
+      text-shadow:
+        1px  1px 0px #fff,
+       -1px -1px 0px rgba(0,0,0,0.3);
       margin-bottom: 10px;
     }
 
+    /* Progress & inputs/buttons */
     input,
     button {
       padding: 10px;
@@ -66,6 +72,7 @@
       cursor: pointer;
     }
 
+    /* Normal card-inner: remove emboss here */
     .card-inner {
       width: 100%;
       height: 100%;
@@ -91,6 +98,7 @@
       display: none !important;
     }
 
+    /* Popup backdrop */
     #popup {
       position: fixed;
       top: 0;
@@ -118,13 +126,17 @@
       padding: 10px;
       background-color: #ffe1cf;
       border-radius: 20px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      /* Emboss effect in popup */
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 30px rgba(0, 0, 0, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       transition: transform 0.2s ease;
       position: relative;
-      overflow: hidden; /* important pour le reflet et le halo */
+      overflow: hidden; /* pour reflet et halo */
     }
 
     /* Reflet animé */
@@ -148,7 +160,7 @@
       z-index: 15;
     }
 
-    /* Halo clair + ombre fusionnés en un seul calque */
+    /* Halo clair + ombre */
     .popup-card-inner::after {
       content: "";
       position: absolute;
@@ -169,7 +181,7 @@
       object-fit: contain;
       pointer-events: none;
       position: relative;
-      z-index: 20; /* devant les halos et reflet */
+      z-index: 20;
       transform-style: preserve-3d;
     }
 
@@ -177,68 +189,64 @@
       visibility: visible;
     }
 
-    /* Effets de rareté */
+    /* Effets de rareté (conservent emboss de base + glow) */
     .popup-card-inner.n {
-      box-shadow: 0 0 20px 5px rgba(155, 89, 182, 0.7);
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 20px 5px rgba(155, 89, 182, 0.7);
     }
 
     .popup-card-inner.hr {
-      box-shadow: 0 0 20px 5px rgba(39, 174, 96, 0.8);
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 20px 5px rgba(39, 174, 96, 0.8);
     }
 
     .popup-card-inner.sr {
-      box-shadow: 0 0 25px 6px rgba(241, 196, 15, 0.85);
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 25px 6px rgba(241, 196, 15, 0.85);
     }
 
     .popup-card-inner.ssr {
-      box-shadow: 0 0 25px 8px rgba(230, 126, 34, 0.9);
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 25px 8px rgba(230, 126, 34, 0.9);
     }
 
     .popup-card-inner.ur {
       background-blend-mode: screen;
       animation: holoShift 3s linear infinite;
-      box-shadow: 0 0 40px 10px rgba(255, 255, 255, 0.4);
+      box-shadow:
+        inset 2px 2px 4px rgba(0,0,0,0.2),
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        0 0 40px 10px rgba(255,255,255,0.4);
     }
 
     @keyframes shineMove {
-      0% {
-        transform: translateX(-100%) translateY(-100%);
-      }
-
-      100% {
-        transform: translateX(100%) translateY(100%);
-      }
+      0% { transform: translateX(-100%) translateY(-100%); }
+      100% { transform: translateX(100%) translateY(100%); }
     }
 
     @keyframes holoShift {
-      0% {
-        filter: hue-rotate(0deg) brightness(1.1);
-      }
-
-      50% {
-        filter: hue-rotate(180deg) brightness(1.3);
-      }
-
-      100% {
-        filter: hue-rotate(360deg) brightness(1.1);
-      }
+      0%   { filter: hue-rotate(0deg) brightness(1.1); }
+      50%  { filter: hue-rotate(180deg) brightness(1.3); }
+      100% { filter: hue-rotate(360deg) brightness(1.1); }
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px) scale(0.95);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
     }
   </style>
 </head>
 <body>
-  <h1>Gobgob DEX</h1>
+  <!-- Titre embossé -->
+  <h1 class="emboss-text">Gobgob DEX</h1>
   <input type="text" id="username" placeholder="Entre ton pseudo Twitch" />
   <button onclick="loadCollection()">Afficher</button>
   <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
@@ -268,13 +276,9 @@
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       return lines
-        .map((line) => line.split(","))
-        .filter((parts) => parts.length === 3)
-        .map(([id, nom, rarete]) => ({
-          id: parseInt(id),
-          name: nom.trim(),
-          rarity: rarete.trim().toLowerCase(),
-        }));
+        .map(line => line.split(","))
+        .filter(parts => parts.length === 3)
+        .map(([id, nom, rarete]) => ({ id: parseInt(id), name: nom.trim(), rarity: rarete.trim().toLowerCase() }));
     }
 
     async function fetchCollection() {
@@ -283,12 +287,9 @@
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       userCollectionCache = lines
-        .map((line) => line.split(","))
-        .filter((parts) => parts.length === 2)
-        .map(([pseudo, id]) => ({
-          pseudo: pseudo.trim().toLowerCase(),
-          id: parseInt(id),
-        }));
+        .map(line => line.split(","))
+        .filter(parts => parts.length === 2)
+        .map(([pseudo, id]) => ({ pseudo: pseudo.trim().toLowerCase(), id: parseInt(id) }));
       return userCollectionCache;
     }
 
@@ -316,24 +317,21 @@
 
     function updateProgressBar(ownedCount, totalCount) {
       const percent = (ownedCount / totalCount) * 100;
-      document.getElementById("progress-text").textContent = `${ownedCount} carte${
-        ownedCount !== 1 ? "s" : ""
-      } débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
       document.getElementById("progress-bar").style.width = percent + "%";
     }
 
     function addTiltEffect(card) {
-      card.addEventListener("mousemove", (e) => {
+      card.addEventListener("mousemove", e => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const rotateX = -(y - centerY) / 3;
-        const rotateY = (x - centerX) / 3;
+        const centerX = rect.width/2;
+        const centerY = rect.height/2;
+        const rotateX = -(y - centerY)/3;
+        const rotateY = (x - centerX)/3;
         card.querySelector(".card-inner").style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
-
       card.addEventListener("mouseleave", () => {
         card.querySelector(".card-inner").style.transform = "rotateX(0deg) rotateY(0deg)";
       });
@@ -343,11 +341,9 @@
       const popup = document.getElementById("popup");
       const inner = document.getElementById("popup-inner");
       const img = document.getElementById("popup-img");
-
       inner.className = `popup-card-inner ${card.rarity}`;
       img.src = `img/${card.id}.png`;
       img.alt = `${card.name} (${card.rarity.toUpperCase()})`;
-
       popup.classList.add("visible");
     }
 
@@ -358,15 +354,15 @@
       inner.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
-    document.getElementById("popup-inner").addEventListener("mousemove", (e) => {
+    document.getElementById("popup-inner").addEventListener("mousemove", e => {
       const container = e.currentTarget;
       const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const rotateX = -(y - centerY) / 6;
-      const rotateY = (x - centerX) / 6;
+      const centerX = rect.width/2;
+      const centerY = rect.height/2;
+      const rotateX = -(y - centerY)/6;
+      const rotateY = (x - centerX)/6;
       container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
     });
 
@@ -375,30 +371,7 @@
       container.style.transform = "rotateX(0deg) rotateY(0deg)";
     });
 
-    async function loadCollection() {
-      const username = document.getElementById("username").value.toLowerCase();
-      const collection = await fetchCollection();
-      const owned = new Set(collection.filter((entry) => entry.pseudo === username).map((entry) => entry.id));
-      const container = document.getElementById("cards");
-      container.innerHTML = "";
-
-      allCards.forEach((card) => {
-        const isOwned = owned.has(card.id);
-        const cardElement = buildCard(card, isOwned);
-        container.appendChild(cardElement);
-      });
-
-      updateProgressBar(owned.size, allCards.length);
-    }
-
-    function toggleMissing() {
-      showMissing = !showMissing;
-      document.querySelectorAll(".card.missing").forEach((card) => {
-        card.classList.toggle("hidden", !showMissing);
-      });
-    }
-
-    fetchCards().then((cards) => (allCards = cards));
+    fetchCards().then(cards => allCards = cards);
   </script>
 </body>
 </html>
