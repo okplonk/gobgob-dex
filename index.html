@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Stack Gobgob HALO</title>
+  <title>Booster Stack Gobgob HALO & Calque Switch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
@@ -55,8 +55,9 @@
       user-drag: none; user-select: none;
     }
     .booster-back { z-index: 1; }
+    /* ---- CARTE ---- */
     .card-img {
-      z-index: 2;
+      z-index: 4; /* Entre back et top au début */
       opacity: 0;
       filter: drop-shadow(0 12px 40px #000a) brightness(0.92);
       transform: translateY(0%) scale(0.97) rotate(2deg);
@@ -77,29 +78,30 @@
     }
     .card-img.revealup {
       opacity: 1;
-      /* Passe devant le booster-top (sous le front) */
-      transition: transform 0.42s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
-      transform: translateY(-48%) scale(1.07) rotate(-2.5deg);
+      /* Monte vers le haut, toujours DERRIÈRE la languette/top */
+      transition: transform 0.53s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
+      transform: translateY(-108%) scale(1.12) rotate(-2.5deg);
       filter: drop-shadow(0 7px 40px #fff5) drop-shadow(0 0px 15px #ffe33a55) brightness(1.11);
-      z-index: 4;
+    }
+    /* Quand la carte "switch" de calque, elle passe DEVANT la languette/top */
+    .card-img.on-top {
+      z-index: 22 !important;
     }
     .card-img.revealdone {
       opacity: 1;
-      /* Se pose pile entre le booster-back et le booster-top */
+      /* Redescend devant tout */
       transition: transform 0.38s cubic-bezier(.42,1.6,.5,1.03), filter 0.4s;
       transform: translateY(-9%) scale(1) rotate(0deg);
       filter: drop-shadow(0 4px 36px #fff3) drop-shadow(0 0px 15px #ffe33a22) brightness(1.05);
-      z-index: 4;
     }
     .card-img.disappear {
       transition: opacity 0.36s cubic-bezier(.45,2,.55,1), transform 0.5s cubic-bezier(.41,2.6,.55,1);
       opacity: 0;
       transform: translateY(-40%) scale(0.8) rotate(-8deg);
       filter: blur(2px) brightness(0.7);
-      z-index: 4;
     }
     .booster-top {
-      z-index: 5;
+      z-index: 9;
       transition: transform 0.44s cubic-bezier(.55,1.7,.33,1), opacity 0.36s;
       transform: translateY(0) rotate(0deg);
       opacity: 1;
@@ -109,13 +111,13 @@
       transform: translateY(-28%) rotate(-10deg) scale(1.08,1.03);
       opacity: 0.94;
     }
-    .booster-front { z-index: 11; pointer-events: none; }
+    .booster-front { z-index: 31; pointer-events: none; }
     /* HALO lumineux */
     .halo {
       position: absolute;
       left: 0; top: 0; width: 100%; height: 100%;
       pointer-events: none;
-      z-index: 22;
+      z-index: 32;
       mix-blend-mode: screen;
       border-radius: 16px;
       opacity: 0.93;
@@ -157,7 +159,7 @@
 <body>
 <div class="booster-zone">
   <div class="popup-stack" id="stack">
-    <!-- Booster 2 (au fond, inactif au début, décalé, terne, blur) -->
+    <!-- Booster 2 (fond, inactif au début, décalé, terne, blur) -->
     <div class="popup-booster-container inactive" id="booster2">
       <img src="img/booster-back.png" class="booster-back">
       <img src="img/14.png" class="card-img" id="card2">
@@ -200,6 +202,18 @@ function addTiltAndHalo(boosterBox, halo) {
 addTiltAndHalo(document.getElementById('booster1'), document.getElementById('halo1'));
 addTiltAndHalo(document.getElementById('booster2'), document.getElementById('halo2'));
 
+function animateCardSwitch(card) {
+  // 1. Commence "derrière" le top (z-index 4)
+  card.classList.add('revealup');
+  // 2. Quand la carte a dépassé le booster (après 500ms), on passe devant (z-index très haut)
+  setTimeout(() => {
+    card.classList.add('on-top');
+    // 3. Puis descend devant tout
+    card.classList.remove('revealup');
+    card.classList.add('revealdone');
+  }, 530);
+}
+
 let current = 1;
 function openBooster(num) {
   const booster = document.getElementById('booster'+num);
@@ -215,35 +229,32 @@ function openBooster(num) {
   setTimeout(() => {
     // 2. Languette pop (translate+rotate)
     boosterTop.classList.add('open');
-    // 3. Carte vibre puis sort, dépasse, puis descend (le top est devant elle, le front reste tout en haut)
+    // 3. Carte vibre puis sort (toujours derrière la languette)
     card.classList.add('vibrating');
     setTimeout(() => {
       card.classList.remove('vibrating');
-      card.classList.add('revealup');
+      card.style.opacity = "1";
+      animateCardSwitch(card);
+      // 4. Après un temps, la carte disparait et booster s'efface
       setTimeout(() => {
-        card.classList.remove('revealup');
-        card.classList.add('revealdone');
-        // 4. Après un temps, la carte disparait et booster s'efface
+        card.classList.add('disappear');
+        booster.classList.remove('vibrating');
+        booster.classList.add('hide');
         setTimeout(() => {
-          card.classList.add('disappear');
-          booster.classList.remove('vibrating');
-          booster.classList.add('hide');
-          setTimeout(() => {
-            booster.style.display = 'none';
-            if (num === 1) {
-              // Booster 2 devient actif
-              const b2 = document.getElementById('booster2');
-              b2.classList.remove('inactive');
-            } else {
-              // Tous ouverts : on passe à la suite
-              setTimeout(()=>{
-                alert("Tous les boosters ouverts ! (redirige vers page classique)");
-                // window.location.href = '/classique.html'; // ou callback, etc.
-              }, 350);
-            }
-          }, 350);
-        }, 850);
-      }, 550);
+          booster.style.display = 'none';
+          if (num === 1) {
+            // Booster 2 devient actif
+            const b2 = document.getElementById('booster2');
+            b2.classList.remove('inactive');
+          } else {
+            // Tous ouverts : on passe à la suite
+            setTimeout(()=>{
+              alert("Tous les boosters ouverts ! (redirige vers page classique)");
+              // window.location.href = '/classique.html'; // ou callback, etc.
+            }, 350);
+          }
+        }, 350);
+      }, 1500);
     }, 420);
   }, 900);
 }
