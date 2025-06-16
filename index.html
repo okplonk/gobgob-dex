@@ -66,6 +66,8 @@
       cursor: pointer;
       background: transparent;
       margin-bottom: 8px;
+      /* empilement propre du halo */
+      overflow: visible;
     }
     .card-inner {
       width: 100%;
@@ -76,6 +78,24 @@
       transition: transform 0.2s cubic-bezier(.5,1.5,.5,1), filter 0.2s;
       background-color: transparent;
       will-change: transform;
+      position: relative;
+      z-index: 1;
+    }
+    .halo-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      /* masquage alpha : ici le masque doit être fourni (PNG en nuances de gris, blanc=opaque, noir=transparent) */
+      mask-image: url('img/alpha-mask.png');
+      mask-size: 100% 100%;
+      mask-repeat: no-repeat;
+      -webkit-mask-image: url('img/alpha-mask.png');
+      -webkit-mask-size: 100% 100%;
+      -webkit-mask-repeat: no-repeat;
+      /* on pourrait adapter l'url si tu la changes ! */
     }
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
@@ -116,6 +136,22 @@
       background-position: center;
       transition: transform 0.2s cubic-bezier(.5,1.5,.5,1);
       will-change: transform;
+      position: relative;
+      z-index: 1;
+    }
+    .popup-halo-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      mask-image: url('img/alpha-mask.png');
+      mask-size: 100% 100%;
+      mask-repeat: no-repeat;
+      -webkit-mask-image: url('img/alpha-mask.png');
+      -webkit-mask-size: 100% 100%;
+      -webkit-mask-repeat: no-repeat;
     }
     #popup.visible {
       visibility: visible;
@@ -160,6 +196,7 @@
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner"></div>
+      <canvas class="popup-halo-overlay"></canvas>
     </div>
   </div>
   <script>
@@ -186,9 +223,46 @@
       });
     }
 
+    function drawHalosOnCanvas(canvas, intensity=1) {
+      // double halo : grand diffus + petit plus vif, centrés, sans toucher alpha PNG
+      const ctx = canvas.getContext("2d");
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0,0,w,h);
+
+      // grand halo large diffus
+      const grad1 = ctx.createRadialGradient(
+        w/2, h/2, w*0.15, w/2, h/2, w*0.48
+      );
+      grad1.addColorStop(0, `rgba(255,255,255,${0.32*intensity})`);
+      grad1.addColorStop(0.6, `rgba(255,255,255,${0.10*intensity})`);
+      grad1.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = grad1;
+      ctx.fillRect(0,0,w,h);
+
+      // petit halo plus net
+      const grad2 = ctx.createRadialGradient(
+        w/2, h/2, 0, w/2, h/2, w*0.23
+      );
+      grad2.addColorStop(0, `rgba(255,255,255,${0.14*intensity})`);
+      grad2.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = grad2;
+      ctx.fillRect(0,0,w,h);
+
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    function updateHalosTransform(cardElem, inner) {
+      // synchronise le halo sur la rotation de la carte
+      const halo = cardElem.querySelector('.halo-overlay');
+      if (halo) {
+        halo.style.transform = inner.style.transform || "";
+      }
+    }
+
     function addTiltEffect(card) {
-      // Seulement sur desktop
       if (window.matchMedia("(pointer: fine)").matches) {
+        const inner = card.querySelector('.card-inner');
         card.addEventListener("mousemove", e => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -197,12 +271,15 @@
           const centerY = rect.height / 2;
           const rotateX = -(y - centerY) / 3;
           const rotateY = (x - centerX) / 3;
-          card.querySelector('.card-inner').style.transform =
+          inner.style.transform =
             `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+          updateHalosTransform(card, inner);
         });
         card.addEventListener("mouseleave", () => {
-          card.querySelector('.card-inner').style.transform =
+          const inner = card.querySelector('.card-inner');
+          inner.style.transform =
             "rotateX(0deg) rotateY(0deg)";
+          updateHalosTransform(card, inner);
         });
       }
     }
@@ -217,12 +294,17 @@
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
+      // Redessine le halo dans le popup
+      const canvas = document.querySelector('.popup-halo-overlay');
+      const rect = inner.getBoundingClientRect();
+      canvas.width = inner.offsetWidth;
+      canvas.height = inner.offsetHeight;
+      drawHalosOnCanvas(canvas, 1);
+
       // On gère effet 3D selon l'appareil
       if (window.matchMedia("(pointer: coarse)").matches) {
-        // Mobile/tablette = gyro
-        enableGyroOnPopup(inner);
+        enableGyroOnPopup(inner, canvas);
       } else {
-        // Desktop = souris
         inner.addEventListener("mousemove", onPopupMouseMove);
         inner.addEventListener("mouseleave", onPopupMouseLeave);
       }
@@ -238,31 +320,34 @@
       const rotateX = -(y - centerY) / 8;
       const rotateY = (x - centerX) / 8;
       inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+
+      // sync halo
+      const canvas = document.querySelector('.popup-halo-overlay');
+      if (canvas) canvas.style.transform = inner.style.transform || "";
     }
     function onPopupMouseLeave(e) {
       const inner = e.currentTarget;
       inner.style.transform = "rotateX(0deg) rotateY(0deg)";
+      const canvas = document.querySelector('.popup-halo-overlay');
+      if (canvas) canvas.style.transform = "";
     }
 
-    function enableGyroOnPopup(inner) {
-      // On clean si déjà actif
+    function enableGyroOnPopup(inner, canvas) {
       disableGyroOnPopup();
       gyroActive = true;
 
-      // Pour iOS 13+ il faut demander la permission au user
       if (typeof DeviceOrientationEvent !== 'undefined' &&
           typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(permissionState => {
           if (permissionState === 'granted') {
             window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
-              applyGyroToPopup(inner, e);
+              applyGyroToPopup(inner, canvas, e);
             });
           }
         }).catch(console.error);
       } else {
-        // Android ou iOS <13
         window.addEventListener('deviceorientation', currentGyroHandler = (e) => {
-          applyGyroToPopup(inner, e);
+          applyGyroToPopup(inner, canvas, e);
         });
       }
     }
@@ -273,30 +358,26 @@
         currentGyroHandler = null;
         gyroActive = false;
       }
-      // Et reset le style
       const inner = document.getElementById("popup-inner");
       if (inner) inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-      // Retire aussi les listeners souris
       inner.removeEventListener("mousemove", onPopupMouseMove);
       inner.removeEventListener("mouseleave", onPopupMouseLeave);
+      const canvas = document.querySelector('.popup-halo-overlay');
+      if (canvas) canvas.style.transform = "";
     }
 
-    function applyGyroToPopup(inner, event) {
-      // event.beta = X (-180 à 180), event.gamma = Y (-90 à 90)
-      let x = event.beta;   // vertical, phone tilt up/down
-      let y = event.gamma;  // horizontal, phone tilt left/right
-
-      // Clamp pour éviter les débordements chelous
+    function applyGyroToPopup(inner, canvas, event) {
+      let x = event.beta;
+      let y = event.gamma;
       if (x > 90) x = 90;
       if (x < -90) x = -90;
       if (y > 90) y = 90;
       if (y < -90) y = -90;
-
-      // Axes inversés, sensibilité augmentée (/2)
       const rotateX = -(x - 0) / 2;
       const rotateY = -(y - 0) / 2;
       inner.style.transform =
         `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.06)`;
+      if (canvas) canvas.style.transform = inner.style.transform || "";
     }
 
     function hidePopup() {
@@ -322,6 +403,18 @@
         inner.style.backgroundImage = `url(img/${card.id}.png)`;
         inner.title = `${card.name} (${card.rarity})`;
         div.appendChild(inner);
+
+        // HALO overlay (canvas) par carte
+        const halo = document.createElement("canvas");
+        halo.className = "halo-overlay";
+        // On taille le halo après insertion dans le DOM (donc après appendChild)
+        div.appendChild(halo);
+        setTimeout(() => {
+          // pour que .offsetWidth existe (DOM update)
+          halo.width = inner.offsetWidth;
+          halo.height = inner.offsetHeight;
+          drawHalosOnCanvas(halo, 0.88);
+        });
 
         const isOwned = owned.has(card.id);
         if (!isOwned) {
@@ -352,6 +445,26 @@
     }
 
     fetchCards().then(cards => allCards = cards);
+
+    // Si resize, on resize tous les halos
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.halo-overlay').forEach(halo => {
+        const parent = halo.parentElement.querySelector('.card-inner');
+        if (parent) {
+          halo.width = parent.offsetWidth;
+          halo.height = parent.offsetHeight;
+          drawHalosOnCanvas(halo, 0.88);
+        }
+      });
+      // Popup aussi
+      const canvas = document.querySelector('.popup-halo-overlay');
+      const popupInner = document.getElementById("popup-inner");
+      if (canvas && popupInner) {
+        canvas.width = popupInner.offsetWidth;
+        canvas.height = popupInner.offsetHeight;
+        drawHalosOnCanvas(canvas, 1);
+      }
+    });
   </script>
 </body>
 </html>
