@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Clean Slide Gobgob</title>
+  <title>Booster Gobgob 3D Tilt - Vibe, Pop & Slide</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
@@ -25,9 +25,10 @@
       z-index: 2;
       background: transparent;
       cursor: pointer;
-      transition: filter 0.2s, opacity 0.2s;
+      transition: filter 0.2s, opacity 0.2s, box-shadow 0.15s;
       opacity: 1;
       display: block;
+      will-change: transform;
     }
     .popup-booster-container.inactive {
       pointer-events: none;
@@ -39,17 +40,43 @@
     .popup-booster-container.hide {
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.4s;
       z-index: -1;
       display: none;
     }
+    /* 3D tilt */
+    .popup-booster-container.tilted {
+      box-shadow: 0 12px 60px #000c;
+      transition: box-shadow 0.12s;
+    }
+    /* Vibrate */
+    @keyframes booster-vibe {
+      0% { transform: scale(1) rotate(0deg);}
+      10% { transform: scale(1.02) rotate(-2deg);}
+      20% { transform: scale(1.04) rotate(2deg);}
+      30% { transform: scale(1.08) rotate(-2deg);}
+      40% { transform: scale(1.04) rotate(2deg);}
+      50% { transform: scale(1.09) rotate(2deg);}
+      60% { transform: scale(1.07) rotate(-2deg);}
+      70% { transform: scale(1.11) rotate(1.5deg);}
+      80% { transform: scale(1.09) rotate(-2deg);}
+      90% { transform: scale(1.04) rotate(1deg);}
+      100% { transform: scale(1.13) rotate(0deg);}
+    }
+    .vibrating {
+      animation: booster-vibe 0.45s cubic-bezier(.41,2.5,.55,1.1) 1;
+    }
     /* CALQUES, du dessus vers le fond */
-    .booster-tab    { z-index: 20; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: opacity 0.2s; }
-    .booster-tab.gone { opacity: 0; transition: opacity 0.2s; }
+    .booster-tab    { z-index: 20; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.36s cubic-bezier(.36,2.2,.36,1), opacity 0.4s;}
+    .booster-tab.pop {
+      transform: translateY(-32%) rotate(-15deg) scale(1.08);
+      opacity: 1;
+    }
+    .booster-tab.faded { opacity:0; transition:opacity 0.45s;}
     .booster-top    { z-index: 18; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.55s cubic-bezier(.44,1.15,.43,1), opacity 0.5s;}
     .booster-back   { z-index: 8;  position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.55s cubic-bezier(.44,1.15,.43,1), opacity 0.5s;}
-    .move-down      { transform: translateY(200px); opacity: 0.05; }
-    .card-img       { z-index: 14; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.36s cubic-bezier(.42,1.3,.4,1), opacity 0.3s; }
+    .move-down      { transform: translateY(200px); }
+    .fade-out       { opacity: 0; }
+    .card-img       { z-index: 14; position:absolute; left:0; top:0; width:100%; height:100%; pointer-events:none; transition: transform 0.36s cubic-bezier(.42,1.3,.4,1), opacity 0.3s;}
     .card-img.in-front { transform: scale(1.13) translateY(-20px); z-index:30; }
     .card-img.gone { opacity: 0; transform: scale(0.83) translateY(-80px) rotate(-6deg);}
     @media (max-width: 400px) {
@@ -78,6 +105,27 @@
   </div>
 </div>
 <script>
+function addTilt(boosterBox) {
+  boosterBox.addEventListener('mousemove', (e) => {
+    const rect = boosterBox.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    // 3D tilt
+    const tiltX = (x-0.5)*22, tiltY = (0.5-y)*19;
+    boosterBox.style.transform = `perspective(900px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) scale(1.03)`;
+    boosterBox.classList.add('tilted');
+  });
+  boosterBox.addEventListener('mouseleave', () => {
+    boosterBox.style.transform = "";
+    boosterBox.classList.remove('tilted');
+  });
+  boosterBox.addEventListener('mouseenter', () => {
+    boosterBox.classList.add('tilted');
+  });
+}
+addTilt(document.getElementById('booster1'));
+addTilt(document.getElementById('booster2'));
+
 function openBooster(num) {
   const booster = document.getElementById('booster'+num);
   const tab = document.getElementById('tab'+num);
@@ -89,20 +137,24 @@ function openBooster(num) {
   booster.removeEventListener('click', openBooster1);
   booster.removeEventListener('click', openBooster2);
 
-  // 1. Booster vibre (optionnel : ici on enlève pour minimal, remets la classe si tu veux)
-  // 2. Languette disparait
-  tab.classList.add('gone');
+  // 1. Vibration + tab pop
+  booster.classList.add('vibrating');
+  tab.classList.add('pop');
   setTimeout(() => {
-    // 3. Top & back partent ensemble
+    booster.classList.remove('vibrating');
+    // 2. Tab fade, top et back descendent ENSEMBLE
+    tab.classList.add('faded');
     top.classList.add('move-down');
     back.classList.add('move-down');
-    // 4. Carte avance (zoom)
     setTimeout(() => {
+      // 3. Fade out tout ce qui reste sauf la carte
+      tab.classList.add('fade-out');
+      top.classList.add('fade-out');
+      back.classList.add('fade-out');
+      // 4. Carte avance puis disparait
       card.classList.add('in-front');
-      // 5. Carte disparait
       setTimeout(() => {
         card.classList.add('gone');
-        // 6. Booster disparait, passe au suivant
         setTimeout(() => {
           booster.classList.add('hide');
           setTimeout(() => {
@@ -116,11 +168,11 @@ function openBooster(num) {
                 // window.location.href = '/classique.html'; // ou callback, etc.
               }, 250);
             }
-          }, 300);
-        }, 600);
-      }, 820);
-    }, 400);
-  }, 200);
+          }, 320);
+        }, 680);
+      }, 600);
+    }, 520);
+  }, 460);
 }
 function openBooster1() { openBooster(1);}
 function openBooster2() { openBooster(2);}
