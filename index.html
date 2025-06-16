@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test Pack Opening Bling - Carte 14</title>
+  <title>Test Pack Opening Vertical Vibe - Carte 14</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { background: #23282f; color: #fff; text-align: center; font-family: sans-serif; }
@@ -15,6 +15,8 @@
       background: #181c20;
       margin: 32px auto 0 auto;
       user-select: none;
+      transition: filter 0.18s;
+      will-change: transform;
     }
     .card-bw, .card-color {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -59,36 +61,38 @@ const cardW = 320, cardH = 480;
 const openBtn = document.getElementById('openBtn');
 const color = document.getElementById('color');
 const bw = document.getElementById('bw');
+const card = document.getElementById('packCard');
 const canvas = document.getElementById('particle-canvas');
 const ctx = canvas.getContext('2d');
 
 function startPackAnimation() {
-  color.style.clipPath = "inset(0 100% 0 0)";
+  color.style.clipPath = "inset(0 0 100% 0)";
   canvas.width = cardW; canvas.height = cardH;
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   let start = null;
-  const duration = 1600; // ms, durée de l'effet
+  const duration = 1600; // ms
   const particles = [];
   openBtn.disabled = true;
   openBtn.style.opacity = 0.65;
 
-  function animateParticles(frontX) {
-    // Grosse pluie de particules lumineuses sur la frontière
-    for (let i = 0; i < 110; i++) {
-      const y = Math.random() * cardH;
+  function animateParticles(frontY) {
+    // Grosse pluie de particules brillantes sur la frontière horizontale
+    for (let i = 0; i < 100; i++) {
+      const x = Math.random() * cardW;
       const angle = (Math.random()-0.5)*Math.PI/2;
-      const vx = Math.cos(angle) * (Math.random()*1.5 + 0.6);
-      const vy = Math.sin(angle) * (Math.random()*1.5 + 0.6);
+      const vx = Math.cos(angle) * (Math.random()*1.6 + 0.7);
+      const vy = Math.sin(angle) * (Math.random()*1.6 + 0.7);
       const colorList = [
         "#fff", "#ffe066", "#fffbe6", "#9ffcff", "#f9f06b",
         "#fffb", "#fff9", "#ffe9", "#fffd", "#fcf5ff"
       ];
       const glowColor = colorList[Math.floor(Math.random()*colorList.length)];
       particles.push({
-        x: frontX + Math.random()*22-11,
-        y, vx, vy,
-        r: 3.5 + Math.random()*2.3,
+        x: x,
+        y: frontY + Math.random()*22-11,
+        vx, vy,
+        r: 3.7 + Math.random()*2.5,
         color: glowColor,
         life: 0,
         maxLife: 13 + Math.random()*16,
@@ -96,12 +100,12 @@ function startPackAnimation() {
       });
     }
     // Très grosses "étincelles" pour effet surbrillant
-    for (let i=0; i<8; i++) {
-      const y = Math.random() * cardH;
+    for (let i=0; i<10; i++) {
+      const x = Math.random() * cardW;
       particles.push({
-        x: frontX, y,
+        x: x, y: frontY,
         vx: (Math.random()-0.5)*0.9, vy: (Math.random()-0.5)*0.9,
-        r: 18 + Math.random()*17,
+        r: 16 + Math.random()*14,
         color: "#fff",
         life: 0,
         maxLife: 12 + Math.random()*10,
@@ -117,11 +121,11 @@ function startPackAnimation() {
       ctx.save();
       if (p.glow) {
         ctx.shadowColor = p.color;
-        ctx.shadowBlur = 18 + Math.random()*18;
+        ctx.shadowBlur = 16 + Math.random()*16;
       } else {
         ctx.shadowBlur = 0;
       }
-      ctx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife); // min alpha pour que ça brille tout du long
+      ctx.globalAlpha = Math.max(0.22, 1 - p.life/p.maxLife);
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, 2*Math.PI);
       ctx.fillStyle = p.color;
@@ -139,16 +143,24 @@ function startPackAnimation() {
   function step(ts) {
     if (!start) start = ts;
     const progress = Math.min(1, (ts-start)/duration);
-    const right = Math.round(cardW - cardW*progress);
-    color.style.clipPath = `inset(0 ${right}px 0 0)`;
+    const bottom = Math.round(cardH - cardH*progress);
+    color.style.clipPath = `inset(0 0 ${bottom}px 0)`;
 
-    animateParticles(cardW - progress*cardW);
+    // Vibration dynamique
+    const vibration = Math.sin(progress*40)*4 + (Math.random()-0.5)*4;
+    const rotate = Math.sin(progress*27)*2 + (Math.random()-0.5)*1.4;
+    card.style.transform = `translate(${vibration}px, ${-vibration/2}px) rotate(${rotate}deg)`;
+
+    // Frontière Y = position de la transition
+    const frontY = cardH - progress*cardH;
+    animateParticles(frontY);
     drawParticles();
 
     if (progress < 1) {
       requestAnimationFrame(step);
     } else {
       color.style.clipPath = "none";
+      card.style.transform = ""; // stop vibration
       setTimeout(() => {
         ctx.clearRect(0,0,canvas.width,canvas.height);
         openBtn.disabled = false;
