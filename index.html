@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Gobgob DEX</title>
   <style>
     body {
@@ -16,7 +16,8 @@
       margin-bottom: 10px;
     }
 
-    input, button {
+    input,
+    button {
       padding: 10px;
       font-size: 1em;
       margin: 5px;
@@ -92,7 +93,10 @@
 
     #popup {
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
@@ -112,7 +116,7 @@
       width: 100%;
       height: 100%;
       padding: 10px;
-      background-color: #FFE1CF;
+      background-color: #ffe1cf;
       border-radius: 20px;
       box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
       display: flex;
@@ -122,11 +126,42 @@
       position: relative;
     }
 
+    /* Halo clair diffus en haut */
+    .popup-card-inner::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 10%;
+      right: 10%;
+      height: 40%;
+      border-radius: 50% / 100%;
+      pointer-events: none;
+      background: radial-gradient(circle at top center, rgba(200, 180, 255, 0.6), transparent 70%);
+      filter: blur(30px);
+      z-index: 10;
+    }
+
+    /* Halo sombre dégradé en bas */
+    .popup-card-inner::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40%;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.3), transparent);
+      border-radius: 0 0 20px 20px;
+      z-index: 10;
+    }
+
     .popup-card-inner img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
       pointer-events: none;
+      position: relative;
+      z-index: 20; /* devant les halos */
     }
 
     #popup.visible {
@@ -134,10 +169,22 @@
     }
 
     /* Effets de rareté */
-    .popup-card-inner.n     { box-shadow: 0 0 20px 5px rgba(155, 89, 182, 0.7); }
-    .popup-card-inner.hr    { box-shadow: 0 0 20px 5px rgba(39, 174, 96, 0.8); }
-    .popup-card-inner.sr    { box-shadow: 0 0 25px 6px rgba(241, 196, 15, 0.85); }
-    .popup-card-inner.ssr   { box-shadow: 0 0 25px 8px rgba(230, 126, 34, 0.9); }
+    .popup-card-inner.n {
+      box-shadow: 0 0 20px 5px rgba(155, 89, 182, 0.7);
+    }
+
+    .popup-card-inner.hr {
+      box-shadow: 0 0 20px 5px rgba(39, 174, 96, 0.8);
+    }
+
+    .popup-card-inner.sr {
+      box-shadow: 0 0 25px 6px rgba(241, 196, 15, 0.85);
+    }
+
+    .popup-card-inner.ssr {
+      box-shadow: 0 0 25px 8px rgba(230, 126, 34, 0.9);
+    }
+
     .popup-card-inner.ur {
       background-blend-mode: screen;
       animation: holoShift 3s linear infinite;
@@ -145,9 +192,17 @@
     }
 
     @keyframes holoShift {
-      0% { filter: hue-rotate(0deg) brightness(1.1); }
-      50% { filter: hue-rotate(180deg) brightness(1.3); }
-      100% { filter: hue-rotate(360deg) brightness(1.1); }
+      0% {
+        filter: hue-rotate(0deg) brightness(1.1);
+      }
+
+      50% {
+        filter: hue-rotate(180deg) brightness(1.3);
+      }
+
+      100% {
+        filter: hue-rotate(360deg) brightness(1.1);
+      }
     }
 
     @keyframes fadeInUp {
@@ -155,6 +210,7 @@
         opacity: 0;
         transform: translateY(20px) scale(0.95);
       }
+
       to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -164,7 +220,7 @@
 </head>
 <body>
   <h1>Gobgob DEX</h1>
-  <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
+  <input type="text" id="username" placeholder="Entre ton pseudo Twitch" />
   <button onclick="loadCollection()">Afficher</button>
   <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
 
@@ -193,12 +249,12 @@
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       return lines
-        .map(line => line.split(","))
-        .filter(parts => parts.length === 3)
+        .map((line) => line.split(","))
+        .filter((parts) => parts.length === 3)
         .map(([id, nom, rarete]) => ({
           id: parseInt(id),
           name: nom.trim(),
-          rarity: rarete.trim().toLowerCase()
+          rarity: rarete.trim().toLowerCase(),
         }));
     }
 
@@ -208,11 +264,11 @@
       const text = await res.text();
       const lines = text.trim().split("\n").slice(1);
       userCollectionCache = lines
-        .map(line => line.split(","))
-        .filter(parts => parts.length === 2)
+        .map((line) => line.split(","))
+        .filter((parts) => parts.length === 2)
         .map(([pseudo, id]) => ({
           pseudo: pseudo.trim().toLowerCase(),
-          id: parseInt(id)
+          id: parseInt(id),
         }));
       return userCollectionCache;
     }
@@ -241,13 +297,14 @@
 
     function updateProgressBar(ownedCount, totalCount) {
       const percent = (ownedCount / totalCount) * 100;
-      document.getElementById("progress-text").textContent =
-        `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+      document.getElementById("progress-text").textContent = `${ownedCount} carte${
+        ownedCount !== 1 ? "s" : ""
+      } débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
       document.getElementById("progress-bar").style.width = percent + "%";
     }
 
     function addTiltEffect(card) {
-      card.addEventListener("mousemove", e => {
+      card.addEventListener("mousemove", (e) => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
@@ -255,12 +312,11 @@
         const centerY = rect.height / 2;
         const rotateX = -(y - centerY) / 3;
         const rotateY = (x - centerX) / 3;
-        card.querySelector('.card-inner').style.transform =
-          `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+        card.querySelector(".card-inner").style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
 
       card.addEventListener("mouseleave", () => {
-        card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
+        card.querySelector(".card-inner").style.transform = "rotateX(0deg) rotateY(0deg)";
       });
     }
 
@@ -283,7 +339,7 @@
       inner.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
-    document.getElementById("popup-inner").addEventListener("mousemove", e => {
+    document.getElementById("popup-inner").addEventListener("mousemove", (e) => {
       const container = e.currentTarget;
       const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -303,11 +359,11 @@
     async function loadCollection() {
       const username = document.getElementById("username").value.toLowerCase();
       const collection = await fetchCollection();
-      const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
+      const owned = new Set(collection.filter((entry) => entry.pseudo === username).map((entry) => entry.id));
       const container = document.getElementById("cards");
       container.innerHTML = "";
 
-      allCards.forEach(card => {
+      allCards.forEach((card) => {
         const isOwned = owned.has(card.id);
         const cardElement = buildCard(card, isOwned);
         container.appendChild(cardElement);
@@ -318,12 +374,12 @@
 
     function toggleMissing() {
       showMissing = !showMissing;
-      document.querySelectorAll(".card.missing").forEach(card => {
+      document.querySelectorAll(".card.missing").forEach((card) => {
         card.classList.toggle("hidden", !showMissing);
       });
     }
 
-    fetchCards().then(cards => allCards = cards);
+    fetchCards().then((cards) => (allCards = cards));
   </script>
 </body>
 </html>
