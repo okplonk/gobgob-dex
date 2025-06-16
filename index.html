@@ -124,7 +124,7 @@
       justify-content: center;
       transition: transform 0.2s ease;
       position: relative;
-      overflow: hidden; /* important pour le reflet */
+      overflow: hidden; /* important pour le reflet et le halo */
     }
 
     /* Reflet animé */
@@ -148,31 +148,17 @@
       z-index: 15;
     }
 
-    /* Halo clair diffus en haut renforcé */
-    .popup-card-inner .halo-light {
+    /* Halo clair + ombre fusionnés en un seul calque */
+    .popup-card-inner::after {
+      content: "";
       position: absolute;
-      top: 0;
-      left: 5%;
-      right: 5%;
-      height: 60%;
-      border-radius: 50% / 100%;
+      inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle at top center, rgba(200, 180, 255, 0.85), transparent 80%);
-      filter: blur(50px);
-      z-index: 10;
-      transform-style: preserve-3d;
-    }
-
-    /* Halo sombre dégradé en bas renforcé */
-    .popup-card-inner .halo-shadow {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60%;
-      pointer-events: none;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
-      border-radius: 0 0 20px 20px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at top center, rgba(200, 180, 255, 0.5), transparent 60%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.35), transparent 60%);
+      filter: blur(40px);
       z-index: 10;
       transform-style: preserve-3d;
     }
@@ -268,8 +254,6 @@
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img id="popup-img" alt="Carte affichée" />
-        <div class="halo-light"></div>
-        <div class="halo-shadow"></div>
       </div>
     </div>
   </div>
@@ -372,11 +356,6 @@
       popup.classList.remove("visible");
       const inner = document.getElementById("popup-inner");
       inner.style.transform = "rotateX(0deg) rotateY(0deg)";
-      // Reset halos rotation
-      const haloLight = inner.querySelector(".halo-light");
-      const haloShadow = inner.querySelector(".halo-shadow");
-      if (haloLight) haloLight.style.transform = "rotateX(0deg) rotateY(0deg)";
-      if (haloShadow) haloShadow.style.transform = "rotateX(0deg) rotateY(0deg)";
     }
 
     document.getElementById("popup-inner").addEventListener("mousemove", (e) => {
@@ -388,24 +367,12 @@
       const centerY = rect.height / 2;
       const rotateX = -(y - centerY) / 6;
       const rotateY = (x - centerX) / 6;
-
-      const transformValue = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-      container.style.transform = transformValue;
-
-      // Appliquer la même rotation aux halos
-      const haloLight = container.querySelector(".halo-light");
-      const haloShadow = container.querySelector(".halo-shadow");
-      if (haloLight) haloLight.style.transform = transformValue;
-      if (haloShadow) haloShadow.style.transform = transformValue;
+      container.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
     });
 
     document.getElementById("popup-inner").addEventListener("mouseleave", () => {
       const container = document.getElementById("popup-inner");
       container.style.transform = "rotateX(0deg) rotateY(0deg)";
-      const haloLight = container.querySelector(".halo-light");
-      const haloShadow = container.querySelector(".halo-shadow");
-      if (haloLight) haloLight.style.transform = "rotateX(0deg) rotateY(0deg)";
-      if (haloShadow) haloShadow.style.transform = "rotateX(0deg) rotateY(0deg)";
     });
 
     async function loadCollection() {
