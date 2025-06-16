@@ -88,6 +88,73 @@
     #popup.visible {
       visibility: visible;
     }
+    .popup-card {
+      width: 300px;
+      height: 450px;
+      perspective: 1000px;
+    }
+    .popup-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border-radius: 12px;
+      isolation: isolate;
+      transform-style: preserve-3d;
+      overflow: hidden;
+      -webkit-mask-image: url('img/alpha_mask.png');
+      mask-image: url('img/alpha_mask.png');
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-mode: alpha;
+      mask-mode: alpha;
+    }
+    .popup-inner img,
+    .popup-inner div {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .popup-inner .main {
+      z-index: 1;
+      object-fit: contain;
+    }
+    .popup-inner .bump {
+      background-image: url('img/placeholder-bump.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      mix-blend-mode: hard-light;
+      opacity: 0.3;
+      filter: blur(0.5px) contrast(1.2);
+      z-index: 2;
+    }
+    .popup-inner .holo {
+      background: linear-gradient(135deg, violet, cyan, gold);
+      background-size: 300% 300%;
+      animation: holoMove 6s linear infinite;
+      mix-blend-mode: soft-light;
+      opacity: 0.3;
+      z-index: 3;
+    }
+    .popup-inner .sparkles {
+      background-image: url('https://assets.codepen.io/13471/sparkles.gif');
+      background-size: cover;
+      background-position: center;
+      mix-blend-mode: screen;
+      opacity: 0.5;
+      z-index: 4;
+    }
+    .popup-inner .halo {
+      background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+      transition: background 0.1s ease;
+      z-index: 5;
+    }
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px) scale(0.95); }
       to { opacity: 1; transform: translateY(0) scale(1); }
@@ -110,7 +177,6 @@
   </div>
 
   <div class="card-grid" id="cards"></div>
-
   <div id="popup" onclick="hidePopup()"></div>
 
   <script>
@@ -135,51 +201,15 @@
       });
     }
 
-    function addTiltEffect(card) {
-      card.addEventListener("mousemove", e => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const rotateX = -(y - rect.height / 2) / 3;
-        const rotateY = (x - rect.width / 2) / 3;
-        card.querySelector('.card-inner').style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-      });
-      card.addEventListener("mouseleave", () => {
-        card.querySelector('.card-inner').style.transform = "rotateX(0deg) rotateY(0deg)";
-      });
-    }
-
     function hidePopup() {
       const popup = document.getElementById("popup");
       popup.classList.remove("visible");
       popup.innerHTML = "";
     }
 
-    function addZoomEffect(cardId) {
-      const popup = document.getElementById("popup");
-      popup.classList.add("visible");
-      popup.innerHTML = `
-        <div style="width: 300px; height: 450px; perspective: 1000px;">
-          <div id="popup-inner"
-            onmousemove="rotatePopup(event)" onmouseleave="resetPopup()"
-            style="width: 100%; height: 100%; position: relative; border-radius: 12px; isolation: isolate; transform-style: preserve-3d; overflow: hidden;
-              -webkit-mask-image: url('img/alpha_mask.png'); mask-image: url('img/alpha_mask.png');
-              -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-              -webkit-mask-position: center; mask-position: center;
-              -webkit-mask-size: contain; mask-size: contain;
-              -webkit-mask-mode: alpha; mask-mode: alpha;">
-            <img src="img/${cardId}.png" alt="card" style="width: 100%; height: 100%; object-fit: contain; display: block; position: relative; z-index: 1; pointer-events: none;" />
-            <div style="position: absolute; inset: 0; background-image: url('img/${cardId}-bump.png'); background-size: contain; background-position: center; background-repeat: no-repeat; mix-blend-mode: hard-light; opacity: 0.3; filter: blur(0.5px) contrast(1.2); pointer-events: none; z-index: 2;"></div>
-            <div style="position: absolute; inset: 0; background: linear-gradient(135deg, violet, cyan, gold); background-size: 300% 300%; animation: holoMove 6s linear infinite; mix-blend-mode: soft-light; opacity: 0.3; pointer-events: none; z-index: 3;"></div>
-            <div style="position: absolute; inset: 0; background-image: url('https://assets.codepen.io/13471/sparkles.gif'); background-size: cover; background-position: center; mix-blend-mode: screen; opacity: 0.5; pointer-events: none; z-index: 4;"></div>
-            <div id="popup-halo" style="position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%); transition: background 0.1s ease; pointer-events: none; z-index: 5;"></div>
-          </div>
-        </div>`;
-    }
-
     function rotatePopup(e) {
       const card = e.currentTarget;
-      const halo = document.getElementById("popup-halo");
+      const halo = card.querySelector(".halo");
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -191,11 +221,27 @@
       halo.style.background = `radial-gradient(circle at ${haloX}% ${haloY}%, rgba(255,255,255,0.4) 0%, transparent 60%)`;
     }
 
-    function resetPopup() {
-      const card = document.getElementById("popup-inner");
-      const halo = document.getElementById("popup-halo");
+    function resetPopup(e) {
+      const card = e.currentTarget;
+      const halo = card.querySelector(".halo");
       card.style.transform = "rotateX(0deg) rotateY(0deg)";
       halo.style.background = `radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%)`;
+    }
+
+    function addZoomEffect(cardId) {
+      const popup = document.getElementById("popup");
+      popup.innerHTML = `
+        <div class="popup-card">
+          <div class="popup-inner" onmousemove="rotatePopup(event)" onmouseleave="resetPopup(event)">
+            <img src="img/${cardId}.png" class="main" alt="card" />
+            <div class="bump" style="background-image: url('img/${cardId}-bump.png');"></div>
+            <div class="holo"></div>
+            <div class="sparkles"></div>
+            <div class="halo"></div>
+          </div>
+        </div>
+      `;
+      popup.classList.add("visible");
     }
 
     async function loadCollection() {
@@ -219,7 +265,6 @@
           div.classList.add("missing");
           if (!showMissing) div.classList.add("hidden");
         } else {
-          addTiltEffect(div);
           div.onclick = () => addZoomEffect(card.id);
         }
         container.appendChild(div);
