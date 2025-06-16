@@ -2,26 +2,49 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Booster Popup Gobgob - Drag Reveal</title>
+  <title>Booster Opening Multi-step Gobgob</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    html, body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
+    body { background: #23282f; color: #fff; font-family: sans-serif; margin:0; padding:0; }
     .booster-zone {
       min-height: 100vh;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
     }
-    .popup-booster-container {
+    .popup-stack {
       position: relative;
-      width: 320px; height: 510px;
+      width: 320px; height: 520px;
       margin: 0 auto;
       user-select: none;
       touch-action: manipulation;
+      background: transparent;
+    }
+    .popup-booster-container {
+      position: absolute;
+      left: 0; top: 0;
+      width: 320px; height: 510px;
       perspective: 1200px;
       z-index: 1;
       background: transparent;
       cursor: pointer;
-      transition: box-shadow 0.2s;
+      transition: box-shadow 0.2s, filter 0.3s;
       box-shadow: 0 2px 24px #000b;
+      opacity: 1;
+      transform: translateY(0) scale(1) rotate(0deg);
+      pointer-events: all;
+    }
+    .popup-booster-container.inactive {
+      pointer-events: none;
+      filter: blur(1px) brightness(0.92) grayscale(0.4);
+      opacity: 0.92;
+      z-index: 0;
+    }
+    .popup-booster-container.hide {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s, filter 0.4s;
+      filter: blur(3px);
+      z-index: -1;
     }
     .booster-back, .card-img, .booster-front, .booster-top {
       position: absolute; left: 0; top: 0; width: 100%; height: 100%;
@@ -33,14 +56,13 @@
     .card-img {
       z-index: 2;
       opacity: 0;
-      /* Commence cachée sous la languette */
       filter: drop-shadow(0 12px 40px #000a) brightness(0.85);
       transform: translateY(0%) scale(0.97) rotate(2deg);
       transition:
-        opacity 0.35s, filter 0.44s;
+        opacity 0.3s, filter 0.42s;
     }
     .card-img.vibrating {
-      animation: card-vibe 0.65s cubic-bezier(.21,1.9,.51,1.2) 1;
+      animation: card-vibe 0.5s cubic-bezier(.21,1.9,.51,1.2) 1;
     }
     @keyframes card-vibe {
       0% { transform: translateY(0%) scale(0.97) rotate(2deg);}
@@ -51,34 +73,63 @@
       80% { transform: translateY(0%) scale(1) rotate(0deg);}
       100% { transform: translateY(0%) scale(0.97) rotate(2deg);}
     }
-    /* Anim principale du reveal, séquencée par JS */
     .card-img.revealup {
       opacity: 1;
-      transition: transform 0.42s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
-      /* Passe devant la languette (dépasse le booster-top, sort du booster) */
+      transition: transform 0.37s cubic-bezier(.33,2,.61,1.15), opacity 0.18s, filter 0.5s;
       transform: translateY(-47%) scale(1.07) rotate(-2.5deg);
       filter: drop-shadow(0 7px 40px #fff5) drop-shadow(0 0px 15px #ffe33a55) brightness(1.09);
       z-index: 14;
     }
     .card-img.revealdone {
       opacity: 1;
-      /* Descend pile sur le booster-top, stack final */
       transition: transform 0.35s cubic-bezier(.42,1.6,.5,1.03), filter 0.4s;
       transform: translateY(-9%) scale(1) rotate(0deg);
       filter: drop-shadow(0 4px 36px #fff3) drop-shadow(0 0px 15px #ffe33a22) brightness(1.03);
       z-index: 15;
     }
-    .booster-front { z-index: 11; pointer-events: none; }
+    .card-img.disappear {
+      transition: opacity 0.36s cubic-bezier(.45,2,.55,1), transform 0.5s cubic-bezier(.41,2.6,.55,1);
+      opacity: 0;
+      transform: translateY(-40%) scale(0.8) rotate(-8deg);
+      filter: blur(2px) brightness(0.7);
+      z-index: 18;
+    }
+    .booster-front { z-index: 11; }
     .booster-top {
       z-index: 12;
-      transition: transform 0.42s cubic-bezier(.55,1.7,.33,1), opacity 0.32s;
-      transform: translateY(0) rotate(0deg);
+      /* PAGE TURN EFFECT */
+      transition:
+        transform 0.7s cubic-bezier(.77,2.1,.38,1),
+        opacity 0.42s;
+      transform: rotateZ(0deg) rotateY(0deg) translateY(0);
       opacity: 1;
+      transform-origin: 100% 0%; /* top right */
       pointer-events: none;
     }
     .booster-top.open {
-      transform: translateY(-28%) rotate(-11deg) scale(1.07,1.01);
-      opacity: 0.96;
+      /* Page turn du haut droit vers le haut gauche */
+      transform: rotateZ(-16deg) rotateY(-92deg) translateY(-18%);
+      opacity: 0.94;
+      transition:
+        transform 0.7s cubic-bezier(.77,2.1,.38,1),
+        opacity 0.37s;
+    }
+    /* Booster VIBRATION */
+    @keyframes booster-vibe {
+      0% { transform: scale(1) rotate(0deg);}
+      10% { transform: scale(1.02) rotate(-2deg);}
+      20% { transform: scale(1.04) rotate(2deg);}
+      30% { transform: scale(1.08) rotate(-2deg);}
+      40% { transform: scale(1.04) rotate(2deg);}
+      50% { transform: scale(1.09) rotate(2deg);}
+      60% { transform: scale(1.07) rotate(-2deg);}
+      70% { transform: scale(1.11) rotate(1.5deg);}
+      80% { transform: scale(1.09) rotate(-2deg);}
+      90% { transform: scale(1.04) rotate(1deg);}
+      100% { transform: scale(1.13) rotate(0deg);}
+    }
+    .vibrating {
+      animation: booster-vibe 0.8s cubic-bezier(.41,2.5,.55,1.1) 1;
     }
     /* 3D tilt */
     .popup-booster-container.tilted {
@@ -86,73 +137,103 @@
       transition: box-shadow 0.08s;
     }
     @media (max-width: 400px) {
-      .popup-booster-container { width: 98vw; max-width: 350px; }
+      .popup-stack { width: 98vw; max-width: 350px; }
+      .popup-booster-container { width: 98vw; max-width: 350px;}
     }
   </style>
 </head>
 <body>
 <div class="booster-zone">
-  <div class="popup-booster-container" id="boosterBox">
-    <img src="img/booster-back.png" class="booster-back">
-    <img src="img/14.png" class="card-img" id="card">
-    <img src="img/booster-front.png" class="booster-front">
-    <img src="img/booster-top.png" class="booster-top" id="boosterTop">
+  <div class="popup-stack" id="stack">
+    <!-- Booster 2 (au fond, inactif au début) -->
+    <div class="popup-booster-container inactive" id="booster2">
+      <img src="img/booster-back.png" class="booster-back">
+      <img src="img/14.png" class="card-img" id="card2">
+      <img src="img/booster-front.png" class="booster-front">
+      <img src="img/booster-top.png" class="booster-top" id="boosterTop2">
+    </div>
+    <!-- Booster 1 (devant, actif au début) -->
+    <div class="popup-booster-container" id="booster1">
+      <img src="img/booster-back.png" class="booster-back">
+      <img src="img/14.png" class="card-img" id="card1">
+      <img src="img/booster-front.png" class="booster-front">
+      <img src="img/booster-top.png" class="booster-top" id="boosterTop1">
+    </div>
   </div>
 </div>
 <script>
-const boosterBox = document.getElementById('boosterBox');
-const boosterTop = document.getElementById('boosterTop');
-const card = document.getElementById('card');
+function addTilt(boosterBox) {
+  boosterBox.addEventListener('mousemove', (e) => {
+    const rect = boosterBox.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const tiltX = x*26, tiltY = -y*24;
+    boosterBox.style.transform = `perspective(900px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) scale(1.03)`;
+    boosterBox.classList.add('tilted');
+  });
+  boosterBox.addEventListener('mouseleave', () => {
+    boosterBox.style.transform = "";
+    boosterBox.classList.remove('tilted');
+  });
+  boosterBox.addEventListener('mouseenter', () => {
+    boosterBox.classList.add('tilted');
+  });
+}
+addTilt(document.getElementById('booster1'));
+addTilt(document.getElementById('booster2'));
 
-let opened = false;
+let current = 1;
+function openBooster(num) {
+  const booster = document.getElementById('booster'+num);
+  const boosterTop = document.getElementById('boosterTop'+num);
+  const card = document.getElementById('card'+num);
+  if (booster.classList.contains('inactive') || booster.classList.contains('hide')) return;
 
-// ---- 3D TILT effet sur hover/touch ----
-let tilt = {x: 0, y: 0};
-boosterBox.addEventListener('mousemove', (e) => {
-  const rect = boosterBox.getBoundingClientRect();
-  const x = (e.clientX - rect.left) / rect.width - 0.5;
-  const y = (e.clientY - rect.top) / rect.height - 0.5;
-  tilt.x = x*26;
-  tilt.y = -y*24;
-  boosterBox.style.transform = `perspective(900px) rotateY(${tilt.x}deg) rotateX(${tilt.y}deg) scale(1.03)`;
-  boosterBox.classList.add('tilted');
-});
-boosterBox.addEventListener('mouseleave', () => {
-  boosterBox.style.transform = "";
-  boosterBox.classList.remove('tilted');
-});
-boosterBox.addEventListener('mouseenter', () => {
-  boosterBox.classList.add('tilted');
-});
+  booster.removeEventListener('click', openBooster1);
+  booster.removeEventListener('click', openBooster2);
 
-// Mobile tilt (gyroscope)
-window.addEventListener("deviceorientation", (e) => {
-  // Optionnel: tu veux l'activer sur mobile ?
-  // let x = Math.max(-1, Math.min(1, e.gamma/20)); // entre -1 et 1
-  // let y = Math.max(-1, Math.min(1, e.beta/24));
-  // boosterBox.style.transform = `perspective(900px) rotateY(${x*26}deg) rotateX(${-y*24}deg) scale(1.04)`;
-  // boosterBox.classList.add('tilted');
-});
-
-// ---- OUVERTURE DU BOOSTER SUR CLICK ----
-boosterBox.addEventListener('click', () => {
-  if (opened) return;
-  opened = true;
-  // 1. La carte vibre sous la languette
-  card.classList.add('vibrating');
+  // 1. Booster vibre
+  booster.classList.add('vibrating');
   setTimeout(() => {
-    // 2. Booster-top s'ouvre
+    // 2. Languette page-turn
     boosterTop.classList.add('open');
-    // 3. La carte sort et passe DEVANT la languette (dépasser)
-    card.classList.remove('vibrating');
-    card.classList.add('revealup');
-    // 4. Après 520ms, la carte descend sur le booster (stack finale)
+    // 3. Carte vibre puis sort, dépasse, puis descend
+    card.classList.add('vibrating');
     setTimeout(() => {
-      card.classList.remove('revealup');
-      card.classList.add('revealdone');
-    }, 520);
-  }, 650); // vibration durée
-});
+      card.classList.remove('vibrating');
+      card.classList.add('revealup');
+      setTimeout(() => {
+        card.classList.remove('revealup');
+        card.classList.add('revealdone');
+        // 4. Après un temps, la carte disparait et booster s'efface
+        setTimeout(() => {
+          card.classList.add('disappear');
+          booster.classList.remove('vibrating');
+          booster.classList.add('hide');
+          setTimeout(() => {
+            booster.style.display = 'none';
+            if (num === 1) {
+              // Booster 2 devient actif
+              document.getElementById('booster2').classList.remove('inactive');
+            } else {
+              // Tous ouverts : on passe à la suite
+              setTimeout(()=>{
+                alert("Tous les boosters ouverts ! (redirige vers page classique)");
+                // window.location.href = '/classique.html'; // ou callback, etc.
+              }, 350);
+            }
+          }, 350);
+        }, 850);
+      }, 550);
+    }, 420);
+  }, 900);
+}
+
+// Associe click
+function openBooster1() { openBooster(1);}
+function openBooster2() { openBooster(2);}
+document.getElementById('booster1').addEventListener('click', openBooster1);
+document.getElementById('booster2').addEventListener('click', openBooster2);
 </script>
 </body>
 </html>
