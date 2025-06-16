@@ -113,7 +113,7 @@
       z-index: 1;
       position: absolute;
       top: 0; left: 0;
-      transition: transform 0.2s ease;
+      transition: transform 0.2s cubic-bezier(.45,.6,.5,1.45);
       filter: brightness(1.13) contrast(1.11) saturate(1.13);
       will-change: filter, transform;
       transform-style: preserve-3d;
@@ -137,50 +137,37 @@
       inset: 0;
       border-radius: 22px;
       z-index: 10;
-      background-blend-mode: screen, soft-light, overlay, lighten;
+      background-blend-mode: lighten,screen,color-dodge,lighten;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(125deg, #fff2 0 4px, transparent 4px 16px),
-        linear-gradient(120deg, #7fffd430 0%, #fff0 60%, #e993ff50 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff5 10%, #fff0 70%);
-      background-size: cover, 280% 220%, 100% 100%, 120% 120%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
-      opacity: 0.39;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.22"/></svg>'),
+        repeating-linear-gradient(125deg, #ffffff22 0 6px, transparent 6px 20px),
+        linear-gradient(120deg,#7fffd430 0%,#fff0 60%,#e993ff50 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff5 10%,#fff0 70%);
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
+      opacity: 0.35;
       animation: shine-anim 6s linear infinite;
       transition: opacity 0.2s;
       transform-style: preserve-3d;
     }
     @keyframes shine-anim {
       100% {
-        background-position: center, 100% 0, center, center;
+        background-position: var(--grain-x,50%) var(--grain-y,50%), 100% 0, center, center;
       }
     }
-    /* Holo UR ultra visible arc-en-ciel */
     .card__shine.ur {
       box-shadow: 0 0 30px 5px #fff, 0 0 100px 18px #49e7ffbb;
       border: 2.5px solid #3beeffb9;
       opacity: 0.6;
       mix-blend-mode: color-dodge;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(
-          125deg,
-          #ffffff22 0 6px, transparent 6px 20px
-        ),
-        linear-gradient(
-          120deg,
-          #f6d365 0%,
-          #fda085 10%,
-          #fcb69f 20%,
-          #a1c4fd 40%,
-          #c2e9fb 60%,
-          #fccb90 80%,
-          #fd6e6a 100%
-        ),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff6 12%, #fff0 80%);
-      background-blend-mode: screen, screen, color-dodge, lighten;
-      background-size: cover, 240% 200%, 180% 180%, 110% 110%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.18"/></svg>'),
+        repeating-linear-gradient(125deg,#ffffff22 0 6px,transparent 6px 20px),
+        linear-gradient(120deg,#f6d365 0%,#fda085 10%,#fcb69f 20%,#a1c4fd 40%,#c2e9fb 60%,#fccb90 80%,#fd6e6a 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff6 12%,#fff0 80%);
+      background-blend-mode: lighten,screen,color-dodge,lighten;
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
       animation: shine-anim 5s linear infinite;
       transform-style: preserve-3d;
     }
@@ -189,13 +176,13 @@
       border: 2.5px solid #ffd900c9;
       opacity: 0.44;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(120deg, #fff8 0 3px, transparent 3px 17px),
-        linear-gradient(115deg, #ffd90099 0%, #fff0 55%, #e993ff50 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff5 10%, #fff0 70%);
-      background-blend-mode: screen, screen, color-dodge, lighten;
-      background-size: cover, 240% 200%, 180% 180%, 110% 110%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.18"/></svg>'),
+        repeating-linear-gradient(120deg,#fff8 0 3px,transparent 3px 17px),
+        linear-gradient(115deg,#ffd90099 0%,#fff0 55%,#e993ff50 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff5 10%,#fff0 70%);
+      background-blend-mode: lighten,screen,color-dodge,lighten;
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
       transform-style: preserve-3d;
     }
     .card__shine.ssr {
@@ -203,13 +190,13 @@
       border: 2.5px solid #ff8c00b8;
       opacity: 0.44;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(120deg, #fff6 0 3px, transparent 3px 17px),
-        linear-gradient(120deg, #ffb34780 0%, #ffd70055 60%, #ff8c0060 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff7 9%, #fff0 70%);
-      background-blend-mode: screen, screen, color-dodge, lighten;
-      background-size: cover, 240% 200%, 180% 180%, 110% 110%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.15"/></svg>'),
+        repeating-linear-gradient(120deg,#fff6 0 3px,transparent 3px 17px),
+        linear-gradient(120deg,#ffb34780 0%,#ffd70055 60%,#ff8c0060 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff7 9%,#fff0 70%);
+      background-blend-mode: lighten,screen,color-dodge,lighten;
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
       transform-style: preserve-3d;
     }
     .card__shine.hr {
@@ -217,13 +204,13 @@
       border: 2.5px solid #4cffb5d0;
       opacity: 0.39;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(120deg, #fff4 0 3px, transparent 3px 13px),
-        linear-gradient(120deg, #a3f9c980 0%, #b4ffb890 60%, #77ffc780 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff6 12%, #fff0 70%);
-      background-blend-mode: screen, screen, color-dodge, lighten;
-      background-size: cover, 240% 200%, 180% 180%, 110% 110%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.15"/></svg>'),
+        repeating-linear-gradient(120deg,#fff4 0 3px,transparent 3px 13px),
+        linear-gradient(120deg,#a3f9c980 0%,#b4ffb890 60%,#77ffc780 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff6 12%,#fff0 70%);
+      background-blend-mode: lighten,screen,color-dodge,lighten;
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
       transform-style: preserve-3d;
     }
     .card__shine.n {
@@ -231,13 +218,13 @@
       box-shadow: 0 0 10px 0 #fff, 0 0 18px 4px #ae69fa66;
       border: 2.5px solid #ae69fa48;
       background-image:
-        url('https://img.freepik.com/free-vector/colorful-background-with-rough-texture-geometric-background-banner-background-template_474888-5658.jpg?semt=ais_hybrid&w=740'),
-        repeating-linear-gradient(120deg, #fff2 0 3px, transparent 3px 16px),
-        linear-gradient(120deg, #c3a6fd80 0%, #d3bfff88 60%, #ae69fa77 100%),
-        radial-gradient(circle at var(--mx,50%) var(--my,50%), #fff3 10%, #fff0 70%);
-      background-blend-mode: screen, screen, color-dodge, lighten;
-      background-size: cover, 240% 200%, 180% 180%, 110% 110%;
-      background-position: center, var(--posx,50%) var(--posy,50%), center, center;
+        url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" stitchTiles="stitch"/></filter><rect width="60" height="60" filter="url(%23f)" opacity="0.12"/></svg>'),
+        repeating-linear-gradient(120deg,#fff2 0 3px,transparent 3px 16px),
+        linear-gradient(120deg,#c3a6fd80 0%,#d3bfff88 60%,#ae69fa77 100%),
+        radial-gradient(circle at var(--mx,50%) var(--my,50%),#fff3 10%,#fff0 70%);
+      background-blend-mode: lighten,screen,color-dodge,lighten;
+      background-size: 120% 120%, 240% 200%, 180% 180%, 110% 110%;
+      background-position: var(--grain-x,50%) var(--grain-y,50%), var(--posx,50%) var(--posy,50%), center, center;
       transform-style: preserve-3d;
     }
   </style>
@@ -316,17 +303,18 @@
         shine.style.setProperty('--my', y + '%');
         shine.style.setProperty('--posx', x + '%');
         shine.style.setProperty('--posy', y + '%');
-
-        // Calcul du tilt
+        // Le grain suit aussi le tilt (plus lent)
+        let grainX = Math.round(50 + (x - 50) * 1.2);
+        let grainY = Math.round(50 + (y - 50) * 1.2);
+        shine.style.setProperty('--grain-x', grainX + '%');
+        shine.style.setProperty('--grain-y', grainY + '%');
+        // Rotation 3D carte
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        const rotateX = -(e.clientY - rect.top - centerY) / 10;
-        const rotateY = (e.clientX - rect.left - centerX) / 10;
-
-        // Applique la même rotation à l'image ET au calque d'effet
+        const rotateX = -(e.clientY - rect.top - centerY) / 9;
+        const rotateY = (e.clientX - rect.left - centerX) / 9;
         if (img) {
           img.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.09)`;
-          // Boost encore plus les UR
           if(rarity === "UR") {
             img.style.filter = "brightness(1.18) contrast(1.17) saturate(1.23)";
           } else {
@@ -340,6 +328,8 @@
         shine.style.setProperty('--my', '50%');
         shine.style.setProperty('--posx', '50%');
         shine.style.setProperty('--posy', '50%');
+        shine.style.setProperty('--grain-x', '50%');
+        shine.style.setProperty('--grain-y', '50%');
         if (img) {
           img.style.transform = "rotateX(0deg) rotateY(0deg) scale(1)";
           img.style.filter = "";
@@ -349,15 +339,16 @@
     }
     function addZoomEffect(cardId) {
       const card = allCards.find(c => c.id === cardId);
+      const rarity = card ? card.rarity : "N";
       const popup = document.getElementById("popup");
-      const popupCard = popup.querySelector(".popup-card");
-      popupCard.innerHTML = "";
+      const popupCard = document.querySelector(".popup-card");
+      popupCard.innerHTML = ""; // clear
       const inner = document.createElement("div");
       inner.className = "popup-card-inner";
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       inner.title = `${card.name} (${card.rarity})`;
       popupCard.appendChild(inner);
-      addPopupHoloFX(popupCard, card.rarity);
+      addPopupHoloFX(popupCard, rarity);
       popup.classList.add("visible");
     }
     function hidePopup() {
