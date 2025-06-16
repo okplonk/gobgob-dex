@@ -99,10 +99,10 @@
       position: relative;
       overflow: hidden;
       border-radius: 18px;
-      box-shadow: 0 8px 32px 8px #0006;
       background: none;
       transition: transform 0.2s ease;
       isolation: isolate;
+      box-shadow: 0 6px 24px 4px #0006, 0 0px 0px 2.5px #fff3 inset;
     }
     .popup-img {
       position: absolute;
@@ -128,41 +128,43 @@
       filter: brightness(9) blur(0.8px) opacity(0.06);
       mix-blend-mode: screen;
     }
-    /* --- HOLO EFFECTS --- */
-    .holo-glare, .holo-rainbow, .holo-sparkles {
+    /* --- LIGHT / GRAIN / HALO --- */
+    .card-grain-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 18px;
+      z-index: 3;
+      opacity: 0.13;
+      mix-blend-mode: soft-light;
+      background-image: url('data:image/svg+xml;utf8,<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" stitchTiles="stitch"/></filter><rect width="128" height="128" filter="url(%23noise)" opacity="0.46" /></svg>');
+      background-size: 60px 60px;
+      background-repeat: repeat;
+    }
+    .card-light-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 18px;
+      z-index: 4;
+      opacity: 0.17;
+      mix-blend-mode: soft-light;
+      background:
+        radial-gradient(circle at 32% 18%, #fff 0%, transparent 68%),
+        radial-gradient(ellipse at 50% 85%, #0005 0 30%, transparent 72%);
+      transition: background 0.18s;
+    }
+    .card-light-bright {
       position: absolute;
       inset: 0;
       pointer-events: none;
       border-radius: 18px;
       z-index: 5;
-      transition: opacity 0.3s;
-    }
-    .holo-rainbow {
-      opacity: 0.13;
-      z-index: 4;
-      mix-blend-mode: color-dodge;
-      background: conic-gradient(from 0deg, #f4aaff, #aaf4ff, #fff1aa, #ffaaf4, #f4aaff);
-      animation: holoRainbowAnim 8s linear infinite;
-      filter: blur(0.7px) brightness(1.08) saturate(1.07);
-    }
-    @keyframes holoRainbowAnim {
-      0% { filter: hue-rotate(0deg);}
-      100% { filter: hue-rotate(360deg);}
-    }
-    .holo-glare {
-      z-index: 6;
-      background: linear-gradient(115deg, transparent 32%, #fff 51%, transparent 63%);
-      background-size: 300% 300%;
-      background-position: 60% 0;
-      mix-blend-mode: lighten;
-      opacity: 0.04;
-      transition: opacity 0.2s;
-    }
-    .holo-sparkles {
-      z-index: 7;
-      background: none;
       opacity: 0.14;
-      pointer-events: none;
+      mix-blend-mode: screen;
+      background:
+        radial-gradient(circle at 50% 50%, #fff9 0 10%, transparent 35%);
+      transition: background 0.12s;
     }
     .emboss-effect {
       position: absolute;
@@ -173,6 +175,42 @@
       background: radial-gradient(circle at 50% 35%, #fff7 55%, #aaa0 80%, transparent 100%);
       z-index: 10;
       transition: background 0.15s;
+    }
+    /* --- HOLO EFFECTS --- */
+    .holo-glare, .holo-rainbow, .holo-sparkles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 18px;
+      z-index: 7;
+      transition: opacity 0.3s;
+    }
+    .holo-rainbow {
+      opacity: 0.13;
+      z-index: 6;
+      mix-blend-mode: color-dodge;
+      background: conic-gradient(from 0deg, #f4aaff, #aaf4ff, #fff1aa, #ffaaf4, #f4aaff);
+      animation: holoRainbowAnim 8s linear infinite;
+      filter: blur(0.7px) brightness(1.08) saturate(1.07);
+    }
+    @keyframes holoRainbowAnim {
+      0% { filter: hue-rotate(0deg);}
+      100% { filter: hue-rotate(360deg);}
+    }
+    .holo-glare {
+      z-index: 8;
+      background: linear-gradient(115deg, transparent 32%, #fff 51%, transparent 63%);
+      background-size: 300% 300%;
+      background-position: 60% 0;
+      mix-blend-mode: lighten;
+      opacity: 0.04;
+      transition: opacity 0.2s;
+    }
+    .holo-sparkles {
+      z-index: 9;
+      background: none;
+      opacity: 0.14;
+      pointer-events: none;
     }
     /* SPARKLE SVG ANIM */
     @keyframes sparkle-anim {
@@ -263,14 +301,17 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <!-- Popup avec effet holo & glitch -->
+  <!-- Popup avec effet holo, lumière, grain et glitch -->
   <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner">
         <img class="popup-img base" id="popup-img-base">
         <img class="popup-img shadow" id="popup-img-shadow">
         <img class="popup-img light" id="popup-img-light">
-        <!-- HOLO FX LAYER inserted by JS -->
+        <!-- EFFETS JS -->
+        <div class="card-grain-layer"></div>
+        <div class="card-light-layer" id="card-light-layer"></div>
+        <div class="card-light-bright" id="card-light-bright"></div>
         <div class="emboss-effect" id="emboss"></div>
       </div>
     </div>
@@ -335,6 +376,7 @@
       } else {
         removeGlitchLayer(inner);
       }
+      setupLightAndGrainLayer(inner);
       setupHoloEffectLayer(inner, rarity, cardId);
 
       function updateEffect(e) {
@@ -364,9 +406,13 @@
         if(holoGlare) {
           let bgX = Math.round((x / rect.width) * 100);
           holoGlare.style.backgroundPosition = `${bgX}% 0%`;
-          // Légère intensité selon déplacement
           holoGlare.style.opacity = parseFloat(holoGlare.dataset.baseOpacity || 0.08) +
             0.06 * Math.abs((x-centerX)/rect.width) + 0.02 * Math.abs((y-centerY)/rect.height);
+        }
+        // Halo blanc mobile (light-bright)
+        const halo = inner.querySelector(".card-light-bright");
+        if (halo) {
+          halo.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, #fff 0 12%, transparent 33%)`;
         }
       }
       inner.onmousemove = updateEffect;
@@ -379,6 +425,11 @@
         if(holoGlare) {
           holoGlare.style.backgroundPosition = "60% 0";
           holoGlare.style.opacity = holoGlare.dataset.baseOpacity || 0.08;
+        }
+        // Halo blanc mobile
+        const halo = inner.querySelector(".card-light-bright");
+        if (halo) {
+          halo.style.background = "radial-gradient(circle at 50% 50%, #fff9 0 10%, transparent 35%)";
         }
       };
     }
@@ -489,6 +540,27 @@
         sp.appendChild(star);
       }
       inner.appendChild(sp);
+    }
+
+    // ==== LIGHT + GRAIN pour toutes les cartes popup ====
+    function setupLightAndGrainLayer(inner) {
+      if (!inner.querySelector('.card-grain-layer')) {
+        let grain = document.createElement('div');
+        grain.className = 'card-grain-layer';
+        inner.appendChild(grain);
+      }
+      if (!inner.querySelector('.card-light-layer')) {
+        let light = document.createElement('div');
+        light.className = 'card-light-layer';
+        light.id = 'card-light-layer';
+        inner.appendChild(light);
+      }
+      if (!inner.querySelector('.card-light-bright')) {
+        let halo = document.createElement('div');
+        halo.className = 'card-light-bright';
+        halo.id = 'card-light-bright';
+        inner.appendChild(halo);
+      }
     }
 
     // ==== GLITCH FX POUR LA CARTE ID 14 ====
