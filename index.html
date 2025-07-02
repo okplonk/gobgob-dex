@@ -43,7 +43,8 @@
       position: absolute;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.3), transparent 60%);
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.4), transparent 60%);
+      mix-blend-mode: overlay;
       pointer-events: none;
     }
 
@@ -51,32 +52,35 @@
       position: absolute;
       width: 100%;
       height: 100%;
-      background-image: linear-gradient(115deg, rgba(255,255,255,0.25) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.25) 75%, transparent 75%, transparent),
-                        linear-gradient(65deg, rgba(255,255,255,0.25) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.25) 75%, transparent 75%, transparent);
-      background-size: 15px 15px;
+      background-image: 
+        linear-gradient(115deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 75%, transparent 75%, transparent),
+        linear-gradient(65deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 75%, transparent 75%, transparent),
+        radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.2), transparent 50%);
+      background-size: 15px 15px, 15px 15px, 100% 100%;
+      background-blend-mode: screen;
       mask-image: url('gobgob_lunadere_mask.png');
       -webkit-mask-image: url('gobgob_lunadere_mask.png');
       mask-size: 100% 100%;
       mask-repeat: no-repeat;
       pointer-events: none;
       overflow: hidden;
-      opacity: 0.9;
+      opacity: 1;
     }
 
     .sparkles {
       position: absolute;
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(rgba(255,255,255,0.6) 5%, transparent 10%);
+      background-image: radial-gradient(rgba(255,255,255,0.8) 5%, transparent 10%);
       background-size: 3px 3px;
-      opacity: 0.8;
+      opacity: 0.9;
       pointer-events: none;
       animation: sparkle 3s linear infinite;
     }
 
     @keyframes sparkle {
       from { background-position: 0 0; }
-      to { background-position: 100px 100px; }
+      to { background-position: 200px 200px; }
     }
 
   </style>
@@ -97,6 +101,7 @@
   const card = document.getElementById('card');
   const cardInner = document.getElementById('card-inner');
   const lightEffect = document.getElementById('light-effect');
+  const effectMask = document.getElementById('effect-mask');
 
   card.addEventListener('mousemove', (e) => {
     const rect = card.getBoundingClientRect();
@@ -110,12 +115,16 @@
 
     lightEffect.style.setProperty('--mouse-x', `${x * 100}%`);
     lightEffect.style.setProperty('--mouse-y', `${y * 100}%`);
+    effectMask.style.setProperty('--mouse-x', `${x * 100}%`);
+    effectMask.style.setProperty('--mouse-y', `${y * 100}%`);
   });
 
   card.addEventListener('mouseleave', () => {
     cardInner.style.transform = 'rotateX(0deg) rotateY(0deg)';
     lightEffect.style.setProperty('--mouse-x', '50%');
     lightEffect.style.setProperty('--mouse-y', '50%');
+    effectMask.style.setProperty('--mouse-x', '50%');
+    effectMask.style.setProperty('--mouse-y', '50%');
   });
 </script>
 
