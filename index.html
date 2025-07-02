@@ -115,7 +115,35 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      transition: transform 0.2s ease;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-card-inner::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0%, transparent 50%);
+      pointer-events: none;
+      transition: all 0.2s ease;
+    }
+
+    .popup-card-inner::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+      pointer-events: none;
+      transition: all 0.2s ease;
     }
 
     .particles {
@@ -138,11 +166,25 @@
       position: absolute;
       width: 200px;
       height: 200px;
-      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+      background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 70%);
       border-radius: 50%;
       pointer-events: none;
       z-index: 2;
-      transition: transform 0.2s ease-out;
+      transition: all 0.2s ease-out;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: overlay;
+    }
+
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      animation: particleAnim 1.5s ease-out forwards;
+      transform-origin: 50% 100%;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      mix-blend-mode: overlay;
     }
 
     .particle {
@@ -283,7 +325,7 @@
         const angle = Math.random() * 360;
         
         // Distance aléatoire pour la dispersion (augmentée)
-        const distance = Math.random() * 150 + 50;
+        const distance = Math.random() * 200 + 50;
         
         // Calculer les coordonnées finales basées sur l'angle et la distance
         const x = Math.cos(angle * Math.PI / 180) * distance;
@@ -293,18 +335,18 @@
         particle.style.transform = `translate(-50%, 100%) translate(${x}px, ${y}px)`;
         
         // Taille aléatoire (augmentée)
-        const size = Math.random() * 4 + 4;
+        const size = Math.random() * 6 + 3;
         particle.style.width = particle.style.height = size + 'px';
         
         // Opacité aléatoire (augmentée)
-        const opacity = Math.random() * 0.4 + 0.6;
+        const opacity = Math.random() * 0.5 + 0.5;
         particle.style.opacity = opacity;
         
-        // Couleur plus variée
-        const r = Math.random() * 100 + 155;
-        const g = Math.random() * 100 + 155;
-        const b = Math.random() * 100 + 200;
-        particle.style.background = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        // Couleur avec dégradé
+        const r = Math.random() * 50 + 200;
+        const g = Math.random() * 50 + 200;
+        const b = Math.random() * 50 + 250;
+        particle.style.background = `linear-gradient(45deg, rgba(${r}, ${g}, ${b}, ${opacity}), rgba(${r}, ${g}, ${b}, ${opacity} * 0.8))`;
         
         // Ajouter un léger décalage à l'animation pour plus de dynamisme
         particle.style.animationDelay = Math.random() * 0.2 + 's';
