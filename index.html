@@ -129,23 +129,44 @@
       transform: translateX(-50%);
     }
 
+    .popup-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .halo {
+      position: absolute;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      transition: transform 0.2s ease-out;
+    }
+
     .particle {
       position: absolute;
-      width: 4px;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.8);
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.9);
       border-radius: 50%;
       animation: particleAnim 1.5s ease-out forwards;
       transform-origin: 50% 100%;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     }
 
     @keyframes particleAnim {
       0% {
-        transform: translate(0, 0) scale(1);
+        transform: translate(0, 0) scale(1.2);
         opacity: 1;
       }
+      50% {
+        transform: translate(0, -50px) scale(1);
+        opacity: 0.8;
+      }
       100% {
-        transform: translate(0, -100px) scale(0.5);
+        transform: translate(0, -150px) scale(0.3);
         opacity: 0;
       }
     }
@@ -242,37 +263,51 @@
         popup.appendChild(particlesContainer);
       }
 
+      // Créer le halo s'il n'existe pas déjà
+      let halo = popup.querySelector('.halo');
+      if (!halo) {
+        halo = document.createElement('div');
+        halo.className = 'halo';
+        popup.appendChild(halo);
+      }
+
       // Générer et animer les particules
       function createParticle() {
         const particle = document.createElement('div');
         particle.className = 'particle';
         
+        // Position initiale au centre de la carte
+        particle.style.transform = 'translate(-50%, 100%)';
+        
         // Angle aléatoire pour la dispersion
         const angle = Math.random() * 360;
         
-        // Distance aléatoire pour la dispersion
-        const distance = Math.random() * 100;
+        // Distance aléatoire pour la dispersion (augmentée)
+        const distance = Math.random() * 150 + 50;
         
         // Calculer les coordonnées finales basées sur l'angle et la distance
         const x = Math.cos(angle * Math.PI / 180) * distance;
         const y = -Math.sin(angle * Math.PI / 180) * distance;
         
         // Appliquer la translation initiale
-        particle.style.transform = `translate(${x}px, ${y}px)`;
+        particle.style.transform = `translate(-50%, 100%) translate(${x}px, ${y}px)`;
         
-        // Taille aléatoire
-        const size = Math.random() * 2 + 2;
+        // Taille aléatoire (augmentée)
+        const size = Math.random() * 4 + 4;
         particle.style.width = particle.style.height = size + 'px';
         
-        // Opacité aléatoire
-        const opacity = Math.random() * 0.3 + 0.5;
+        // Opacité aléatoire (augmentée)
+        const opacity = Math.random() * 0.4 + 0.6;
         particle.style.opacity = opacity;
         
-        // Couleur légèrement aléatoire
-        const r = Math.random() * 50 + 205; // Entre 205 et 255
-        const g = Math.random() * 50 + 205;
-        const b = Math.random() * 50 + 255;
+        // Couleur plus variée
+        const r = Math.random() * 100 + 155;
+        const g = Math.random() * 100 + 155;
+        const b = Math.random() * 100 + 200;
         particle.style.background = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        
+        // Ajouter un léger décalage à l'animation pour plus de dynamisme
+        particle.style.animationDelay = Math.random() * 0.2 + 's';
         
         particlesContainer.appendChild(particle);
         
@@ -293,6 +328,7 @@
         particlesContainer.innerHTML = '';
       }, { once: true });
 
+      // Ajouter l'effet de halo qui suit la souris
       inner.addEventListener("mousemove", e => {
         const rect = inner.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -301,6 +337,11 @@
         const centerY = rect.height / 2;
         const rotateX = -(y - centerY) / 6;
         const rotateY = (x - centerX) / 6;
+        
+        // Positionner le halo
+        halo.style.transform = `translate(${x - 100}px, ${y - 100}px)`;
+        
+        // Appliquer la rotation et le scale
         inner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
       });
 
