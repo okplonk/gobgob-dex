@@ -39,25 +39,46 @@
       pointer-events: none;
     }
 
+    .light-effect {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.15), transparent 60%);
+      pointer-events: none;
+    }
+
     .effect-mask {
       position: absolute;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0);
       background-image: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
         rgba(255, 255, 255, 0.8),
         rgba(0, 200, 255, 0.6),
         rgba(255, 0, 200, 0.4));
       background-size: 200% 200%;
-      background-position: center;
       mask-image: url('gobgob_lunadere_mask.png');
       -webkit-mask-image: url('gobgob_lunadere_mask.png');
       mask-size: 100% 100%;
       mask-repeat: no-repeat;
-      -webkit-mask-size: 100% 100%;
-      -webkit-mask-repeat: no-repeat;
       pointer-events: none;
+      overflow: hidden;
     }
+
+    .sparkles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(white 15%, transparent 20%), radial-gradient(white 10%, transparent 15%);
+      background-size: 10px 10px, 15px 15px;
+      animation: sparkle 2s infinite linear;
+      opacity: 0.6;
+    }
+
+    @keyframes sparkle {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 100px 100px, -100px -100px; }
+    }
+
   </style>
 </head>
 <body>
@@ -65,7 +86,10 @@
 <div class="card" id="card">
   <div class="card-inner" id="card-inner">
     <img src="gobgob_lunadere_base.png" alt="Gobgob Lunadere Base">
-    <div class="effect-mask" id="effect-mask"></div>
+    <div class="light-effect" id="light-effect"></div>
+    <div class="effect-mask" id="effect-mask">
+      <div class="sparkles"></div>
+    </div>
   </div>
 </div>
 
@@ -73,6 +97,7 @@
   const card = document.getElementById('card');
   const cardInner = document.getElementById('card-inner');
   const effectMask = document.getElementById('effect-mask');
+  const lightEffect = document.getElementById('light-effect');
 
   card.addEventListener('mousemove', (e) => {
     const rect = card.getBoundingClientRect();
@@ -86,12 +111,16 @@
 
     effectMask.style.setProperty('--mouse-x', `${x * 100}%`);
     effectMask.style.setProperty('--mouse-y', `${y * 100}%`);
+    lightEffect.style.setProperty('--mouse-x', `${x * 100}%`);
+    lightEffect.style.setProperty('--mouse-y', `${y * 100}%`);
   });
 
   card.addEventListener('mouseleave', () => {
     cardInner.style.transform = 'rotateX(0deg) rotateY(0deg)';
     effectMask.style.setProperty('--mouse-x', '50%');
     effectMask.style.setProperty('--mouse-y', '50%');
+    lightEffect.style.setProperty('--mouse-x', '50%');
+    lightEffect.style.setProperty('--mouse-y', '50%');
   });
 </script>
 
