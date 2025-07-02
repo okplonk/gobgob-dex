@@ -5,78 +5,36 @@
   <title>Gobgob DEX</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #1a1a1a;
-      color: #ffffff;
+      font-family: sans-serif;
+      background-color: #f8f8f8;
       text-align: center;
       padding: 20px;
-      min-height: 100vh;
     }
 
     h1 {
-      font-size: 3.5em;
-      margin-bottom: 20px;
-      background: linear-gradient(45deg, #5cd9ff, #4fc87a);
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-size: 3em;
+      margin-bottom: 10px;
     }
 
-    .input-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 30px;
-    }
-
-    input {
-      background-color: #2a2a2a;
-      color: #ffffff;
-      border: 2px solid #444;
-      padding: 12px 20px;
-      font-size: 1.1em;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #5cd9ff;
-      box-shadow: 0 0 10px rgba(92, 217, 255, 0.3);
-    }
-
-    button {
-      background: linear-gradient(45deg, #5cd9ff, #4fc87a);
-      color: #1a1a1a;
-      cursor: pointer;
-      padding: 12px 20px;
-      font-size: 1.1em;
-      border: none;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(92, 217, 255, 0.3);
-    }
-
-    button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(92, 217, 255, 0.4);
+    input, button {
+      padding: 10px;
+      font-size: 1em;
+      margin: 5px;
     }
 
     #progress-text {
       margin-top: 20px;
-      font-size: 1.2em;
-      color: #5cd9ff;
+      font-size: 1.1em;
     }
 
     #progress-bar-container {
       width: 300px;
       height: 20px;
-      background: #2a2a2a;
+      background: #ddd;
       border-radius: 10px;
       margin: 10px auto;
       overflow: hidden;
       display: block;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     #progress-bar {
@@ -88,12 +46,13 @@
     }
 
     .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
       justify-content: center;
       margin-top: 30px;
-      padding: 0 10%;
+      margin-right: 10%;
+      margin-left: 10%;
     }
 
     .card {
@@ -104,14 +63,6 @@
       opacity: 0;
       position: relative;
       cursor: pointer;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      transition: transform 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
     }
 
     .card-inner {
@@ -120,22 +71,19 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      transition: all 0.2s ease;
+      transition: transform 0.2s ease, filter 0.2s ease;
       background-color: transparent;
-      border-radius: 10px;
     }
 
     .card:not(.missing):hover .card-inner {
       filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
       z-index: 2;
-      transform: scale(1.02);
     }
 
     .card.missing .card-inner {
       filter: grayscale(100%) brightness(0.6) contrast(0.8);
       opacity: 0.7;
       pointer-events: none;
-      border: 2px dashed #5cd9ff;
     }
 
     .hidden {
@@ -145,22 +93,20 @@
     #popup {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 9999;
       visibility: hidden;
-      backdrop-filter: blur(5px);
     }
 
     .popup-card {
-      width: 350px;
-      height: 500px;
+      width: 300px;
+      height: 450px;
       perspective: 1000px;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: visible;
     }
 
     .popup-card-inner {
@@ -170,7 +116,36 @@
       background-repeat: no-repeat;
       background-position: center;
       transition: transform 0.2s ease;
-      border-radius: 15px;
+    }
+
+    .particles {
+      position: absolute;
+      bottom: -20px;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 50%;
+      animation: particleAnim 1.5s ease-out forwards;
+    }
+
+    @keyframes particleAnim {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) scale(0.5);
+        opacity: 0;
+      }
     }
 
     #popup.visible {
@@ -187,30 +162,13 @@
         transform: translateY(0) scale(1);
       }
     }
-
-    @media (max-width: 768px) {
-      .card-grid {
-        padding: 0 5%;
-      }
-
-      #progress-bar-container {
-        width: 200px;
-      }
-
-      .popup-card {
-        width: 300px;
-        height: 450px;
-      }
-    }
   </style>
 </head>
 <body>
   <h1>Gobgob DEX</h1>
-  <div class="input-container">
-    <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
-    <button onclick="loadCollection()">Afficher ma collection</button>
-    <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
-  </div>
+  <input type="text" id="username" placeholder="Entre ton pseudo Twitch">
+  <button onclick="loadCollection()">Afficher</button>
+  <button onclick="toggleMissing()">Afficher/Cacher les cartes non obtenues</button>
 
   <div id="progress-text"></div>
   <div id="progress-bar-container">
@@ -219,7 +177,7 @@
 
   <div class="card-grid" id="cards"></div>
 
-  <div id="popup">
+  <div id="popup" onclick="hidePopup()">
     <div class="popup-card">
       <div class="popup-card-inner" id="popup-inner"></div>
     </div>
@@ -230,37 +188,23 @@
     let showMissing = true;
 
     async function fetchCards() {
-      try {
-        const res = await fetch("cards.csv");
-        if (!res.ok) throw new Error('Erreur lors du chargement des cartes');
-        const text = await res.text();
-        const lines = text.trim().split("\n").slice(1);
-        return lines.map(line => {
-          const [id, nom, rarete] = line.split(",");
-          return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim() };
-        });
-      } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur lors du chargement des cartes. Veuillez réessayer.');
-        return [];
-      }
+      const res = await fetch("cards.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [id, nom, rarete] = line.split(",");
+        return { id: parseInt(id), name: nom.trim(), rarity: rarete.trim() };
+      });
     }
 
     async function fetchCollection() {
-      try {
-        const res = await fetch("collection.csv");
-        if (!res.ok) throw new Error('Erreur lors du chargement de la collection');
-        const text = await res.text();
-        const lines = text.trim().split("\n").slice(1);
-        return lines.map(line => {
-          const [pseudo, id] = line.split(",");
-          return { pseudo: pseudo.trim().toLowerCase(), id: parseInt(id) };
-        });
-      } catch (error) {
-        console.error('Erreur:', error);
-        alert('Erreur lors du chargement de la collection. Veuillez réessayer.');
-        return [];
-      }
+      const res = await fetch("collection.csv");
+      const text = await res.text();
+      const lines = text.trim().split("\n").slice(1);
+      return lines.map(line => {
+        const [pseudo, id] = line.split(",");
+        return { pseudo: pseudo.trim().toLowerCase(), id: parseInt(id) };
+      });
     }
 
     function addTiltEffect(card) {
@@ -288,6 +232,50 @@
       inner.style.backgroundImage = `url(img/${cardId}.png)`;
       popup.classList.add("visible");
 
+      // Créer le conteneur des particules s'il n'existe pas déjà
+      let particlesContainer = popup.querySelector('.particles');
+      if (!particlesContainer) {
+        particlesContainer = document.createElement('div');
+        particlesContainer.className = 'particles';
+        popup.appendChild(particlesContainer);
+      }
+
+      // Générer et animer les particules
+      function createParticle() {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Position aléatoire horizontale
+        const x = Math.random() * 300;
+        particle.style.left = x + 'px';
+        
+        // Taille aléatoire
+        const size = Math.random() * 2 + 2;
+        particle.style.width = particle.style.height = size + 'px';
+        
+        // Opacité aléatoire
+        const opacity = Math.random() * 0.3 + 0.5;
+        particle.style.opacity = opacity;
+        
+        particlesContainer.appendChild(particle);
+        
+        // Supprimer la particule après l'animation
+        particle.addEventListener('animationend', () => {
+          particle.remove();
+        });
+      }
+
+      // Créer une particule toutes les 100ms
+      const interval = setInterval(() => {
+        createParticle();
+      }, 100);
+
+      // Nettoyer les particules et l'intervalle quand la popup se ferme
+      popup.addEventListener('click', () => {
+        clearInterval(interval);
+        particlesContainer.innerHTML = '';
+      }, { once: true });
+
       inner.addEventListener("mousemove", e => {
         const rect = inner.getBoundingClientRect();
         const x = e.clientX - rect.left;
@@ -310,11 +298,6 @@
 
     async function loadCollection() {
       const username = document.getElementById("username").value.toLowerCase();
-      if (!username) {
-        alert("Veuillez entrer votre pseudo Twitch");
-        return;
-      }
-
       const collection = await fetchCollection();
       const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
       const container = document.getElementById("cards");
@@ -359,14 +342,7 @@
       });
     }
 
-    fetchCards().then(cards => {
-      allCards = cards;
-      // Initialiser les effets de zoom et de tilt pour toutes les cartes
-      document.querySelectorAll('.card:not(.missing)').forEach(card => addTiltEffect(card));
-    });
-
-    // Ajouter l'événement de clic sur le fond pour fermer la popup
-    document.getElementById('popup').addEventListener('click', hidePopup);
+    fetchCards().then(cards => allCards = cards);
   </script>
 </body>
 </html>
