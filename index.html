@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Holofoil Rare Gobgob Lunadere</title>
+  <title>Carte Foil Quadrillage Gobgob Lunadere</title>
 
   <style>
     body {
@@ -51,32 +51,28 @@
       position: absolute;
       width: 100%;
       height: 100%;
-      background-image: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%),
-                        linear-gradient(65deg, #ff0080, #8000ff, #0080ff, #00ff80, #ff8000, #ff0080);
-      background-size: 250% 250%;
+      background-image: linear-gradient(115deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
+                        linear-gradient(65deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+      background-size: 20px 20px;
       mask-image: url('gobgob_lunadere_mask.png');
       -webkit-mask-image: url('gobgob_lunadere_mask.png');
       mask-size: 100% 100%;
       mask-repeat: no-repeat;
       pointer-events: none;
       overflow: hidden;
-      opacity: 0.8;
+      opacity: 0.7;
     }
 
     .sparkles {
       position: absolute;
       width: 100%;
       height: 100%;
-      background-image: radial-gradient(white 15%, transparent 20%), radial-gradient(white 10%, transparent 15%);
-      background-size: 10px 10px, 15px 15px;
-      animation: sparkle 2s infinite linear;
-      opacity: 0.6;
+      background-image: radial-gradient(rgba(255,255,255,0.3) 5%, transparent 10%);
+      background-size: 5px 5px;
+      opacity: 0.5;
+      pointer-events: none;
     }
 
-    @keyframes sparkle {
-      from { background-position: 0 0, 0 0; }
-      to { background-position: 100px 100px, -100px -100px; }
-    }
   </style>
 </head>
 <body>
@@ -107,15 +103,12 @@
 
     cardInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
 
-    effectMask.style.backgroundPosition = `${x * 100}% ${y * 100}%`;
-
     lightEffect.style.setProperty('--mouse-x', `${x * 100}%`);
     lightEffect.style.setProperty('--mouse-y', `${y * 100}%`);
   });
 
   card.addEventListener('mouseleave', () => {
     cardInner.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    effectMask.style.backgroundPosition = '50% 50%';
     lightEffect.style.setProperty('--mouse-x', '50%');
     lightEffect.style.setProperty('--mouse-y', '50%');
   });
