@@ -6,43 +6,7 @@
     <title>Gobgob Cards Collection</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .card-container {
-            margin: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .card {
-            transition: transform 0.3s ease, filter 0.3s ease;
-            cursor: pointer;
-            perspective: 1000px;
-        }
-        .card:hover {
-            transform: scale(1.05) rotateY(10deg);
-        }
-        .card:not(.owned) img {
-            filter: grayscale(100%) blur(2px);
-        }
-        .card-image {
-            width: 150px;
-            height: 200px;
-            object-fit: contain;
-            border-radius: 5px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .collection-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            padding: 20px;
-        }
-        .no-cards {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
