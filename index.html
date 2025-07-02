@@ -14,12 +14,15 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         .card {
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, filter 0.3s ease;
             cursor: pointer;
             perspective: 1000px;
         }
         .card:hover {
             transform: scale(1.05) rotateY(10deg);
+        }
+        .card:not(.owned) img {
+            filter: grayscale(100%) blur(2px);
         }
         .card-image {
             width: 150px;
@@ -117,10 +120,9 @@
         // Créer un élément carte
         function createCardElement(card, isInCollection) {
             const div = document.createElement('div');
-            div.className = 'card';
+            div.className = `card ${isInCollection ? 'owned' : ''}`;
             div.innerHTML = `
                 <img src="img/${card.id}.png" alt="${card.name}" class="card-image">
-                ${isInCollection ? '<i class="fas fa-check-circle text-success"></i>' : ''}
             `;
             return div;
         }
@@ -130,9 +132,12 @@
             const searchInput = document.getElementById('searchInput');
             const searchTerm = searchInput.value.toLowerCase();
             const collectionDisplay = document.getElementById('collectionDisplay');
+            const cardsList = document.getElementById('cardsList');
             
             if (!searchTerm) {
-                collectionDisplay.innerHTML = '<p class="no-cards">Veuillez entrer un pseudo pour rechercher une collection.</p>';
+                // Si pas de terme de recherche, afficher toutes les cartes
+                collectionDisplay.innerHTML = '';
+                displayAllCards();
                 return;
             }
 
@@ -146,14 +151,12 @@
                 return;
             }
 
-            // Afficher la collection
+            // Afficher toutes les cartes avec leur statut
             collectionDisplay.innerHTML = '';
-            userCards.forEach(id => {
-                const card = allCards.find(c => c.id === id);
-                if (card) {
-                    const cardElement = createCardElement(card, true);
-                    collectionDisplay.appendChild(cardElement);
-                }
+            allCards.forEach(card => {
+                const isInCollection = userCards.includes(card.id);
+                const cardElement = createCardElement(card, isInCollection);
+                collectionDisplay.appendChild(cardElement);
             });
         }
 
