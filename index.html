@@ -147,7 +147,8 @@
         }
 
         async function loadCollection() {
-            const username = document.getElementById("username").value.toLowerCase();
+            // Nettoyer le pseudo entré en supprimant les espaces et en convertissant en minuscules
+            const username = document.getElementById("username").value.replace(/\s+/g, '').toLowerCase();
             const collection = await fetchCollection();
             const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
             const container = document.getElementById("cards");
