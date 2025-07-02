@@ -1,132 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carte Foil Quadrillage Gobgob Lunadere</title>
-
-  <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #121212;
-      margin: 0;
-      overflow: hidden;
-    }
-
-    .card {
-      position: relative;
-      width: 350px;
-      height: 490px;
-      perspective: 1000px;
-    }
-
-    .card-inner {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease;
-    }
-
-    .card img {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      user-select: none;
-      pointer-events: none;
-    }
-
-    .light-effect {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.4), transparent 60%);
-      mix-blend-mode: overlay;
-      pointer-events: none;
-    }
-
-    .effect-mask {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: 
-        linear-gradient(115deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 75%, transparent 75%, transparent),
-        linear-gradient(65deg, rgba(255,255,255,0.3) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.3) 75%, transparent 75%, transparent),
-        radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.2), transparent 50%);
-      background-size: 15px 15px, 15px 15px, 100% 100%;
-      background-blend-mode: screen;
-      mask-image: url('gobgob_lunadere_mask.png');
-      -webkit-mask-image: url('gobgob_lunadere_mask.png');
-      mask-size: 100% 100%;
-      mask-repeat: no-repeat;
-      pointer-events: none;
-      overflow: hidden;
-      opacity: 1;
-    }
-
-    .sparkles {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(rgba(255,255,255,0.8) 5%, transparent 10%);
-      background-size: 3px 3px;
-      opacity: 0.9;
-      pointer-events: none;
-      animation: sparkle 3s linear infinite;
-    }
-
-    @keyframes sparkle {
-      from { background-position: 0 0; }
-      to { background-position: 200px 200px; }
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gobgob Cards Collection</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-container {
+            margin: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card-image {
+            max-height: 200px;
+            object-fit: contain;
+        }
+        .rarity {
+            font-weight: bold;
+        }
+        .search-box {
+            margin: 20px 0;
+        }
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .no-cards {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1 class="text-center my-4">Gobgob Cards Collection</h1>
+        
+        <!-- Search Section -->
+        <div class="search-box">
+            <div class="input-group">
+                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher par pseudo...">
+                <button class="btn btn-primary" onclick="searchCollection()">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+            </div>
+        </div>
 
-<div class="card" id="card">
-  <div class="card-inner" id="card-inner">
-    <img src="gobgob_lunadere_base.png" alt="Gobgob Lunadere Base">
-    <div class="light-effect" id="light-effect"></div>
-    <div class="effect-mask" id="effect-mask">
-      <div class="sparkles"></div>
+        <!-- Collection Display -->
+        <div id="collectionDisplay" class="collection-grid">
+            <!-- Collection will be populated here -->
+        </div>
+
+        <!-- Cards List -->
+        <div class="card-container">
+            <h2>Toutes les cartes</h2>
+            <div id="cardsList" class="collection-grid">
+                <!-- Cards will be populated here -->
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-  const card = document.getElementById('card');
-  const cardInner = document.getElementById('card-inner');
-  const lightEffect = document.getElementById('light-effect');
-  const effectMask = document.getElementById('effect-mask');
+    <script>
+        // Variables pour stocker les données
+        let allCards = [];
+        let collectionData = [];
 
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
+        // Charger les données au chargement de la page
+        async function loadAllData() {
+            try {
+                // Charger les cartes
+                const cardsResponse = await fetch('cards.csv');
+                const cardsText = await cardsResponse.text();
+                allCards = parseCSV(cardsText);
 
-    const rotateX = (y - 0.5) * 20;
-    const rotateY = (x - 0.5) * -20;
+                // Charger la collection
+                const collectionResponse = await fetch('collection.csv');
+                const collectionText = await collectionResponse.text();
+                collectionData = parseCSV(collectionText);
 
-    cardInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                // Afficher toutes les cartes
+                displayAllCards();
+            } catch (error) {
+                console.error('Erreur lors du chargement des données:', error);
+                alert('Erreur lors du chargement des données. Vérifiez que les fichiers CSV sont correctement formatés.');
+            }
+        }
 
-    lightEffect.style.setProperty('--mouse-x', `${x * 100}%`);
-    lightEffect.style.setProperty('--mouse-y', `${y * 100}%`);
-    effectMask.style.setProperty('--mouse-x', `${x * 100}%`);
-    effectMask.style.setProperty('--mouse-y', `${y * 100}%`);
-  });
+        // Parser le CSV
+        function parseCSV(csvText) {
+            return csvText.trim().split('\n').map(row => {
+                const [id, name, rarity] = row.split(',');
+                return { id: parseInt(id), name, rarity };
+            });
+        }
 
-  card.addEventListener('mouseleave', () => {
-    cardInner.style.transform = 'rotateX(0deg) rotateY(0deg)';
-    lightEffect.style.setProperty('--mouse-x', '50%');
-    lightEffect.style.setProperty('--mouse-y', '50%');
-    effectMask.style.setProperty('--mouse-x', '50%');
-    effectMask.style.setProperty('--mouse-y', '50%');
-  });
-</script>
+        // Afficher toutes les cartes
+        function displayAllCards() {
+            const container = document.getElementById('cardsList');
+            container.innerHTML = '';
+            
+            allCards.forEach(card => {
+                const cardElement = createCardElement(card, false);
+                container.appendChild(cardElement);
+            });
+        }
 
+        // Créer un élément carte
+        function createCardElement(card, isInCollection) {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <img src="img/${card.id}.png" alt="${card.name}" class="card-image">
+                <div class="card-body">
+                    <h5 class="card-title">${card.name}</h5>
+                    <p class="rarity">Rareté: ${card.rarity}</p>
+                    ${isInCollection ? '<i class="fas fa-check-circle text-success"></i>' : ''}
+                </div>
+            `;
+            return div;
+        }
+
+        // Rechercher la collection d'un joueur
+        function searchCollection() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.toLowerCase();
+            const collectionDisplay = document.getElementById('collectionDisplay');
+            
+            if (!searchTerm) {
+                collectionDisplay.innerHTML = '<p class="no-cards">Veuillez entrer un pseudo pour rechercher une collection.</p>';
+                return;
+            }
+
+            // Filtrer la collection
+            const userCards = collectionData
+                .filter(row => row[0].toLowerCase() === searchTerm)
+                .map(row => parseInt(row[1]));
+
+            if (userCards.length === 0) {
+                collectionDisplay.innerHTML = `<p class="no-cards">Aucune collection trouvée pour le pseudo "${searchTerm}".</p>`;
+                return;
+            }
+
+            // Afficher la collection
+            collectionDisplay.innerHTML = '';
+            userCards.forEach(id => {
+                const card = allCards.find(c => c.id === id);
+                if (card) {
+                    const cardElement = createCardElement(card, true);
+                    collectionDisplay.appendChild(cardElement);
+                }
+            });
+        }
+
+        // Charger les données au chargement de la page
+        document.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
 </body>
 </html>
