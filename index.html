@@ -13,20 +13,25 @@
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        .card {
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+        .card:hover {
+            transform: scale(1.05) rotateY(10deg);
+        }
         .card-image {
-            max-height: 200px;
+            width: 150px;
+            height: 200px;
             object-fit: contain;
-        }
-        .rarity {
-            font-weight: bold;
-        }
-        .search-box {
-            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .collection-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
             padding: 20px;
         }
         .no-cards {
@@ -115,11 +120,7 @@
             div.className = 'card';
             div.innerHTML = `
                 <img src="img/${card.id}.png" alt="${card.name}" class="card-image">
-                <div class="card-body">
-                    <h5 class="card-title">${card.name}</h5>
-                    <p class="rarity">Rareté: ${card.rarity}</p>
-                    ${isInCollection ? '<i class="fas fa-check-circle text-success"></i>' : ''}
-                </div>
+                ${isInCollection ? '<i class="fas fa-check-circle text-success"></i>' : ''}
             `;
             return div;
         }
