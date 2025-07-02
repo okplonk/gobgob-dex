@@ -1,100 +1,129 @@
-/* Variables */
-:root {
-    --primary-color: #4CAF50;
-}
-
-/* Container principal */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+body {
+    font-family: sans-serif;
+    background-color: #f8f8f8;
+    text-align: center;
     padding: 20px;
 }
 
-/* Titre */
-.page-title {
-    text-align: center;
-    color: var(--primary-color);
-    margin-bottom: 30px;
-    font-size: 2.5em;
+h1 {
+    font-size: 3em;
+    margin-bottom: 10px;
 }
 
-/* Barre de recherche */
-.search-box {
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.search-box input {
-    width: 300px;
+input, button {
     padding: 10px;
-    margin-right: 10px;
-    border: 2px solid var(--primary-color);
-    border-radius: 5px;
+    font-size: 1em;
+    margin: 5px;
 }
 
-.search-box button {
-    padding: 10px 20px;
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+#progress-text {
+    margin-top: 20px;
+    font-size: 1.1em;
 }
 
-.search-box button:hover {
-    background-color: #388E3C;
+#progress-bar-container {
+    width: 300px;
+    height: 20px;
+    background: #ddd;
+    border-radius: 10px;
+    margin: 10px auto;
+    overflow: hidden;
+    display: block;
 }
 
-/* Grille de cartes */
-.collection-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+#progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(to right, #5cd9ff, #4fc87a);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.card-grid {
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
-    padding: 20px;
+    justify-content: center;
+    margin-top: 30px;
+    margin-right: 10%;
+    margin-left: 10%;
 }
 
-/* Carte individuelle */
 .card {
-    transition: transform 0.3s ease;
+    width: 120px;
+    height: 190px;
+    perspective: 1000px;
+    animation: fadeInUp 0.4s ease forwards;
+    opacity: 0;
+    position: relative;
     cursor: pointer;
 }
 
-.card:hover {
-    transform: scale(1.05);
+.card-inner {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    background-color: transparent;
 }
 
-.card:not(.owned) {
-    opacity: 0.5;
+.card:not(.missing):hover .card-inner {
+    filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.3));
+    z-index: 2;
 }
 
-.card:not(.owned) img {
-    filter: grayscale(100%);
+.card.missing .card-inner {
+    filter: grayscale(100%) brightness(0.6) contrast(0.8);
+    opacity: 0.7;
+    pointer-events: none;
 }
 
-/* Image de carte */
-.card-image {
-    width: 150px;
-    height: 200px;
-    object-fit: contain;
+.hidden {
+    display: none !important;
 }
 
-/* Messages */
-.no-cards {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-    margin: 20px;
+#popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    visibility: hidden;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .page-title {
-        font-size: 2em;
+.popup-card {
+    width: 300px;
+    height: 450px;
+    perspective: 1000px;
+}
+
+.popup-card-inner {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: transform 0.2s ease;
+}
+
+#popup.visible {
+    visibility: visible;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
     }
-    
-    .search-box input {
-        width: 100%;
-        margin-bottom: 10px;
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
