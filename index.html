@@ -147,43 +147,60 @@
         }
 
         async function loadCollection() {
-            // Nettoyer le pseudo entré en supprimant les espaces et en convertissant en minuscules
-            const username = document.getElementById("username").value.replace(/\s+/g, '').toLowerCase();
-            const collection = await fetchCollection();
-            const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
-            const container = document.getElementById("cards");
-            container.innerHTML = "";
-
-            let index = 0;
-            for (const card of allCards) {
-                const div = document.createElement("div");
-                div.className = "card";
-                div.style.animationDelay = `${index * 50}ms`;
-
-                const inner = document.createElement("div");
-                inner.className = "card-inner";
-                inner.style.backgroundImage = `url(img/${card.id}.png)`;
-                inner.title = `${card.name} (${card.rarity})`;
-                div.appendChild(inner);
-
-                const isOwned = owned.has(card.id);
-                if (!isOwned) {
-                    div.classList.add("missing");
-                    if (!showMissing) div.classList.add("hidden");
-                } else {
-                    addTiltEffect(div);
-                    div.onclick = () => addZoomEffect(card.id);
+            try {
+                // Nettoyer le pseudo entré en supprimant les espaces et en convertissant en minuscules
+                const username = document.getElementById("username").value.replace(/\s+/g, '').toLowerCase();
+                
+                if (!username) {
+                    throw new Error("Veuillez entrer un pseudo.");
                 }
 
-                container.appendChild(div);
-                index++;
-            }
+                const collection = await fetchCollection();
+                const owned = new Set(collection.filter(entry => entry.pseudo === username).map(entry => entry.id));
+                const container = document.getElementById("cards");
+                container.innerHTML = "";
 
-            const ownedCount = owned.size;
-            const totalCount = allCards.length || 1;
-            const percent = (ownedCount / totalCount) * 100;
-            document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
-            document.getElementById("progress-bar").style.width = percent + "%";
+                let index = 0;
+                for (const card of allCards) {
+                    const div = document.createElement("div");
+                    div.className = "card";
+                    div.style.animationDelay = `${index * 50}ms`;
+
+                    const inner = document.createElement("div");
+                    inner.className = "card-inner";
+                    inner.style.backgroundImage = `url(img/${card.id}.png)`;
+                    inner.title = `${card.name} (${card.rarity})`;
+                    div.appendChild(inner);
+
+                    const isOwned = owned.has(card.id);
+                    if (!isOwned) {
+                        div.classList.add("missing");
+                        if (!showMissing) div.classList.add("hidden");
+                    } else {
+                        addTiltEffect(div);
+                        div.onclick = () => addZoomEffect(card.id);
+                    }
+
+                    container.appendChild(div);
+                    index++;
+                }
+
+                const ownedCount = owned.size;
+                const totalCount = allCards.length || 1;
+                const percent = (ownedCount / totalCount) * 100;
+                document.getElementById("progress-text").textContent = `${ownedCount} carte${ownedCount !== 1 ? "s" : ""} débloquée${ownedCount !== 1 ? "s" : ""} sur ${totalCount}`;
+                document.getElementById("progress-bar").style.width = percent + "%";
+
+                if (ownedCount === 0) {
+                    throw new Error(`Aucune carte trouvée pour le pseudo "${username}". Vérifiez que votre pseudo est correct.`);
+                }
+
+            } catch (error) {
+                const container = document.getElementById("cards");
+                container.innerHTML = `<div style="text-align: center; margin: 20px 0; color: #ff4444;">${error.message}</div>`;
+                document.getElementById("progress-text").textContent = "";
+                document.getElementById("progress-bar").style.width = "0%";
+            }
         }
 
         function toggleMissing() {
