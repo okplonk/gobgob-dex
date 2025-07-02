@@ -1,9 +1,6 @@
 /* Variables */
 :root {
     --primary-color: #4CAF50;
-    --secondary-color: #2196F3;
-    --text-color: #333;
-    --background-color: #f5f5f5;
 }
 
 /* Container principal */
@@ -16,7 +13,7 @@
 /* Titre */
 .page-title {
     text-align: center;
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 30px;
     font-size: 2.5em;
 }
@@ -24,42 +21,55 @@
 /* Barre de recherche */
 .search-box {
     margin-bottom: 30px;
+    text-align: center;
 }
 
-.search-box .input-group {
-    max-width: 500px;
-    margin: 0 auto;
+.search-box input {
+    width: 300px;
+    padding: 10px;
+    margin-right: 10px;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+}
+
+.search-box button {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.search-box button:hover {
+    background-color: #388E3C;
 }
 
 /* Grille de cartes */
 .collection-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
     padding: 20px;
 }
 
 /* Carte individuelle */
 .card {
-    transition: transform 0.3s ease, filter 0.3s ease;
+    transition: transform 0.3s ease;
     cursor: pointer;
-    perspective: 1000px;
-    background: white;
-    border-radius: 10px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .card:hover {
-    transform: scale(1.05) rotateY(10deg);
+    transform: scale(1.05);
 }
 
 .card:not(.owned) {
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
 .card:not(.owned) img {
-    filter: grayscale(100%) blur(2px);
+    filter: grayscale(100%);
 }
 
 /* Image de carte */
@@ -67,8 +77,6 @@
     width: 150px;
     height: 200px;
     object-fit: contain;
-    border-radius: 5px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
 /* Messages */
@@ -76,9 +84,7 @@
     text-align: center;
     padding: 20px;
     color: #666;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin: 20px;
 }
 
 /* Responsive */
@@ -87,7 +93,8 @@
         font-size: 2em;
     }
     
-    .search-box .input-group {
-        max-width: 100%;
+    .search-box input {
+        width: 100%;
+        margin-bottom: 10px;
     }
 }
