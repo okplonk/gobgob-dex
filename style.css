@@ -1,0 +1,93 @@
+/* Variables */
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --text-color: #333;
+    --background-color: #f5f5f5;
+}
+
+/* Container principal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Titre */
+.page-title {
+    text-align: center;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+}
+
+/* Barre de recherche */
+.search-box {
+    margin-bottom: 30px;
+}
+
+.search-box .input-group {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Grille de cartes */
+.collection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+/* Carte individuelle */
+.card {
+    transition: transform 0.3s ease, filter 0.3s ease;
+    cursor: pointer;
+    perspective: 1000px;
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: scale(1.05) rotateY(10deg);
+}
+
+.card:not(.owned) {
+    opacity: 0.7;
+}
+
+.card:not(.owned) img {
+    filter: grayscale(100%) blur(2px);
+}
+
+/* Image de carte */
+.card-image {
+    width: 150px;
+    height: 200px;
+    object-fit: contain;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Messages */
+.no-cards {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 2em;
+    }
+    
+    .search-box .input-group {
+        max-width: 100%;
+    }
+}
