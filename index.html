@@ -120,12 +120,13 @@
 
     .particles {
       position: absolute;
-      bottom: -20px;
-      left: 0;
+      bottom: 0;
+      left: 50%;
       width: 100%;
       height: 100px;
       pointer-events: none;
       z-index: 1;
+      transform: translateX(-50%);
     }
 
     .particle {
@@ -135,15 +136,16 @@
       background: rgba(255, 255, 255, 0.8);
       border-radius: 50%;
       animation: particleAnim 1.5s ease-out forwards;
+      transform-origin: 50% 100%;
     }
 
     @keyframes particleAnim {
       0% {
-        transform: translateY(0) scale(1);
+        transform: translate(0, 0) scale(1);
         opacity: 1;
       }
       100% {
-        transform: translateY(-100px) scale(0.5);
+        transform: translate(0, -100px) scale(0.5);
         opacity: 0;
       }
     }
@@ -245,9 +247,18 @@
         const particle = document.createElement('div');
         particle.className = 'particle';
         
-        // Position aléatoire horizontale
-        const x = Math.random() * 300;
-        particle.style.left = x + 'px';
+        // Angle aléatoire pour la dispersion
+        const angle = Math.random() * 360;
+        
+        // Distance aléatoire pour la dispersion
+        const distance = Math.random() * 100;
+        
+        // Calculer les coordonnées finales basées sur l'angle et la distance
+        const x = Math.cos(angle * Math.PI / 180) * distance;
+        const y = -Math.sin(angle * Math.PI / 180) * distance;
+        
+        // Appliquer la translation initiale
+        particle.style.transform = `translate(${x}px, ${y}px)`;
         
         // Taille aléatoire
         const size = Math.random() * 2 + 2;
@@ -256,6 +267,12 @@
         // Opacité aléatoire
         const opacity = Math.random() * 0.3 + 0.5;
         particle.style.opacity = opacity;
+        
+        // Couleur légèrement aléatoire
+        const r = Math.random() * 50 + 205; // Entre 205 et 255
+        const g = Math.random() * 50 + 205;
+        const b = Math.random() * 50 + 255;
+        particle.style.background = `rgba(${r}, ${g}, ${b}, ${opacity})`;
         
         particlesContainer.appendChild(particle);
         
